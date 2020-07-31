@@ -1,0 +1,31 @@
+{
+  "PID_SPEC": {
+    "roll": 1,
+    "pitch": 2,
+    "yaw": 3,
+    "all": 4
+  },
+  "CONTROL_SPEC": {
+    "START_TELEMETRY": 1,
+    "STOP_TELEMETRY": 2,
+    "START_PID": 3,
+    "STOP_PID": 4,
+    "ARMED": 5,
+    "DISARMED": 6
+  },
+  "TO_GUI": {
+    "ERROR": 0,
+    "PID": 1,
+    "MOTORS": 2,
+    "BOAT_DATA": 3,
+    "IMU": 4,
+    "CONTROL": 5
+  },
+  "TO_ODROID": {
+    "CONTROL": 0,
+    "PID": 1,
+    "PID_REQUEST": 2,
+    "BOAT_DATA_REQUEST": 3,
+    "PAD": 4
+  }
+}

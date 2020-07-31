@@ -127,3 +127,6 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+/.vs/jetson-v2/v16
+/.vs/slnx.sqlite
+/.vs
