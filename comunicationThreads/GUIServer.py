@@ -1,7 +1,7 @@
 import asyncio,socket, struct, threading, logging, json
 from controlThread.controlThread import controlThread
 from concurrent.futures import ThreadPoolExecutor
-from variable import GUI_ADDRESS
+from variable import GUI_ADDRESS, GUI_STREAM
 from autonomy.autonomyThread import autonomy
 class comunicator:
     #class for sending data to gui.
@@ -9,6 +9,32 @@ class comunicator:
          self.confirmArm=None
          self.confirmDisarm =None
 
+class GUIStream(threading.Thread):
+    def __init__(self, stream):
+        self.stream = stream
+        self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        print("ok")
+        self.stream.getFrame()
+        print("received frame")
+        self.socket.bind(GUI_STREAM)
+        self.active = False
+        self.socket.listen()
+     
+    def run(self):
+        print("ok")
+        self.active= True
+        while True:
+            print("here")
+
+            connection, addr = self.socket.accept()
+            print("ok")
+            while self.active:
+                a = connection.recv(1)
+                if a==b"\x69":
+                    connection.send(b"\x69")
+                    data = self.stream.getFrame()
+                    l = len(data)
+                    connection.sendall(struct.pack("<I",l)+data)
 
 class sender:
     def __init__(self,protocol):
@@ -134,7 +160,7 @@ class parser:
                 self.controlThread.disarm()
                 self.thre
             if(data[1]==control_spec["START_AUTONOMY"]):
-                self.autonomyThread = autonomy(self.controlThread)
+                self.autonomyThread = autonomy(self.controlThread, self.stream)
                 self.executor.submit(self.autonomyThread.run)
             if(data[1]==control_spec["STOP_AUTONOMY"]):
                 self.autonomyThread.active=False
@@ -153,7 +179,7 @@ class parser:
 
 
 class connectionHandler(threading.Thread, sender,parser):
-    def __init__(self):
+    def __init__(self, stream):
         threading.Thread.__init__(self)
         with open('config/GUI.json', 'r') as fd:
             self.protocol = json.load(fd)
@@ -171,6 +197,11 @@ class connectionHandler(threading.Thread, sender,parser):
         self.sendingActive = False
         self.comunicator= comunicator()
         self.configComunicator()
+        self.stream = stream;
+        self.GUIStream = GUIStream(stream)
+        self.executor.submit(self.stream.run)
+        self.executor.submit(self.GUIStream.run)
+
 
     def configComunicator(self):
         self.comunicator.confirmArm = self.confirmArm
