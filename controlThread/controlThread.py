@@ -1,16 +1,15 @@
 
-#this should be some kind of thread. It should talk with odroid. 
-#I assume that imu and motors are connected to odroid 
-#server should receive data from stm/odroid all the time. All methods used for sending data will be used from other threads.
-class odroidConnection():
-    
-    def __init(self):
+#class for controlling AUV
+#all methods should be implemented acording to comunicationThreads
+class controlThread:    
+    def __init__(self):
         pass
-    #enabling/disabling pid thread and motors
     def arm(self):
         pass
+
     def disarm(self):
         pass
+
 #here we are implementing 2 controll methods 
     def setControlMode(self, mode):
         #mode 1 --> 'acro' (cant find better name). --> in this mode our boat is trying to maintain orientation. We are controlling it by setting angular velocity
@@ -23,11 +22,9 @@ class odroidConnection():
         pass
 
 #how to control boat in mode 1
-#pls keep in mind that this mode will allow us to perform flips and other fancy stuff so it is very important
     #velocity is in deg/sec. 
     def setAngularVelocity(self, pitch, roll, yaw):
         pass
-
 
 #how to control boat in mode 2
     #yaw is still controlled by setting angular velocity
@@ -46,6 +43,7 @@ class odroidConnection():
     def setDepth(self, depth):
         pass
 
+#methods for obtaining data from jetson/stm/simulation
     def getHeading(self):
         #return heading
         pass
@@ -58,6 +56,10 @@ class odroidConnection():
         #return depth
         pass
 
+    def getMotors(self):
+        pass
+
+#PID stuff
     def setPIDs(self, arg, P, I , D):
         #arg is "yaw", "roll" etc...
         pass

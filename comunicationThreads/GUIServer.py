@@ -1,6 +1,15 @@
 import asyncio,socket, struct, threading, logging, json
+from controlThread.controlThread import controlThread
 from concurrent.futures import ThreadPoolExecutor
-#from variable import GUI_ADDRES, motors_speed_pad
+from variable import GUI_ADDRESS
+from autonomy.autonomyThread import autonomy
+class comunicator:
+    #class for sending data to gui.
+     def __init__(self):
+         self.confirmArm=None
+         self.confirmDisarm =None
+
+
 class sender:
     def __init__(self,protocol):
         self.proto = protocol["TO_GUI"]
@@ -86,13 +95,13 @@ class parser:
                     msg[0] ='pitch'
                 elif msg[0]==pid_spec["yaw"]:
                     msg[0]='yaw'
-                self.setPIDs(msg)
+                self.controlThread.setPIDs(msg)
             elif data[1]==pid_spec["all"]:
                 msg  = struct.unpack('<2B9f', data)
                 msg = list(msg)
                 msg.pop(0)
                 msg[0]='all'
-                self.setPIDs(msg)
+                self.controlThread.setPIDs(msg)
                 
         if data[0] == proto["PID_REQUEST"]:
             msg = struct.unpack('<2B',data)
@@ -118,10 +127,17 @@ class parser:
                 msg = struct.unpack('<2BI',data)
                 msg = list(msg)
                 logging.debug("Received arm signal")
-                self.start_PIDthread(msg[2])
+                self.controlThread.arm()
 
+                
             if (data[1]==control_spec["STOP_PID"]):
-                self.stop_PIDthread()
+                self.controlThread.disarm()
+                self.thre
+            if(data[1]==control_spec["START_AUTONOMY"]):
+                self.autonomyThread = autonomy(self.controlThread)
+                self.executor.submit(self.autonomyThread.run)
+            if(data[1]==control_spec["STOP_AUTONOMY"]):
+                self.autonomyThread.active=False
 
         if(data[0]==proto["BOAT_DATA_REQUEST"]):
             self.sendBoatData()
@@ -130,61 +146,48 @@ class parser:
             msg = struct.unpack('<B2f3i', data)
             msg = list(msg)
             msg.pop(0)
-            self.control_motors(msg)
+            self.controlThread.setAngle(msg[0], msg[1])
+            self.controlThread.yaw(msg[2])
+            self.controlThread.vertical(msg[3])
+            self.controlThread.moveForward(msg[4])
 
 
 class connectionHandler(threading.Thread, sender,parser):
-    def __init__(self, pidThread, config):
+    def __init__(self):
         threading.Thread.__init__(self)
-        with open('control/GUI/protocol.json', 'r') as fd:
+        with open('config/GUI.json', 'r') as fd:
             self.protocol = json.load(fd)
         sender.__init__(self,self.protocol)
         self.lock = threading.Lock()
         #4 is enought even with working autonomy...
         self.executor = ThreadPoolExecutor(max_workers=4)
-        self.config = config
-        self.pidThread = pidThread
-        addr = GUI_ADDRES
+        addr = GUI_ADDRESS
+        self.controlThread = None
         self.host = addr[0]
         self.port = addr[1]
         self.active = True
         self.tx_ready = True
-        self.tx_buff = []
         self.clientConnected = False
         self.sendingActive = False
-        self.methodCollector(self.pidThread.getPIDs, self.pidThread.setPIDs,self.pidThread.getMotors, self.pidThread.getIMU)
+        self.comunicator= comunicator()
+        self.configComunicator()
+
+    def configComunicator(self):
+        self.comunicator.confirmArm = self.confirmArm
+        self.comunicator.confirmDisarm=self.confirmDisarm
+
+    def setControlThread(self, arg = controlThread()):
+        self.controlThread = arg
         self.loadPIDs()
 
     def loadPIDs(self):
-        roll = [self.config.get_pid("roll","P"),self.config.get_pid("roll","I"),self.config.get_pid("roll","D")]
-        pitch = [self.config.get_pid("pitch","P"),self.config.get_pid("pitch","I"),self.config.get_pid("pitch","D")]
-        yaw = [self.config.get_pid("yaw","P"),self.config.get_pid("yaw","I"),self.config.get_pid("yaw","D")]
-        self.pidThread.setPIDs(["all"]+roll+pitch+yaw)
+        with open("config/PID_simulation.json", "r") as fd:
+            self.data = json.load(fd)
+        self.controlThread.setPIDs("roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"])
+        self.controlThread.setPIDs("pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"])
+        self.controlThread.setPIDs("yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"] )
 
-    def control_motors(self, arg):
-        global motors_speed_pad
-        #it would be wise to use momentum of motors 2,3,4 to rotate
-        #vertical should be splitted on motors according to distance from center of mass
-        roll_offset = arg[0]
-        pitch_offset= arg[1]
-        yaw = arg[2]
-        vertical = arg[3]
-        throttle = arg[4]
-        motors_speed_pad[0] = yaw+throttle
-        motors_speed_pad[1]=throttle-yaw
-        motors_speed_pad[2]=-vertical
-        motors_speed_pad[3]=vertical*2/3
-        motors_speed_pad[4]= -vertical
-        #self.pidThread.fancy_setpoints[roll_offset,pitch_offset]
-        self.pidThread.roll_PID.setSetPoint(roll_offset)
-        self.pidThread.pitch_PID.setSetPoint(pitch_offset)
-
-    def methodCollector(self, getPIDs, setPIDs, getMotors, getIMU): #getDepth, getHummidity...
-        self.getPIDs = getPIDs
-        self.getMotors = getMotors
-        self.setPIDs = setPIDs
-        self.getIMU = getIMU
-
+    
     def start_sending(self, interval = 30):
         if(self.sendingActive == False):
             self.interval = interval/1000
@@ -196,31 +199,20 @@ class connectionHandler(threading.Thread, sender,parser):
     def stop_sending(self):
         self.sendingActive = False
 
-    def start_serving(self):
-        self.run()
-    
-    def start_PIDthread(self, arg):
-        if self.pidThread.isActive == True:
-            return
-        with self.lock:
-            self.pidThread.interval = arg/1000
-        if self.pidThread.isActive == False:
-            self.pidThread.active = True
-            self.executor.submit(self.pidThread.run)
-            self.sendControl([self.protocol["CONTROL_SPEC"]["ARMED"]])
+    def confirmArm(self):
+        self.sendControl([self.protocol["CONTROL_SPEC"]["ARMED"]])
 
-    def stop_PIDthread(self):
-
+    def confirmDisarm(self):
         self.sendControl([self.protocol["CONTROL_SPEC"]["DISARMED"]])
-        self.pidThread.active=False
+
 
     async def loop(self):
         if self.clientConnected:
             self.sendingActive = True           
             while self.clientConnected and self.sendingActive:
                 await asyncio.sleep(self.interval)
-                self.sendIMU(self.getIMU())
-                self.sendMotors(self.getMotors())               
+                self.sendIMU(self.controlThread.getImuData())
+                self.sendMotors(self.controlThread.getMotors())               
             self.sendingActive = False
 
     async def clientHandler(self, reader,writer):

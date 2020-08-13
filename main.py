@@ -1,10 +1,10 @@
-
+from controlThread.controlThread_simulation import simulationConnection
 from comunicationThreads.GUIServer import connectionHandler
-from comunicationThreads.jetson_odroid import odroidConnection
+
 
 if __name__ == '__main__':
-#comunicationThread = odroidConnection()
-#communicationThread.run()
-#guiServer = connectionHandler(communicationThread)
-#guiServer.run()
-    pass
+    
+    guiServer = connectionHandler()
+    controlThread = simulationConnection(guiServer.comunicator)
+    guiServer.setControlThread(controlThread)
+    guiServer.start()

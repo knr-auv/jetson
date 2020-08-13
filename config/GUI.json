@@ -11,7 +11,9 @@
     "START_PID": 3,
     "STOP_PID": 4,
     "ARMED": 5,
-    "DISARMED": 6
+    "DISARMED": 6,
+    "START_AUTONOMY": 7,
+    "STOP_AUTONOMY":  8
   },
   "TO_GUI": {
     "ERROR": 0,
