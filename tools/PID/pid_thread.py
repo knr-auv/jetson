@@ -30,6 +30,7 @@ class PIDThread(threading.Thread):
         self.forward = 0
         self.interval = 0.01
         self.roll_diff, self.pitch_diff, self.yaw_diff = 0, 0, 0
+  
         
         max_sum_output = 18000.
         self.roll_PID.setMaxOutput(max_sum_output / 4)
@@ -41,7 +42,7 @@ class PIDThread(threading.Thread):
     def run(self): 
         logging.debug("STARTING PID THREAD")
         self.isActive=True
-        
+        self.active = True
         while self.active:
             now = time.time()
             self.client.catch_sample()
@@ -50,11 +51,6 @@ class PIDThread(threading.Thread):
             yaw = self.client.get_sample('yaw')
             depth = self.client.get_sample('depth')
             self.imu_data = [roll, pitch,yaw,depth]
-            #print("{} {} {} {}]".format(roll, pitch, yaw,  depth))
-            # self.plotter.plot(yaw)
-            # print(yaw)
-            #print(roll)
-
             self.roll_diff = self.roll_PID.update(roll)
             self.pitch_diff = self.pitch_PID.update(pitch)
             self.yaw_diff = self.yaw_PID.update(yaw)  # maybe try:  'gyro_raw_x' 'gro_proc_x'
@@ -71,6 +67,7 @@ class PIDThread(threading.Thread):
             else:
                 time.sleep((self.interval-time.time()+now))
         logging.debug("STOPING PID THREAD")
+
         with self.lock:
             self.disable_motors()
             self.active = True

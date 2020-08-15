@@ -23,7 +23,7 @@ class SimulationClient(cameraStream):
         while self.active:
             self.receive_frame()
             #around 40 fps
-            time.sleep(0.035)
+            time.sleep(0.01)
             
     def stop(self):
         self.socket.close()
@@ -40,7 +40,7 @@ class SimulationClient(cameraStream):
         self.socket.send(b"\x69")
         confirm = self.socket.recv(1)
         if not(confirm == b"\x69"):
-            logging.debug("Message error")
+            logging.debug("Message error s")
         lenght = self.socket.recv(4)
         lenght = struct.unpack('<I', lenght)[0]
         while not(len(self.data) >= lenght):

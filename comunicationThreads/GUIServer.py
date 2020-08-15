@@ -8,26 +8,18 @@ class comunicator:
      def __init__(self):
          self.confirmArm=None
          self.confirmDisarm =None
-
+         
 class GUIStream(threading.Thread):
     def __init__(self, stream):
         self.stream = stream
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        print("ok")
         self.stream.getFrame()
-        print("received frame")
         self.socket.bind(GUI_STREAM)
         self.active = False
         self.socket.listen()
-     
-    def run(self):
-        print("ok")
-        self.active= True
-        while True:
-            print("here")
 
-            connection, addr = self.socket.accept()
-            print("ok")
+    def clienThread(self, connection):
+        try:
             while self.active:
                 a = connection.recv(1)
                 if a==b"\x69":
@@ -35,6 +27,15 @@ class GUIStream(threading.Thread):
                     data = self.stream.getFrame()
                     l = len(data)
                     connection.sendall(struct.pack("<I",l)+data)
+        except:
+            pass
+        
+    def run(self):
+        self.active= True    
+        while True:
+            connection, addr = self.socket.accept()
+            x = threading.Thread(target = self.clienThread, args=(connection,))
+            x.start()
 
 class sender:
     def __init__(self,protocol):
@@ -110,7 +111,6 @@ class parser:
         control_spec = self.protocol["CONTROL_SPEC"]
 
         if data[0] == proto["PID"]:
-
             if data[1]!= pid_spec["all"]:
                 msg = struct.unpack('<2B3f', data)
                 msg = list(msg)
@@ -140,7 +140,7 @@ class parser:
                  msg[1]='yaw'
             elif msg[1]== pid_spec["all"]:
                 msg[1] = 'all'
-            self.sendPid(self.getPIDs(msg[1]))
+            self.sendPid(self.controlThread.getPIDs(msg[1]))
 
         if (data[0] == proto["CONTROL"]):
             if (data[1]==control_spec["START_TELEMETRY"]):
@@ -160,6 +160,7 @@ class parser:
                 self.controlThread.disarm()
                 self.thre
             if(data[1]==control_spec["START_AUTONOMY"]):
+                logging.debug("starting autonomy")
                 self.autonomyThread = autonomy(self.controlThread, self.stream)
                 self.executor.submit(self.autonomyThread.run)
             if(data[1]==control_spec["STOP_AUTONOMY"]):
@@ -186,7 +187,7 @@ class connectionHandler(threading.Thread, sender,parser):
         sender.__init__(self,self.protocol)
         self.lock = threading.Lock()
         #4 is enought even with working autonomy...
-        self.executor = ThreadPoolExecutor(max_workers=4)
+        self.executor = ThreadPoolExecutor(max_workers=10)
         addr = GUI_ADDRESS
         self.controlThread = None
         self.host = addr[0]
@@ -214,9 +215,9 @@ class connectionHandler(threading.Thread, sender,parser):
     def loadPIDs(self):
         with open("config/PID_simulation.json", "r") as fd:
             self.data = json.load(fd)
-        self.controlThread.setPIDs("roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"])
-        self.controlThread.setPIDs("pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"])
-        self.controlThread.setPIDs("yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"] )
+        self.controlThread.setPIDs(["roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"]])
+        self.controlThread.setPIDs(["pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"]])
+        self.controlThread.setPIDs(["yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"] ])
 
     
     def start_sending(self, interval = 30):
@@ -255,32 +256,39 @@ class connectionHandler(threading.Thread, sender,parser):
         self.client_loop = asyncio.get_running_loop()
         self.clientConnected = True
         try:
-            while self.active:    
-                if(rx_state ==HEADER):
-                    async def receive4():
-                        data = await reader.read(4)
-                        return data
-                    self.reader_task = asyncio.create_task(receive4())
-                    data = await self.reader_task
-                    if data == b'':
-                        raise ConnectionResetError                           
-                    rx_len = struct.unpack("<L",data)[0]
-                    rx_len -= 4
-                    rx_state = DATA
-                elif(rx_state == DATA):
-                    data = await reader.readexactly(rx_len)
-                    self.executor.submit(self.parse ,data)
-                    rx_state = HEADER
-        except asyncio.IncompleteReadError as er:
-                logging.debug(er)
-                rx_state = HEADER
+            
+            while self.active: 
+                try:
+                    if(rx_state ==HEADER):
+                        async def receive4():
+                            data = await reader.read(4)
+                            return data
+                        self.reader_task = asyncio.create_task(receive4())
+                        data = await self.reader_task
+                        if data == b'':
+                            raise ConnectionResetError                           
+                        rx_len = struct.unpack("<L",data)[0]
+                        rx_len -= 4
+                        rx_state = DATA
+                    elif(rx_state == DATA):
+                        data = await reader.readexactly(rx_len)
+                        self.executor.submit(self.parse ,data)
+                        rx_state = HEADER
+                except asyncio.IncompleteReadError as er:
+                        logging.debug(er)
+                        rx_state = HEADER
+
         except asyncio.CancelledError:               
-                pass
-        except ConnectionResetError:
-            self.pidThread.active = False
+            pass
+        #except ConnectionAbortedError:
+         #   self.clientConnected = False
+        except ConnectionError:
+            self.controlThread.PIDThread.active = False
             self.clientConnected = False
-            logging.debug("Client disconnected")
-            return
+
+            #logging.debug("Client disconnected")
+            #return
+        self.clientConnected = False
         logging.debug("closing")
         self.clientConnected = False
         writer.close()
@@ -310,6 +318,6 @@ class connectionHandler(threading.Thread, sender,parser):
     def send(self, data):
         async def write():
             self.writer.write(data)
-            await self.writer.drain()       
+            await self.writer.drain()
         asyncio.run_coroutine_threadsafe(write(), self.client_loop)
 

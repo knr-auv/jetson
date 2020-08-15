@@ -5,6 +5,7 @@ from comunicationThreads.simulationClient import SimulationClient
 from comunicationThreads.GUIServer import comunicator
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import controlThread
+import threading
 
 
 class simulationConnection(controlThread):
@@ -15,14 +16,16 @@ class simulationConnection(controlThread):
         pass
 
     def arm(self):
-        self.PIDThread.start()
+        x = threading.Thread(target=self.PIDThread.run)
+        x.start()
+        
         self.comunicator.confirmArm()
         pass
 
     def disarm(self):
         self.PIDThread.active = False
         self.comunicator.confirmDisarm()
-
+        
 
     def setControlMode(self, mode):
         print(mode)
@@ -73,12 +76,11 @@ class simulationConnection(controlThread):
         return self.PIDThread.getMotors()
 
 #PID stuff
-    def setPIDs(self, arg, P, I , D):
-        arg = [arg,P,I,D]
+    def setPIDs(self, arg):
         self.PIDThread.setPIDs(arg)
        
     def getPIDs(self, arg):
-        self.PIDThread.getPIDs(arg)
+        return self.PIDThread.getPIDs(arg)
 
     def storePIDs(self):
         pass
