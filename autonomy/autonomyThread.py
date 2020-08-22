@@ -6,11 +6,12 @@ class autonomy(threading.Thread):
     def __init__(self,controlThread = controlThread(), stream = cameraStream()):
         threading.Thread.__init__(self)
         self.active = False
-        print("autonomy")
+        self.cT= controlThread
 
     def run(self):
         self.active = True
         while self.active:
             time.sleep(1)
-            print("running")
+
+            self.cT.comunicator.autonomyMsg("running...")#method for sending messages to gui. msg must be string
             pass

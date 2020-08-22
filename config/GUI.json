@@ -21,7 +21,8 @@
     "MOTORS": 2,
     "BOAT_DATA": 3,
     "IMU": 4,
-    "CONTROL": 5
+    "CONTROL": 5,
+    "AUTONOMY_MSG": 6
   },
   "TO_ODROID": {
     "CONTROL": 0,

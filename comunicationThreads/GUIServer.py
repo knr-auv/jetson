@@ -3,11 +3,13 @@ from controlThread.controlThread import controlThread
 from concurrent.futures import ThreadPoolExecutor
 from variable import GUI_ADDRESS, GUI_STREAM
 from autonomy.autonomyThread import autonomy
+
 class comunicator:
     #class for sending data to gui.
      def __init__(self):
          self.confirmArm=None
          self.confirmDisarm =None
+         self.autonomyMsg = None
          
 class GUIStream(threading.Thread):
     def __init__(self, stream):
@@ -103,6 +105,14 @@ class sender:
             tx_buffer = [self.proto["CONTROL"]]+msg
             tx_buffer = struct.pack('<2B',*(tx_buffer))
             self.send_msg(tx_buffer)
+
+    def sendAutonomyMsg(self, msg):
+        data = bytes(msg, 'utf-8')
+        data_len = len(data)
+        tx_buffer = [self.proto["AUTONOMY_MSG"],data_len, data]
+        tx_buffer = struct.pack('<2B'+str(data_len)+'s', *(tx_buffer))
+        self.send_msg(tx_buffer)
+
 class parser:
 
     def parse(self, data):
@@ -207,6 +217,7 @@ class connectionHandler(threading.Thread, sender,parser):
     def configComunicator(self):
         self.comunicator.confirmArm = self.confirmArm
         self.comunicator.confirmDisarm=self.confirmDisarm
+        self.comunicator.autonomyMsg = self.sendAutonomyMsg
 
     def setControlThread(self, arg = controlThread()):
         self.controlThread = arg
@@ -236,7 +247,6 @@ class connectionHandler(threading.Thread, sender,parser):
 
     def confirmDisarm(self):
         self.sendControl([self.protocol["CONTROL_SPEC"]["DISARMED"]])
-
 
     async def loop(self):
         if self.clientConnected:
@@ -278,14 +288,15 @@ class connectionHandler(threading.Thread, sender,parser):
                         logging.debug(er)
                         rx_state = HEADER
 
-        except asyncio.CancelledError:               
-            pass
+
         #except ConnectionAbortedError:
          #   self.clientConnected = False
-        except ConnectionError:
+        except:
             self.controlThread.PIDThread.active = False
-            self.clientConnected = False
 
+            self.clientConnected = False
+            if self.autonomyThread:
+                self.autonomyThread.active = False
             #logging.debug("Client disconnected")
             #return
         self.clientConnected = False

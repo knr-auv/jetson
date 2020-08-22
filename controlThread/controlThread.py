@@ -1,9 +1,16 @@
 
 #class for controlling AUV
 #all methods should be implemented acording to comunicationThreads
+class comunicator:
+    #class for sending data to gui.
+     def __init__(self):
+         self.confirmArm=None
+         self.confirmDisarm =None
+         self.autonomyMsg = None
+
 class controlThread:    
-    def __init__(self):
-        pass
+    def __init__(self, comunicator = comunicator()):
+        self.comunicator = comunicator
     def arm(self):
         pass
 

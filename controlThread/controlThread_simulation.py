@@ -2,15 +2,14 @@
 #this should be some kind of thread.
 #it controll pid thread and simulation client
 from comunicationThreads.simulationClient import SimulationClient
-from comunicationThreads.GUIServer import comunicator
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import controlThread
 import threading
 
 
 class simulationConnection(controlThread):
-    def __init__(self, comunicator = comunicator()):
-        self.comunicator = comunicator
+    def __init__(self, comunicator):
+        super().__init__(comunicator)
         self.client = SimulationClient()
         self.PIDThread = PIDThread(self.client)
         pass
