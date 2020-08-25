@@ -3,7 +3,10 @@
     "roll": 1,
     "pitch": 2,
     "yaw": 3,
-    "all": 4
+    "a_roll": 4,
+    "a_pitch": 5,
+    "depth": 6,
+    "all": 7
   },
   "CONTROL_SPEC": {
     "START_TELEMETRY": 1,
@@ -13,7 +16,8 @@
     "ARMED": 5,
     "DISARMED": 6,
     "START_AUTONOMY": 7,
-    "STOP_AUTONOMY":  8
+    "STOP_AUTONOMY": 8,
+    "MODE": 9
   },
   "TO_GUI": {
     "ERROR": 0,

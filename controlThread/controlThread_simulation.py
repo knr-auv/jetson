@@ -12,6 +12,7 @@ class simulationConnection(controlThread):
         super().__init__(comunicator)
         self.client = SimulationClient()
         self.PIDThread = PIDThread(self.client)
+        self.mode  = 0
         pass
 
     def arm(self):
@@ -27,8 +28,12 @@ class simulationConnection(controlThread):
         
 
     def setControlMode(self, mode):
-        print(mode)
-        pass
+        print("mode changed to:"+str(mode))
+        self.PIDThread.mode = mode
+        self.mode = mode
+
+    def getControlMode(self):
+        return self.mode
 
     def moveForward(self, value):
         self.PIDThread.forward = value
@@ -36,20 +41,22 @@ class simulationConnection(controlThread):
     #temporary methods
     def vertical(self, value):
         self.PIDThread.vertical = value
-    def yaw(self, value):
-        self.PIDThread.yaw = value
+
 
 #mode 1
-    def setAngularVelocity(self, pitch, roll, yaw):
-        pass
+    def setAngularVelocity(self, roll,pitch, yaw):
+        self.PIDThread.vel_pitch_setpoint = pitch
+        self.PIDThread.vel_roll_setpoint = roll
+        self.PIDThread.vel_yaw_setpoint = yaw
 
 #mode 2
-    def yawVelocity(self, yaw):
-        pass
+    def setYawVelocity(self, yaw):
+        self.PIDThread.vel_yaw_setpoint = yaw
 
     def setAngle(self, roll, pitch):
-        self.PIDThread.roll_PID.set_point = roll
-        self.PIDThread.pitch_PID.set_point = pitch
+        self.PIDThread.roll_setpoint = roll
+        self.PIDThread.pitch_setpoint = pitch
+
 
     #if we are in mode supported by magnetometer we can set heading
     def setHeading(self, heading):

@@ -59,6 +59,12 @@ class sender:
             spec = self.pid_spec["pitch"]
         elif axis == 'yaw':
             spec = self.pid_spec["yaw"]
+        elif axis == 'a_pitch':
+            spec = self.pid_spec['a_pitch']
+        elif axis == 'a_roll':
+            spec = self.pid_spec['a_roll']
+        elif axis == 'depth':
+            spec = self.pid_spec['depth']
         elif axis =='all':
             spec = self.pid_spec["all"]
         else:
@@ -71,7 +77,7 @@ class sender:
             self.send_msg(tx_buffer)
         elif spec == self.pid_spec["all"]:
             tx_buffer = [self.proto["PID"],spec]  + PID
-            tx_buffer = struct.pack('<2B9f', *(tx_buffer))
+            tx_buffer = struct.pack('<2B18f', *(tx_buffer))
             self.send_msg(tx_buffer)
           
     def sendMotors(self,data): 
@@ -131,9 +137,15 @@ class parser:
                     msg[0] ='pitch'
                 elif msg[0]==pid_spec["yaw"]:
                     msg[0]='yaw'
+                elif msg[0]==pid_spec["a_roll"]:
+                    msg[0]='a_roll'
+                elif msg[0]==pid_spec["a_pitch"]:
+                    msg[0]='a_pitch'
+                elif msg[0]==pid_spec["depth"]:
+                    msg[0]='depth'
                 self.controlThread.setPIDs(msg)
             elif data[1]==pid_spec["all"]:
-                msg  = struct.unpack('<2B9f', data)
+                msg  = struct.unpack('<2B18f', data)
                 msg = list(msg)
                 msg.pop(0)
                 msg[0]='all'
@@ -148,6 +160,13 @@ class parser:
                 msg[1] ='pitch'
             elif msg[1]==pid_spec["yaw"]:
                  msg[1]='yaw'
+            elif msg[0]==pid_spec["a_roll"]:
+                msg[0]='a_roll'
+            elif msg[0]==pid_spec["a_pitch"]:
+                msg[0]='a_pitch'
+            elif msg[0]==pid_spec["depth"]:
+                msg[0]='depth'
+
             elif msg[1]== pid_spec["all"]:
                 msg[1] = 'all'
             self.sendPid(self.controlThread.getPIDs(msg[1]))
@@ -157,24 +176,26 @@ class parser:
                 msg = struct.unpack('<2BI',data)
                 msg = list(msg)
                 self.start_sending(msg[2])
-            if (data[1]==control_spec["STOP_TELEMETRY"]):
+            elif (data[1]==control_spec["STOP_TELEMETRY"]):
                 self.stop_sending()
-            if (data[1]==control_spec["START_PID"]):
+            elif (data[1]==control_spec["START_PID"]):
                 msg = struct.unpack('<2BI',data)
                 msg = list(msg)
                 logging.debug("Received arm signal")
                 self.controlThread.arm()
 
                 
-            if (data[1]==control_spec["STOP_PID"]):
+            elif (data[1]==control_spec["STOP_PID"]):
                 self.controlThread.disarm()
-                self.thre
-            if(data[1]==control_spec["START_AUTONOMY"]):
+            elif(data[1]==control_spec["START_AUTONOMY"]):
                 logging.debug("starting autonomy")
                 self.autonomyThread = autonomy(self.controlThread, self.stream)
                 self.executor.submit(self.autonomyThread.run)
-            if(data[1]==control_spec["STOP_AUTONOMY"]):
+            elif(data[1]==control_spec["STOP_AUTONOMY"]):
                 self.autonomyThread.active=False
+            elif data[1]==control_spec["MODE"]:
+                msg = struct.unpack("<3B", data)
+                self.controlThread.setControlMode(msg[2])
 
         if(data[0]==proto["BOAT_DATA_REQUEST"]):
             self.sendBoatData()
@@ -183,10 +204,8 @@ class parser:
             msg = struct.unpack('<B2f3i', data)
             msg = list(msg)
             msg.pop(0)
-            self.controlThread.setAngle(msg[0], msg[1])
-            self.controlThread.yaw(msg[2])
-            self.controlThread.vertical(msg[3])
-            self.controlThread.moveForward(msg[4])
+            self.parsePadData(msg)
+
 
 
 class connectionHandler(threading.Thread, sender,parser):
@@ -213,6 +232,17 @@ class connectionHandler(threading.Thread, sender,parser):
         self.executor.submit(self.stream.run)
         self.executor.submit(self.GUIStream.run)
 
+    def parsePadData(self, msg):
+        mode = self.controlThread.getControlMode()
+        if mode == 0:
+            self.controlThread.setAngle(msg[0], msg[1])
+            self.controlThread.setYawVelocity(msg[2])
+            self.controlThread.vertical(msg[3])
+            self.controlThread.moveForward(msg[4])
+        elif mode ==1:
+            self.controlThread.setAngularVelocity(msg[0], msg[1], msg[2])
+            self.controlThread.vertical(msg[3])
+            self.controlThread.moveForward(msg[4])
 
     def configComunicator(self):
         self.comunicator.confirmArm = self.confirmArm
@@ -229,7 +259,9 @@ class connectionHandler(threading.Thread, sender,parser):
         self.controlThread.setPIDs(["roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"]])
         self.controlThread.setPIDs(["pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"]])
         self.controlThread.setPIDs(["yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"] ])
-
+        self.controlThread.setPIDs(["a_pitch", self.data["a_pitch"]["P"],self.data["a_pitch"]["I"],self.data["a_pitch"]["D"]])
+        self.controlThread.setPIDs(["a_roll",self.data["a_roll"]["P"],self.data["a_roll"]["I"],self.data["a_roll"]["D"] ])
+        self.controlThread.setPIDs(["depth", self.data["depth"]["P"],self.data["depth"]["I"],self.data["depth"]["D"]])
     
     def start_sending(self, interval = 30):
         if(self.sendingActive == False):

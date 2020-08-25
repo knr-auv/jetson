@@ -11,6 +11,7 @@ class comunicator:
 class controlThread:    
     def __init__(self, comunicator = comunicator()):
         self.comunicator = comunicator
+        self.padData = None
     def arm(self):
         pass
 
@@ -23,19 +24,20 @@ class controlThread:
         #mode 2 --> horizontal --> here boat will try to be leveled. We can set roll/pitch setpoints
         #while being in horizontal mode we should be able to enable/disable barometer and magnetometer support. 
         pass
-
+    def getControlMode(self):
+        pass
     def moveForward(self, value):
         #lets say that 500 is neutral, 0 is max backward and 1000 is max forward (almost like in pwm)
         pass
 
 #how to control boat in mode 1
     #velocity is in deg/sec. 
-    def setAngularVelocity(self, pitch, roll, yaw):
+    def setAngularVelocity(self, roll,pitch, yaw):
         pass
 
 #how to control boat in mode 2
     #yaw is still controlled by setting angular velocity
-    def yawVelocity(self, yaw):
+    def setYawVelocity(self, yaw):
         pass
 
     def setAngle(self, pitch, roll):
@@ -67,7 +69,7 @@ class controlThread:
         pass
 
 #PID stuff
-    def setPIDs(self, arg, P, I , D):
+    def setPIDs(self, arg):
         #arg is "yaw", "roll" etc...
         pass
 
