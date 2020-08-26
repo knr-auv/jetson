@@ -27,15 +27,15 @@ class PIDThread(threading.Thread):
 
         self.pitch_setpoint = 0
         self.roll_setpoint = 0
+        self.depth_setpoint =0
+        self.heading_setpoint = 0
+
         self.forward = 0
-        #temporary
         self.vertical = 0
 
         self.roll_PID = PID()
         self.pitch_PID = PID()
         self.yaw_PID = PID()
-        self.a_roll_PID = PID()
-        self.a_pitch_PID=PID()
         self.depth_PID= PID()
 
         #0 is stable, 1 is acro
@@ -43,8 +43,7 @@ class PIDThread(threading.Thread):
 
         self.roll_diff =0
         self.pitch_diff = 0
-
-        self.yaw_vel_diff = 0
+        self.yaw_diff = 0
         self.depth_diff = 0
 
         self.m = [0,0,0,0,0]
@@ -66,21 +65,23 @@ class PIDThread(threading.Thread):
         logging.debug("STARTING PID THREAD")
         self.isActive=True
         self.active = True
-
+        self.heading_setpoint = self.client.get_sample('roll')
         while self.active:
             now = time.time()
             self.client.catch_sample()
+            #catch input
             
             roll = self.client.get_sample('roll')
             pitch = self.client.get_sample('pitch')
             yaw = self.client.get_sample('yaw')
             depth = self.client.get_sample('depth')
-
             self.imu_data = [roll, pitch,yaw,depth]
 
+            #estimate velocity. Normally we should use gyro input
             vel_roll = roll - self.prev_roll
             vel_pitch = pitch - self.prev_pitch
             vel_yaw = yaw - self.prev_yaw
+            vel_depth = depth - self.prev_depth
 
             self.prev_roll = roll
             self.prev_pitch = pitch
@@ -88,12 +89,19 @@ class PIDThread(threading.Thread):
             self.prev_depth = depth
             #mode 0 --> stable
             if self.mode == 0:
-                vel_roll_setpoint = self.a_roll_PID.update(roll, self.roll_setpoint)
-                vel_pitch_setpoint = self.a_pitch_PID.update(pitch, self.pitch_setpoint)
+                vel_roll_setpoint = (self.roll_setpoint - roll)*self.roll_PID.Kl
+                vel_pitch_setpoint = (self.pitch_setpoint - pitch)*self.pitch_PID.Kl
+                vel_yaw_setpoint = (self.heading_setpoint - yaw)*self.yaw_PID.Kl
+                vel_depth_setpoint = (self.depth_setpoint - depth)*self.depth_PID.Kl
+
                 self.roll_diff = self.roll_PID.update(vel_roll, vel_roll_setpoint)
                 self.pitch_diff = self.pitch_PID.update(vel_pitch, vel_pitch_setpoint)
-            #mode 1-->acro
+                self.yaw_diff = self.yaw_PID.update(vel_yaw, vel_yaw_setpoint)
+                self.depth_diff = self.depth_PID.update(vel_depth, vel_depth_setpoint)
 
+                
+
+            #mode 1-->acro
             elif self.mode ==1:
                 if self.vel_roll_setpoint != 0 or self.vel_pitch_setpoint != 0:
                     self.roll_diff = self.roll_PID.update(vel_roll, self.vel_roll_setpoint)
@@ -101,12 +109,13 @@ class PIDThread(threading.Thread):
                     self.pitch_setpoint = pitch
                     self.roll_setpoint = roll
                 else:
-                    vel_roll_setpoint = self.a_roll_PID.update(roll, self.roll_setpoint)
-                    self.roll_diff = self.roll_PID.update(vel_roll, vel_roll_setpoint)
-                    vel_pitch_setpoint = self.a_pitch_PID.update(pitch, self.pitch_setpoint)
-                    self.pitch_diff = self.pitch_PID.update(vel_pitch, vel_pitch_setpoint)
 
-            self.yaw_diff = self.yaw_PID.update(vel_yaw, self.vel_yaw_setpoint)
+                    vel_roll_setpoint = (self.roll_setpoint - roll)*self.roll_PID.Kl
+                    vel_pitch_setpoint = (self.pitch_setpoint - pitch)*self.pitch_PID.Kl
+                    self.roll_diff = self.roll_PID.update(vel_roll, vel_roll_setpoint)
+                    self.pitch_diff = self.pitch_PID.update(vel_pitch, vel_pitch_setpoint)
+                self.yaw_diff = self.yaw_PID.update(vel_yaw, self.vel_yaw_setpoint)
+                self.depth_diff = self.vertical
             
             
             
@@ -114,7 +123,8 @@ class PIDThread(threading.Thread):
                 self.roll_control()
                 self.pitch_control()
                 self.yaw_control()
-                self.pad_control()
+                self.speed_control()
+                self.depth_control()
                 self.update_motors()
 
             if(time.time()-now>self.interval):
@@ -145,12 +155,14 @@ class PIDThread(threading.Thread):
         self.pid_motors_speeds_update[0] += self.yaw_diff
         self.pid_motors_speeds_update[1] -= self.yaw_diff
 
-    def pad_control(self):
+    def speed_control(self):
         self.pid_motors_speeds_update[0] += self.forward
         self.pid_motors_speeds_update[1] += self.forward
-        self.pid_motors_speeds_update[2] -= self.vertical
-        self.pid_motors_speeds_update[3] += self.vertical
-        self.pid_motors_speeds_update[4] -= self.vertical
+
+    def depth_control(self):
+        self.pid_motors_speeds_update[2] += self.depth_diff
+        self.pid_motors_speeds_update[3] -= self.depth_diff
+        self.pid_motors_speeds_update[4] += self.depth_diff
 
 
     def update_motors(self):
@@ -179,24 +191,18 @@ class PIDThread(threading.Thread):
 
     def setPIDs(self, arg):
         if arg[0] == 'roll':
-            self.roll_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
+            self.roll_PID.setPIDCoefficients(arg[1],arg[2],arg[3],arg[4])
         elif arg[0] == 'pitch':
-            self.pitch_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
+            self.pitch_PID.setPIDCoefficients(arg[1],arg[2],arg[3],arg[4])
         elif arg[0] == 'yaw':
-            self.yaw_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
-        elif arg[0] == 'a_roll':
-            self.a_roll_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
-        elif arg[0] == 'a_pitch':
-            self.a_pitch_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
+            self.yaw_PID.setPIDCoefficients(arg[1],arg[2],arg[3],arg[4])
         elif arg[0] == 'depth':
-            self.depth_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
+            self.depth_PID.setPIDCoefficients(arg[1],arg[2],arg[3],arg[4])
         elif arg[0] == 'all':
-            self.roll_PID.setPIDCoefficients(arg[1],arg[2],arg[3])
-            self.pitch_PID.setPIDCoefficients(arg[4],arg[5],arg[6])
-            self.yaw_PID.setPIDCoefficients(arg[7],arg[8],arg[9])
-            self.a_roll_PID.setPIDCoefficients(arg[10], arg[11], arg[12])
-            self.a_pitch_PID.setPIDCoefficients(arg[13], arg[14], arg[15])
-            self.depth_PID.setPIDCoefficients(arg[16], arg[17], arg[18])
+            self.roll_PID.setPIDCoefficients(arg[1],arg[2],arg[3],arg[4])
+            self.pitch_PID.setPIDCoefficients(arg[5],arg[6],arg[7],arg[8])
+            self.yaw_PID.setPIDCoefficients(arg[9],arg[10],arg[11],arg[12])
+            self.depth_PID.setPIDCoefficients(arg[13], arg[14], arg[15],arg[16])
 
     def getPIDs(self,arg):
         if arg=='roll':
@@ -205,11 +211,7 @@ class PIDThread(threading.Thread):
             return [arg]+self.pitch_PID.getPIDCoefficients()
         elif arg == 'yaw':
             return [arg]+self.yaw_PID.getPIDCoefficients()
-        elif arg == 'a_roll':
-            return [arg]+self.a_roll_PID.getPIDCoefficients()
-        elif arg == 'a_pitch':
-            return [arg]+self.a_pitch_PID.getPIDCoefficients()
         elif arg == 'depth':
             return [arg]+self.depth_PID.getPIDCoefficients()
         elif arg == 'all':
-            return [arg]+self.roll_PID.getPIDCoefficients()+self.pitch_PID.getPIDCoefficients()+self.yaw_PID.getPIDCoefficients()+self.a_roll_PID.getPIDCoefficients()+self.a_pitch_PID.getPIDCoefficients()+self.depth_PID.getPIDCoefficients()
+            return [arg]+self.roll_PID.getPIDCoefficients()+self.pitch_PID.getPIDCoefficients()+self.yaw_PID.getPIDCoefficients()+self.depth_PID.getPIDCoefficients()

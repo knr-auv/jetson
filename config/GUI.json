@@ -3,10 +3,8 @@
     "roll": 1,
     "pitch": 2,
     "yaw": 3,
-    "a_roll": 4,
-    "a_pitch": 5,
-    "depth": 6,
-    "all": 7
+    "depth": 4,
+    "all": 5
   },
   "CONTROL_SPEC": {
     "START_TELEMETRY": 1,

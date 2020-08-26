@@ -30,6 +30,7 @@ class simulationConnection(controlThread):
     def setControlMode(self, mode):
         print("mode changed to:"+str(mode))
         self.PIDThread.mode = mode
+        self.PIDThread.heading_setpoint = self.PIDThread.client.get_sample('yaw')
         self.mode = mode
 
     def getControlMode(self):
@@ -39,44 +40,40 @@ class simulationConnection(controlThread):
         self.PIDThread.forward = value
 
     #temporary methods
-    def vertical(self, value):
-        self.PIDThread.vertical = value
 
 
-#mode 1
+
+#mode 0
     def setAngularVelocity(self, roll,pitch, yaw):
         self.PIDThread.vel_pitch_setpoint = pitch
         self.PIDThread.vel_roll_setpoint = roll
         self.PIDThread.vel_yaw_setpoint = yaw
+    def vertical(self, arg):
+        self.PIDThread.vertical = arg
 
-#mode 2
-    def setYawVelocity(self, yaw):
-        self.PIDThread.vel_yaw_setpoint = yaw
-
+#mode 1
     def setAngle(self, roll, pitch):
         self.PIDThread.roll_setpoint = roll
         self.PIDThread.pitch_setpoint = pitch
 
 
-    #if we are in mode supported by magnetometer we can set heading
     def setHeading(self, heading):
-        #here we set heading... north, east, west etc.
+        self.PIDThread.heading_setpoint = heading
         pass
     
     def setDepth(self, depth):
-        pass
+        self.PIDThread.depth_setpoint= depth
 
 #comunication stuff
 
     def getHeading(self):
-        #return heading
-        pass
+        return self.PIDThread.imu_data[2]
 
     def getImuData(self):
         return self.PIDThread.imu_data
     
     def getDepth(self):
-        pass
+        return self.PIDThread.imu_data[3]
 
     def getMotors(self):
         return self.PIDThread.getMotors()
@@ -86,6 +83,9 @@ class simulationConnection(controlThread):
         self.PIDThread.setPIDs(arg)
        
     def getPIDs(self, arg):
+        print(arg)
+        val = self.PIDThread.getPIDs(arg)
+        print(val)
         return self.PIDThread.getPIDs(arg)
 
     def storePIDs(self):

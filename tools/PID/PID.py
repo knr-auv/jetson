@@ -3,11 +3,12 @@ import time, threading
 
 class PID:
 
-    def __init__(self, P=0., I=0., D=0., set_point = 0):
+    def __init__(self, P=0., I=0., D=0., L=0.):
 
         self.Kp = P
         self.Ki = I
         self.Kd = D
+        self.Kl = L
         self.lock = threading.Lock()
 
         self.PTerm = 0
@@ -57,14 +58,15 @@ class PID:
     def setWindup(self, windup):
         self.windup_guard = windup
 
-    def setPIDCoefficients(self, Kp, Ki, Kd):
+    def setPIDCoefficients(self, Kp, Ki, Kd, Kl):
         self.Kp = Kp
         self.Ki = Ki
         self.Kd = Kd
-        print(Kp, Ki, Kd)
+        self.Kl = Kl
+        print(Kp, Ki, Kd, Kl)
 
     def getPIDCoefficients(self):
-        return [self.Kp, self.Ki, self.Kd]
+        return [self.Kp, self.Ki, self.Kd, self.Kl]
 
     def setMaxOutput(self, max_output):
         self.max_output = max_output
