@@ -3,6 +3,9 @@ import threading
 import logging
 import time, random
 from tools.PID.PID import PID
+import quaternion as Q
+import numpy as np
+import math
 
 class PIDThread(threading.Thread):
     """Thread class that sets up all PID controllers and updates motors velocity after calculating difference
@@ -61,6 +64,7 @@ class PIDThread(threading.Thread):
         self.prev_yaw = 0
         self.prev_depth = 0
 
+
     def run(self): 
         logging.debug("STARTING PID THREAD")
         self.isActive=True
@@ -77,6 +81,7 @@ class PIDThread(threading.Thread):
             depth = self.client.get_sample('depth')
             self.imu_data = [roll, pitch,yaw,depth]
 
+    
             #estimate velocity. Normally we should use gyro input
             vel_roll = roll - self.prev_roll
             vel_pitch = pitch - self.prev_pitch
@@ -87,6 +92,8 @@ class PIDThread(threading.Thread):
             self.prev_pitch = pitch
             self.prev_yaw = yaw
             self.prev_depth = depth
+
+
             #mode 0 --> stable
             if self.mode == 0:
                 vel_roll_setpoint = (self.roll_setpoint - roll)*self.roll_PID.Kl
@@ -102,16 +109,24 @@ class PIDThread(threading.Thread):
                 
 
             #mode 1-->acro
+
             elif self.mode ==1:
+                
                 if self.vel_roll_setpoint != 0 or self.vel_pitch_setpoint != 0:
+                    
                     self.roll_diff = self.roll_PID.update(vel_roll, self.vel_roll_setpoint)
+                    
                     self.pitch_diff = self.pitch_PID.update(vel_pitch, self.vel_pitch_setpoint)
+                    
                     self.pitch_setpoint = pitch
                     self.roll_setpoint = roll
                 else:
-
+                    upside_down = (roll<-90 or roll>90)
                     vel_roll_setpoint = (self.roll_setpoint - roll)*self.roll_PID.Kl
-                    vel_pitch_setpoint = (self.pitch_setpoint - pitch)*self.pitch_PID.Kl
+                    if not upside_down:
+                        vel_pitch_setpoint = (self.pitch_setpoint - pitch)*self.pitch_PID.Kl
+                    else:
+                        vel_pitch_setpoint = -(self.pitch_setpoint - pitch)*self.pitch_PID.Kl
                     self.roll_diff = self.roll_PID.update(vel_roll, vel_roll_setpoint)
                     self.pitch_diff = self.pitch_PID.update(vel_pitch, vel_pitch_setpoint)
                 self.yaw_diff = self.yaw_PID.update(vel_yaw, self.vel_yaw_setpoint)
