@@ -1,6 +1,6 @@
 
 #class for controlling AUV
-#all methods should be implemented acording to comunicationThreads
+#all methods should be implemented acording to communicationThreads
 class comunicator:
     #class for sending data to gui.
      def __init__(self):

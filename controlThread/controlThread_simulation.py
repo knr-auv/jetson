@@ -1,7 +1,7 @@
 
 #this should be some kind of thread.
 #it controll pid thread and simulation client
-from comunicationThreads.simulationClient import SimulationClient
+from communicationThreads.simulationClient import SimulationClient
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import controlThread
 import threading

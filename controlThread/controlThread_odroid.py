@@ -1,8 +1,8 @@
 
 #this should be some kind of thread.
 #it controll pid thread and simulation client
-from comunicationThreads.odroidClient import OdroidClient
-from comunicationThreads.GUIServer import comunicator
+from communicationThreads.odroidClient import OdroidClient
+from communicationThreads.GUIServer import comunicator
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import controlThread
 import threading

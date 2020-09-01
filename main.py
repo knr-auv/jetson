@@ -1,5 +1,5 @@
 from controlThread.controlThread_simulation import simulationConnection
-from comunicationThreads.GUIServer import connectionHandler
+from communicationThreads.GUIServer import connectionHandler
 from cameraStream.stream_simulation import SimulationClient
 import logging
 
