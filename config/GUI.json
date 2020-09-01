@@ -3,7 +3,8 @@
     "roll": 1,
     "pitch": 2,
     "yaw": 3,
-    "all": 4
+    "depth": 4,
+    "all": 5
   },
   "CONTROL_SPEC": {
     "START_TELEMETRY": 1,
@@ -13,7 +14,8 @@
     "ARMED": 5,
     "DISARMED": 6,
     "START_AUTONOMY": 7,
-    "STOP_AUTONOMY":  8
+    "STOP_AUTONOMY": 8,
+    "MODE": 9
   },
   "TO_GUI": {
     "ERROR": 0,
@@ -21,7 +23,8 @@
     "MOTORS": 2,
     "BOAT_DATA": 3,
     "IMU": 4,
-    "CONTROL": 5
+    "CONTROL": 5,
+    "AUTONOMY_MSG": 6
   },
   "TO_ODROID": {
     "CONTROL": 0,

@@ -3,11 +3,13 @@ from controlThread.controlThread import controlThread
 from concurrent.futures import ThreadPoolExecutor
 from variable import GUI_ADDRESS, GUI_STREAM
 from autonomy.autonomyThread import autonomy
+
 class comunicator:
     #class for sending data to gui.
      def __init__(self):
          self.confirmArm=None
          self.confirmDisarm =None
+         self.autonomyMsg = None
          
 class GUIStream(threading.Thread):
     def __init__(self, stream):
@@ -57,6 +59,8 @@ class sender:
             spec = self.pid_spec["pitch"]
         elif axis == 'yaw':
             spec = self.pid_spec["yaw"]
+        elif axis == 'depth':
+            spec = self.pid_spec['depth']
         elif axis =='all':
             spec = self.pid_spec["all"]
         else:
@@ -65,11 +69,11 @@ class sender:
         PID.pop(0)
         if spec != self.pid_spec["all"]:
             tx_buffer = [self.proto["PID"],spec]  + PID
-            tx_buffer = struct.pack('<2B3f', *(tx_buffer))
+            tx_buffer = struct.pack('<2B4f', *(tx_buffer))
             self.send_msg(tx_buffer)
         elif spec == self.pid_spec["all"]:
             tx_buffer = [self.proto["PID"],spec]  + PID
-            tx_buffer = struct.pack('<2B9f', *(tx_buffer))
+            tx_buffer = struct.pack('<2B16f', *(tx_buffer))
             self.send_msg(tx_buffer)
           
     def sendMotors(self,data): 
@@ -103,6 +107,14 @@ class sender:
             tx_buffer = [self.proto["CONTROL"]]+msg
             tx_buffer = struct.pack('<2B',*(tx_buffer))
             self.send_msg(tx_buffer)
+
+    def sendAutonomyMsg(self, msg):
+        data = bytes(msg, 'utf-8')
+        data_len = len(data)
+        tx_buffer = [self.proto["AUTONOMY_MSG"],data_len, data]
+        tx_buffer = struct.pack('<2B'+str(data_len)+'s', *(tx_buffer))
+        self.send_msg(tx_buffer)
+
 class parser:
 
     def parse(self, data):
@@ -112,7 +124,7 @@ class parser:
 
         if data[0] == proto["PID"]:
             if data[1]!= pid_spec["all"]:
-                msg = struct.unpack('<2B3f', data)
+                msg = struct.unpack('<2B4f', data)
                 msg = list(msg)
                 msg.pop(0)
                 if msg[0]==pid_spec["roll"]:
@@ -121,9 +133,11 @@ class parser:
                     msg[0] ='pitch'
                 elif msg[0]==pid_spec["yaw"]:
                     msg[0]='yaw'
+                elif msg[0]==pid_spec["depth"]:
+                    msg[0]='depth'
                 self.controlThread.setPIDs(msg)
             elif data[1]==pid_spec["all"]:
-                msg  = struct.unpack('<2B9f', data)
+                msg  = struct.unpack('<2B16f', data)
                 msg = list(msg)
                 msg.pop(0)
                 msg[0]='all'
@@ -138,6 +152,9 @@ class parser:
                 msg[1] ='pitch'
             elif msg[1]==pid_spec["yaw"]:
                  msg[1]='yaw'
+            elif msg[1]==pid_spec["depth"]:
+                msg[1]='depth'
+
             elif msg[1]== pid_spec["all"]:
                 msg[1] = 'all'
             self.sendPid(self.controlThread.getPIDs(msg[1]))
@@ -147,24 +164,26 @@ class parser:
                 msg = struct.unpack('<2BI',data)
                 msg = list(msg)
                 self.start_sending(msg[2])
-            if (data[1]==control_spec["STOP_TELEMETRY"]):
+            elif (data[1]==control_spec["STOP_TELEMETRY"]):
                 self.stop_sending()
-            if (data[1]==control_spec["START_PID"]):
+            elif (data[1]==control_spec["START_PID"]):
                 msg = struct.unpack('<2BI',data)
                 msg = list(msg)
                 logging.debug("Received arm signal")
                 self.controlThread.arm()
 
                 
-            if (data[1]==control_spec["STOP_PID"]):
+            elif (data[1]==control_spec["STOP_PID"]):
                 self.controlThread.disarm()
-                self.thre
-            if(data[1]==control_spec["START_AUTONOMY"]):
+            elif(data[1]==control_spec["START_AUTONOMY"]):
                 logging.debug("starting autonomy")
                 self.autonomyThread = autonomy(self.controlThread, self.stream)
                 self.executor.submit(self.autonomyThread.run)
-            if(data[1]==control_spec["STOP_AUTONOMY"]):
+            elif(data[1]==control_spec["STOP_AUTONOMY"]):
                 self.autonomyThread.active=False
+            elif data[1]==control_spec["MODE"]:
+                msg = struct.unpack("<3B", data)
+                self.controlThread.setControlMode(msg[2])
 
         if(data[0]==proto["BOAT_DATA_REQUEST"]):
             self.sendBoatData()
@@ -173,10 +192,8 @@ class parser:
             msg = struct.unpack('<B2f3i', data)
             msg = list(msg)
             msg.pop(0)
-            self.controlThread.setAngle(msg[0], msg[1])
-            self.controlThread.yaw(msg[2])
-            self.controlThread.vertical(msg[3])
-            self.controlThread.moveForward(msg[4])
+            self.parsePadData(msg)
+
 
 
 class connectionHandler(threading.Thread, sender,parser):
@@ -203,10 +220,29 @@ class connectionHandler(threading.Thread, sender,parser):
         self.executor.submit(self.stream.run)
         self.executor.submit(self.GUIStream.run)
 
+    def parsePadData(self, msg):
+        mode = self.controlThread.getControlMode()
+        if mode == 0:
+            self.controlThread.setAngle(msg[0], msg[1])
+            if(msg[2]!=0):
+                heading = self.controlThread.getHeading()
+                heading +=msg[2]/100.
+                self.controlThread.setHeading(heading)
+            if(msg[3]!=0):
+                depth = self.controlThread.getDepth()
+                depth -=msg[3]/2000
+                self.controlThread.setDepth(depth)
+            self.controlThread.moveForward(msg[4])
+
+        elif mode ==1:
+            self.controlThread.setAngularVelocity(msg[0], msg[1], msg[2])
+            self.controlThread.vertical(-msg[3])
+            self.controlThread.moveForward(msg[4])
 
     def configComunicator(self):
         self.comunicator.confirmArm = self.confirmArm
         self.comunicator.confirmDisarm=self.confirmDisarm
+        self.comunicator.autonomyMsg = self.sendAutonomyMsg
 
     def setControlThread(self, arg = controlThread()):
         self.controlThread = arg
@@ -215,10 +251,10 @@ class connectionHandler(threading.Thread, sender,parser):
     def loadPIDs(self):
         with open("config/PID_simulation.json", "r") as fd:
             self.data = json.load(fd)
-        self.controlThread.setPIDs(["roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"]])
-        self.controlThread.setPIDs(["pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"]])
-        self.controlThread.setPIDs(["yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"] ])
-
+        self.controlThread.setPIDs(["roll", self.data["roll"]["P"],self.data["roll"]["I"],self.data["roll"]["D"], self.data["roll"]["stab"]])
+        self.controlThread.setPIDs(["pitch", self.data["pitch"]["P"],self.data["pitch"]["I"],self.data["pitch"]["D"], self.data["roll"]["stab"]])
+        self.controlThread.setPIDs(["yaw",self.data["yaw"]["P"],self.data["yaw"]["I"],self.data["yaw"]["D"], self.data["roll"]["stab"] ])
+        self.controlThread.setPIDs(["depth", self.data["depth"]["P"],self.data["depth"]["I"],self.data["depth"]["D"], self.data["depth"]["stab"]])
     
     def start_sending(self, interval = 30):
         if(self.sendingActive == False):
@@ -236,7 +272,6 @@ class connectionHandler(threading.Thread, sender,parser):
 
     def confirmDisarm(self):
         self.sendControl([self.protocol["CONTROL_SPEC"]["DISARMED"]])
-
 
     async def loop(self):
         if self.clientConnected:
@@ -278,14 +313,15 @@ class connectionHandler(threading.Thread, sender,parser):
                         logging.debug(er)
                         rx_state = HEADER
 
-        except asyncio.CancelledError:               
-            pass
+
         #except ConnectionAbortedError:
          #   self.clientConnected = False
-        except ConnectionError:
+        except:
             self.controlThread.PIDThread.active = False
-            self.clientConnected = False
 
+            self.clientConnected = False
+            if self.autonomyThread:
+                self.autonomyThread.active = False
             #logging.debug("Client disconnected")
             #return
         self.clientConnected = False
