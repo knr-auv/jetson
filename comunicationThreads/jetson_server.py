@@ -1,17 +1,25 @@
-import socket, struct, random, time
+import json
+import logging
+import socket
+import struct
+import time
 from concurrent.futures import ThreadPoolExecutor
+
+from dummy_data_provider import DummyDataProvider as ddp
 from jetson_parser import JetsonParser
 from jetson_sender import JetsonSender
-
-
+from variable import *
 
 
 class ConnectionHandler(JetsonSender, JetsonParser):
 
-    def __init__(self, addr, getPIDs,setPIDs, getMotors):
-        super(ConnectionHandler, self).__init__()
+    def __init__(self, getPIDs, setPIDs, getMotors, protocol, addr=JETSON_ADDRESS):
+        JetsonSender.__init__(self, protocol)
+        JetsonParser.__init__(self)
+        self.protocol = protocol
         self.executor = ThreadPoolExecutor(max_workers=3)
         self.methodCollector(getPIDs,setPIDs, getMotors)
+        self.server=None
         self.host = addr[0]
         self.port = addr[1]
         self.active = True
@@ -31,6 +39,7 @@ class ConnectionHandler(JetsonSender, JetsonParser):
 
     def stop_sending(self):
         self.sendingActive = False
+
     def start_serving(self):
         self.executor.submit(self.run)
 
@@ -40,105 +49,93 @@ class ConnectionHandler(JetsonSender, JetsonParser):
 
             while self.clientConnected and self.sendingActive:
                 time.sleep(self.interval)
-
                 self.sendMotors(self.getMotors())
 
             self.sendingActive = False
 
-    async def clientHandler(self, reader,writer):
-        HEADER = 0
-        DATA = 1
-        rx_state = HEADER
-        print("client connected")
-        self.writer = writer
-        self.client_loop = asyncio.get_running_loop()
+    def clientHandler(self, conn, addr):
         self.clientConnected = True
-
-        try:
-            while self.active:
-
-                if(rx_state ==HEADER):
-                    async def receive4():
-                        data = await reader.read(4)
-                        return data
-                    self.reader_task = asyncio.create_task(receive4())
-                    data = await self.reader_task
+        print(f"New connection from {addr}")
+        rx_state=FRAME_SECTION["HEADER"]
+        rx_len=0
+        while self.active:
+            try:
+                if(rx_state==FRAME_SECTION["HEADER"]):
+                    data=conn.recv(4)
                     if data == b'':
                         raise ConnectionResetError
-
-                    rx_len = struct.unpack("<L",data)[0]
-                    rx_len -= 4
-                    rx_state = DATA
-
-                elif(rx_state == DATA):
-                    data = await reader.readexactly(rx_len)
+                    rx_len=struct.unpack("<I",data)[0]
+                    rx_len-=4
+                    rx_state=FRAME_SECTION["DATA"]
+                elif(rx_state==FRAME_SECTION["DATA"]):
+                    data=conn.recv(rx_len).decode("ascii")
+                    logging.debug(data)
                     self.executor.submit(self.parse ,data)
-                    rx_state = HEADER
-        except asyncio.IncompleteReadError as er:
-                print(er)
-                rx_state = HEADER
-        except asyncio.CancelledError:
-
-                pass
-        except ConnectionResetError:
-            self.clientConnected = False
-            print("Client disconnected")
-            return
+                    rx_state=FRAME_SECTION["HEADER"]
+            except ConnectionResetError:
+                self.clientConnected = False
+                conn.close()
+                print("Client disconnected")
+                return
+            except Exception as e:
+                logging.debug("Exception")
+                rx_state=FRAME_SECTION["HEADER"]
         print("closing")
         self.clientConnected = False
-        writer.close()
-        await writer.wait_closed()
+        conn.close()
         return
 
+    def serverHandler(self):
+        self.server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
+        self.server.bind((self.host,self.port))
+        self.server.listen()
+        self.active=True
+        print(f"[LISTENING] Server is listening on {self.host}:{self.port}.")
 
-    async def serverHandler(self):
-        self.server = await asyncio.start_server(self.clientHandler, self.host, self.port, family = socket.AF_INET, flags = socket.SOCK_STREAM)
-        print("Server is listening: " + str(self.host)+":"+str(self.port))
-        try:
-           async with self.server:
-                await self.server.serve_forever()
+        while self.active:
+            conn, addr = self.server.accept()
+            self.executor.submit(self.clientHandler,conn, addr)
+            # t=threading.Thread(target=self.clientHandler, args=(conn, addr))
+            # t.start()
 
-        except asyncio.CancelledError:
-            self.active=False
-            print("Server terminated")
-            await self.server.wait_closed()
 
     def run(self):
-        asyncio.run(self.serverHandler(),debug =True)
+        self.serverHandler()
 
 
     def stop(self):
-        async def coro():
-            self.active= False
-            await self.server.close()
-        asyncio.run_coroutine_threadsafe(coro() , self.client_loop)
+        logging.debug(f"Closing server on {self.host}:{self.port}")
+        self.active= False
+        self.server.close()
 
 
     def send(self, data):
-        async def write():
-            self.writer.write(data)
-            await self.writer.drain()
-        asyncio.run_coroutine_threadsafe(write(), self.client_loop)
+        self.ack = b""
+        serialized = json.dumps(data).encode('ascii')
+        lenght = struct.pack('<I', len(serialized))
+        logging.debug(lenght)
+        self.server.send(b"\xA0"+lenght)
+        logging.debug(b"\xA0"+lenght)
+        self.server.sendall(serialized)
+        # async def write():
+        #     self.writer.write(data)
+        #     await self.writer.drain()
+        # asyncio.run_coroutine_threadsafe(write(), self.client_loop)
 
-def dummyDataProvider(len=None, spec = None):
 
-    data = []
-    if spec ==None:
-        for i in range(len):
-            data.append(random.randint(0,100))
-    elif spec!='all':
-        data.append(spec)
-        for i in range(3):
-            data.append(random.randint(0,10))
-    elif spec=='all':
-        data.append(spec)
-        for i in range(9):
-            data.append(random.randint(0,10))
-    return data
 
 if __name__=="__main__":
-    addr = ("localhost", 8080)
-    server = ConnectionHandler(addr, lambda x:dummyDataProvider(len=None, spec = x),print, lambda: dummyDataProvider(len=5))
+    logging.basicConfig(level=logging.DEBUG)
+    addr = ("localhost", 1234)
+    with open("../config/protocol.json", 'r') as p:
+        protocol = json.load(p)
+    server = ConnectionHandler(
+        lambda x:ddp.provide_dummy_data(len=None, spec = x),
+        print,
+        lambda: ddp.provide_dummy_data(len=5),
+        protocol,
+        addr)
     server.start_serving()
+    server.start_sending()
     while True:
             time.sleep(1)

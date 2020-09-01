@@ -130,3 +130,5 @@ dmypy.json
 /.vs/jetson-v2/v16
 /.vs/slnx.sqlite
 /.vs
+
+.idea/

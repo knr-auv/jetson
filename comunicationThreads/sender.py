@@ -6,7 +6,7 @@ class Sender():
         self.pid_spec = protocol["PID_SPEC"]
         self.control_spec = protocol['CONTROL_SPEC']
 
-    def send(self):
+    def send(self, msg):
         pass
 
     def send_msg(self, msg):

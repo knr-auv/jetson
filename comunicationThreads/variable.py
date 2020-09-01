@@ -1,1 +1,2 @@
 JETSON_ADDRESS = ('localhost',8181)
+FRAME_SECTION={"HEADER":0, "DATA":1}

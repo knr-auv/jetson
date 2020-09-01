@@ -2,7 +2,7 @@ import struct, logging, sys
 
 class JetsonParser():
     def parse(self, data):
-        proto = self.protocol["TO_GUI"]
+        proto = self.protocol["TO_JETSON"]
         pid_spec = self.protocol["PID_SPEC"]
         control_spec = self.protocol["CONTROL_SPEC"]
         try:
