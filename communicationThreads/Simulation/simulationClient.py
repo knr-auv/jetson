@@ -3,11 +3,11 @@ from struct import *
 import logging
 import time
 import json
-
+import variable as var
 
 class SimulationClient:
-    """Klasa Tworzy clienta do odbierania ramek zdjec z symulacji"""
-    def __init__(self, port=44210, ip='localhost'):
+    """Klasa Tworzy clienta do sterowania łódką w symulacji"""
+    def __init__(self, port=var.SIM_CONTROL_ADDRESS[1], ip=var.SIM_CONTROL_ADDRESS[0]):
         """Inicjalizacja socekta """
         self.port = port
         self.ip = ip

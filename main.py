@@ -1,11 +1,11 @@
 from controlThread.controlThread_simulation import simulationConnection
-from communicationThreads.GUIServer import connectionHandler
-from cameraStream.stream_simulation import SimulationClient
+from communicationThreads.GUI.GUIServer import connectionHandler
+from cameraStream.stream_simulation import SimulationStreamClient
 import logging
 
 if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
-    cameraStream = SimulationClient()
+    cameraStream = SimulationStreamClient()
     guiServer = connectionHandler(cameraStream)
     controlThread = simulationConnection(guiServer.comunicator)
     guiServer.setControlThread(controlThread)

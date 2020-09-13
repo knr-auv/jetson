@@ -1,17 +1,17 @@
 
 import numpy as np
 import asyncio,socket, struct, logging, time
-from variable import STREAM_ADDRESS
+from variable import SIM_STREAM_ADDRESS
 from cameraStream.stream import cameraStream
 
 
-class SimulationClient(cameraStream):
+class SimulationStreamClient(cameraStream):
     """Klasa Tworzy clienta do odbierania ramek zdjec z symulacji"""
     def __init__(self):
-        super(SimulationClient, self).__init__()
+        super(SimulationStreamClient, self).__init__()
         """Inicjalizacja socekta """
-        self.port = STREAM_ADDRESS[1]
-        self.ip = STREAM_ADDRESS[0]
+        self.port = SIM_STREAM_ADDRESS[1]
+        self.ip = SIM_STREAM_ADDRESS[0]
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.active = True
         self.data = b""

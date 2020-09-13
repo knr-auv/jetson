@@ -1,8 +1,11 @@
+#gui address
 GUI_ADDRESS = ('localhost',8080)
-GUI_STREAM = ('127.0.0.1', 8090)
+#z tego adresu gui pobiera obraz z kamery od jetsona
+GUI_STREAM = ('127.0.0.1', 8090) #todo sending this address to gui. Now is hardcoded
 
 #simulation addres
-STREAM_ADDRESS = ('localhost', 44209)
+SIM_CONTROL_ADDRESS = ('localhost', 44210)
+SIM_STREAM_ADDRESS = ('localhost', 44209)
 
 JETSON_ADDRESS = ('10.41.0.1',8181)
 #ODROID_ADDRESS = ('10.41.0.42')
