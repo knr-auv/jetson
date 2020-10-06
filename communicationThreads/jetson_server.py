@@ -3,139 +3,133 @@ import logging
 import socket
 import struct
 import time
+import threading
 from concurrent.futures import ThreadPoolExecutor
 
-from dummy_data_provider import DummyDataProvider as ddp
 from jetson_parser import JetsonParser
 from jetson_sender import JetsonSender
 from variable import *
 
 
-class ConnectionHandler(JetsonSender, JetsonParser):
+class JetsonServer(JetsonSender, JetsonParser):
 
-    def __init__(self, getPIDs, setPIDs, getMotors, protocol, addr=JETSON_ADDRESS):
+    def __init__(self, protocol, addr=JETSON_ADDRESS):
         JetsonSender.__init__(self, protocol)
-        JetsonParser.__init__(self)
-        self.protocol = protocol
+        JetsonParser.__init__(self, protocol)
         self.executor = ThreadPoolExecutor(max_workers=3)
-        self.methodCollector(getPIDs,setPIDs, getMotors)
-        self.server=None
+
+        self.server = None
+        self.active_conn = None
+        self.lock=threading.Lock()
         self.host = addr[0]
         self.port = addr[1]
         self.active = True
         self.tx_ready = True
         self.tx_buff = []
         self.clientConnected = False
-        self.sendingActive = False
 
-    def methodCollector(self, getPIDs, setPIDs, getMotors): #getDepth, getHummidity...
-        self.getPIDs = getPIDs
-        self.getMotors = getMotors
-        self.setPIDs = setPIDs
+    def start_telemetry(self, interval):
+        logging.debug("Starting telemetry")
+        self.sendControl([self.control_spec["START_TELEMETRY"], interval])
 
-    def start_sending(self, interval = 30):
-        self.interval = interval/1000
-        self.executor.submit(self.loop)
+    def disarm(self):
+        logging.debug("DISARMING")
+        self.sendControl([self.control_spec["STOP_PID"]])
 
-    def stop_sending(self):
-        self.sendingActive = False
+    def arm(self, interval):
+        logging.debug("ARMING")
+        self.sendControl([self.control_spec["START_PID"], interval])
+
+        self.checked = False
+
+    def startAutonomy(self):
+        self.sendControl([self.control_spec["START_AUTONOMY"]])
+
+    def stopAutonomy(self):
+        self.sendControl([self.control_spec["STOP_AUTONOMY"]])
+
+    def setMode(self, mode):
+        self.sendControl([self.control_spec["MODE"], mode])
 
     def start_serving(self):
         self.executor.submit(self.run)
 
-    def loop(self):
-        if self.clientConnected:
-            self.sendingActive = True
-
-            while self.clientConnected and self.sendingActive:
-                time.sleep(self.interval)
-                self.sendMotors(self.getMotors())
-
-            self.sendingActive = False
-
     def clientHandler(self, conn, addr):
         self.clientConnected = True
         print(f"New connection from {addr}")
-        rx_state=FRAME_SECTION["HEADER"]
-        rx_len=0
+        rx_state = FRAME_SECTION["HEADER"]
+        rx_len = 0
+        with self.lock:
+            self.active_conn = conn
+        self.start_telemetry(30)
+
+        self.sendBoatDataRequest()
+        self.sendPIDRequest("all")
+
+
         while self.active:
             try:
-                if(rx_state==FRAME_SECTION["HEADER"]):
-                    data=conn.recv(4)
+                if rx_state == FRAME_SECTION["HEADER"]:
+                    logging.debug("Header")
+
+                    data = self.active_conn.recv(4)
                     if data == b'':
                         raise ConnectionResetError
-                    rx_len=struct.unpack("<I",data)[0]
-                    rx_len-=4
-                    rx_state=FRAME_SECTION["DATA"]
-                elif(rx_state==FRAME_SECTION["DATA"]):
-                    data=conn.recv(rx_len).decode("ascii")
-                    logging.debug(data)
-                    self.executor.submit(self.parse ,data)
-                    rx_state=FRAME_SECTION["HEADER"]
+                    rx_len = struct.unpack("<L", data)[0]
+                    logging.debug(f"frame length: {rx_len}")
+                    # rx_len -= 4
+                    #logging.debug(rx_len)
+                    rx_state = FRAME_SECTION["DATA"]
+
+                elif rx_state == FRAME_SECTION["DATA"]:
+                    logging.debug("Data")
+                    data = self.active_conn.recv(rx_len)
+                    self.parse(data)
+                    rx_state = FRAME_SECTION["HEADER"]
             except ConnectionResetError:
                 self.clientConnected = False
                 conn.close()
                 print("Client disconnected")
                 return
+            except socket.gaierror:
+                logging.debug("Connection terminated")
+                return
             except Exception as e:
-                logging.debug("Exception")
-                rx_state=FRAME_SECTION["HEADER"]
+                logging.debug(e)
+                rx_state = FRAME_SECTION["HEADER"]
         print("closing")
         self.clientConnected = False
         conn.close()
         return
 
     def serverHandler(self):
-        self.server=socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-        self.server.bind((self.host,self.port))
+        self.server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.server.bind((self.host, self.port))
         self.server.listen()
-        self.active=True
+        self.active = True
         print(f"[LISTENING] Server is listening on {self.host}:{self.port}.")
 
         while self.active:
             conn, addr = self.server.accept()
-            self.executor.submit(self.clientHandler,conn, addr)
-            # t=threading.Thread(target=self.clientHandler, args=(conn, addr))
-            # t.start()
-
+            self.executor.submit(self.clientHandler, conn, addr)
 
     def run(self):
         self.serverHandler()
 
-
     def stop(self):
         logging.debug(f"Closing server on {self.host}:{self.port}")
-        self.active= False
+        self.active = False
         self.server.close()
 
 
-    def send(self, data):
-        self.ack = b""
-        serialized = json.dumps(data).encode('ascii')
-        lenght = struct.pack('<I', len(serialized))
-        logging.debug(lenght)
-        self.server.send(b"\xA0"+lenght)
-        logging.debug(b"\xA0"+lenght)
-        self.server.sendall(serialized)
-        # async def write():
-        #     self.writer.write(data)
-        #     await self.writer.drain()
-        # asyncio.run_coroutine_threadsafe(write(), self.client_loop)
 
-
-
-if __name__=="__main__":
+if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     addr = ("localhost", 1234)
-    with open("../config/protocol.json", 'r') as p:
+    with open("protocol.json", 'r') as p:
         protocol = json.load(p)
-    server = ConnectionHandler(
-        lambda x:ddp.provide_dummy_data(len=None, spec = x),
-        print,
-        lambda: ddp.provide_dummy_data(len=5),
-        protocol,
-        addr)
+    server = JetsonServer(protocol, addr)
     server.start_serving()
-    server.start_sending()
+
     while True:
-            time.sleep(1)
+        time.sleep(1)
