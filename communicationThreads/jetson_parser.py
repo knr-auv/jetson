@@ -1,62 +1,76 @@
-import struct, logging, sys
+import logging, sys, json
+from parser_baseclass import Parser
 
-class JetsonParser():
+
+class JetsonParser(Parser):
+    def __init__(self, protocol):
+        super().__init__(protocol)
+        self.parser_proto = protocol["TO_JETSON"]
+
     def parse(self, data):
-        proto = self.protocol["TO_JETSON"]
-        pid_spec = self.protocol["PID_SPEC"]
-        control_spec = self.protocol["CONTROL_SPEC"]
+        logging.debug("Parsing")
+        data = data.decode("ansi")
+        data = json.loads(data)
+        logging.debug(f"frame:{data}")
+        msg = list(data)
         try:
-            if data[0]== proto["PID"]:
-                if data[1]!= pid_spec['all']:
-                    msg = struct.unpack('<2B4f', data)
-                    msg = list(msg)
+            if data[0] == self.parser_proto["PID"]:
+                logging.debug("PID")
+                if data[1] != self.pid_spec['all']:
                     msg.pop(0)
-                    if msg[0]==pid_spec["roll"]:
+                    if msg[0] == self.pid_spec["roll"]:
                         msg[0] = 'roll'
-                    elif msg[0]==pid_spec["pitch"]:
-                        msg[0] ='pitch'
-                    elif msg[0]==pid_spec["yaw"]:
-                        msg[0]='yaw'
-                    elif msg[0]==pid_spec["depth"]:
-                        msg[0]='depth'
-                    self.signals.receivedPID.emit(msg)
-                elif data[1]==pid_spec["all"]:
-                    msg  = struct.unpack('<2B16f', data)
-                    msg = list(msg)
+                    elif msg[0] == self.pid_spec["pitch"]:
+                        msg[0] = 'pitch'
+                    elif msg[0] == self.pid_spec["yaw"]:
+                        msg[0] = 'yaw'
+                    elif msg[0] == self.pid_spec["depth"]:
+                        msg[0] = 'depth'
+                    logging.debug(msg)
+                elif data[1] == self.pid_spec["all"]:
                     msg.pop(0)
-                    msg[0]='all'
-                    self.signals.receivedPID.emit(msg)
+                    msg[0] = 'all'
+                    logging.debug(msg)
 
-            elif data[0]==proto["MOTORS"]:
-                msg = struct.unpack('<B5f', data)
-                msg = list(msg)
+            elif data[0] == self.parser_proto["MOTORS"]:
+                logging.debug("MOTORS")
                 msg.pop(0)
-                self.signals.receivedMotors.emit(msg)
+                logging.debug(msg)
 
-            elif data[0] == proto["BOAT_DATA"]:
-                msg = struct.unpack('<2B'+str(data[1])+'s',data)
-                self.signals.receivedBoatData.emit(msg[2])
+            elif data[0] == self.parser_proto["BOAT_DATA"]:
+                logging.debug("BOAT_DATA")
+                logging.debug(msg)
 
-            elif data[0] == proto["IMU"]:
-                msg = struct.unpack('<B4f',data)
-                msg = list(msg)
+            elif data[0] == self.parser_proto["IMU"]:
+                logging.debug("IMU")
                 msg.pop(0)
-                self.signals.receivedIMUData.emit(msg)
+                logging.debug(msg)
 
-            elif data[0] == proto["CONTROL"]:
-                if data[1]==control_spec["ARMED"]:
+            elif data[0] == self.parser_proto["CONTROL"]:
+                logging.debug("CONTROL")
+                if data[1] == self.control_spec["START_TELEMETRY"]:
+                    logging.debug("START_TELEMETRY")
+                elif data[1] == self.control_spec["STOP_TELEMETRY"]:
+                    logging.debug("STOP_TELEMETRY")
+                elif data[1] == self.control_spec["START_PID"]:
+                    logging.debug("START_PID")
+                elif data[1] == self.control_spec["STOP_PID"]:
+                    logging.debug("STOP_PID")
+                elif data[1] == self.control_spec["ARMED"]:
                     logging.debug("ARMED")
-                    self.signals.armed.emit()
-                elif data[1]==control_spec["DISARMED"]:
+                elif data[1] == self.control_spec["DISARMED"]:
                     logging.debug("DISARMED")
-                    self.signals.disarmed.emit()
+                elif data[1] == self.control_spec["START_AUTONOMY"]:
+                    logging.debug("START_AUTONOMY")
+                elif data[1] == self.control_spec["STOP_AUTONOMY"]:
+                    logging.debug("STOP_AUTONOMY")
+                elif data[1] == self.control_spec["MODE"]:
+                    logging.debug("MODE")
 
-
-            elif data[0] == proto["AUTONOMY_MSG"]:
-                msg = struct.unpack('<2B'+str(data[1])+'s',data)
-                text = msg[2].decode('utf-8')
-                self.signals.receivedAutonomyMsg.emit(text)
-
-        except:
-            sys.exc_info()
+            elif data[0] == self.parser_proto["AUTONOMY_MSG"]:
+                logging.debug("AUTONOMY_MSG")
+                text = msg[2]
+                logging.debug(text)
+        except Exception as exc:
             logging.critical("error while parsing data")
+            logging.critical(exc)

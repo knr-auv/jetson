@@ -1,28 +1,37 @@
-import struct, logging
+import struct, logging, json
 
 
-class Sender():
+class Sender:
     def __init__(self, protocol):
         self.pid_spec = protocol["PID_SPEC"]
         self.control_spec = protocol['CONTROL_SPEC']
 
-    def send(self, msg):
-        pass
+    def send_msg(self, data):
+        # self.ack = b""
+        logging.debug("send_msg")
+        length = struct.pack('<I', len(data))
+        #logging.debug(f"frame length: {len(data)}")
+        # logging.debug(length)
+        header = length
+        # header = b"\xA0" + length
+        # logging.debug(header)
+        try:
+            self.active_conn.send(header)
+        except Exception as e:
+            logging.critical(e)
+        logging.debug("Header sent")
+        self.active_conn.sendall(data)
+        logging.debug("Data sent")
 
-    def send_msg(self, msg):
-        header = struct.pack('<i', len(msg)+ 4)
-        msg = bytearray(header+msg)
-        self.send(msg)
-
-    def sendPid(self, PID = []):
+    def sendPid(self, PID=[]):
         axis = PID[0]
-        if axis=='roll':
-            spec=self.pid_spec["roll"]
-        elif axis =='pitch':
+        if axis == 'roll':
+            spec = self.pid_spec["roll"]
+        elif axis == 'pitch':
             spec = self.pid_spec["pitch"]
         elif axis == 'yaw':
             spec = self.pid_spec["yaw"]
-        elif axis =='all':
+        elif axis == 'all':
             spec = self.pid_spec["all"]
         elif axis == 'depth':
             spec = self.pid_spec['depth']
@@ -30,11 +39,7 @@ class Sender():
             logging.debug(f"{axis} is not a valid argument of sendPid. Valid arguments: 'roll', 'pitch', 'yaw', 'all'")
             return
         PID.pop(0)
-        if spec != self.pid_spec['all']:
-            tx_buffer = [self.proto["PID"],spec]  + PID
-            tx_buffer = struct.pack('<2B4f', *(tx_buffer))
-            self.send_msg(tx_buffer)
-        elif spec == self.pid_spec['all']:
-            tx_buffer = [self.proto["PID"],spec]  + PID
-            tx_buffer = struct.pack('<2B16f', *(tx_buffer))
-            self.send_msg(tx_buffer)
+        frame = [self.sender_proto["PID"], spec] + PID
+        logging.debug(f"frame: {frame}")
+        frame=json.dumps(frame).encode("ansi")
+        self.send_msg(frame)
