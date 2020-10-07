@@ -3,7 +3,6 @@ import threading
 import logging
 import time, random
 from tools.PID.PID import PID
-import quaternion as Q
 import numpy as np
 import math
 

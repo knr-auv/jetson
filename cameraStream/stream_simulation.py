@@ -1,6 +1,6 @@
 
 import numpy as np
-import asyncio,socket, struct, logging, time
+import asyncio,socket, struct, logging, time, threading
 from variable import SIM_STREAM_ADDRESS
 from cameraStream.stream import cameraStream
 
@@ -17,6 +17,7 @@ class SimulationStreamClient(cameraStream):
         self.data = b""
         self.frame = None
         self.newFrame = False
+        self.lock = threading.Lock()
 
     def run(self):
         self.socket.connect((self.ip, self.port))
@@ -32,10 +33,11 @@ class SimulationStreamClient(cameraStream):
         self.socket.close()
 
     def getFrame(self):
-        return self.frame
 
+        return self.frame
     """Metdoa zwraca klatke OpenCV uzyskana z Symulacji"""
     def receive_frame(self):
+        self.newFrame = False
         self.data = b""
         self.socket.send(b"\x69")
         confirm = self.socket.recv(1)

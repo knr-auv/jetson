@@ -1,5 +1,6 @@
 import socket
 from struct import *
+import base64
 import logging
 import time
 import json
@@ -22,6 +23,26 @@ class SimulationClient:
 
     def __del__(self):
         self.socket.close()
+
+    def get_depth_map(self):
+        self.data = b""
+        self.socket.send(b"\xb1\x00\x00\x00\x00")
+
+        confirm = self.socket.recv(1)
+
+        if not(confirm == b"\xB1"):
+            logging.debug("Message error")
+            # print(confirm)
+            return None
+        lenght = self.socket.recv(4)
+        lenght = unpack('<I', lenght)[0]
+
+        while not(len(self.data) >= lenght):
+            self.data += self.socket.recv(4096)
+        ack = self.data[lenght:]
+        data = json.loads(self.data[:lenght])
+        data = base64.b64decode(data["depth"])
+        return  data
 
     def set_motors(self):
         self.ack = b""
@@ -51,6 +72,7 @@ class SimulationClient:
             self.data += self.socket.recv(4096)
 
         ack = self.data[lenght:]
+
         return json.loads(self.data[:lenght])
 
     def get_sens(self):

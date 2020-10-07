@@ -180,7 +180,7 @@ class parser:
                 self.autonomyThread = autonomy(self.controlThread, self.stream)
                 self.executor.submit(self.autonomyThread.run)
             elif(data[1]==control_spec["STOP_AUTONOMY"]):
-                self.autonomyThread.active=False
+                self.autonomyThread.stop()
             elif data[1]==control_spec["MODE"]:
                 msg = struct.unpack("<3B", data)
                 self.controlThread.setControlMode(msg[2])
