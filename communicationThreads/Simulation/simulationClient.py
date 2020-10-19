@@ -94,6 +94,24 @@ class SimulationClient:
         ack = self.data[lenght:]
         return json.loads(self.data[:lenght])
 
+    def get_detection(self):
+        self.data = b""
+        self.socket.send(b"\xb2\x00\x00\x00\x00")
+        confirm = self.socket.recv(1)
+        if not(confirm == b"\xB2"):
+            logging.debug("Message error")
+            # print(confirm)
+            return None
+        lenght = self.socket.recv(4)
+        lenght = unpack('<I', lenght)[0]
+
+        while not(len(self.data) >= lenght):
+            self.data += self.socket.recv(4096)
+        ack = self.data[lenght:]
+        data = json.loads(self.data[:lenght])
+        return  data
+
+
     def get_sample(self, sample):
         if self.samples is None:
             return 0

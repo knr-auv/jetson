@@ -1,6 +1,0 @@
-cublas64_11
-cublastLt64_11
-cudart64_110
-curand64_10
-pthreadVC2
-yolo_cpp_dll

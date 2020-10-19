@@ -1,2 +1,0 @@
-classes= 1
-names = autonomy/cfg/names.txt
