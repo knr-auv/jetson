@@ -13,9 +13,8 @@ class SimulationClient:
         self.port = port
         self.ip = ip
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        logging.debug("Socket connect port:{}".format(port))
         self.socket.connect((self.ip, self.port))
-        logging.debug("Socket now Connect with port:{}".format(port))
+        logging.debug("Connected with simulation on port:{}".format(port))
         self.motors_data = {"FL":0.0,"FR":0.0,"ML":0.0,"MR":0.0,"B":0.0}
         self.data =  b""
         self.ack = b""

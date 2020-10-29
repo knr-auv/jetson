@@ -1,30 +1,21 @@
 
-#this should be some kind of thread.
-#it controll pid thread and simulation client
 from communicationThreads.Simulation.simulationClient import SimulationClient
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import controlThread
 import threading
 
 
-class simulationConnection(controlThread):
-    def __init__(self, comunicator):
-        super().__init__(comunicator)
+class SimulationControlThread(controlThread):
+    def __init__(self):
         self.client = SimulationClient()
         self.PIDThread = PIDThread(self.client)
-        self.mode  = 0
-        pass
 
     def arm(self):
-        x = threading.Thread(target=self.PIDThread.run)
-        x.start()
-        
-        self.comunicator.confirmArm()
+        self.PIDThread.arm()
         pass
 
     def disarm(self):
-        self.PIDThread.active = False
-        self.comunicator.confirmDisarm()
+        self.PIDThread.disarm()
         
 
     def setControlMode(self, mode):
@@ -88,5 +79,3 @@ class simulationConnection(controlThread):
         print(val)
         return self.PIDThread.getPIDs(arg)
 
-    def storePIDs(self):
-        pass

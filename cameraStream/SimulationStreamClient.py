@@ -8,7 +8,7 @@ from cameraStream.stream import cameraStream
 class SimulationStreamClient(cameraStream):
     """Klasa Tworzy clienta do odbierania ramek zdjec z symulacji"""
     def __init__(self):
-        super(SimulationStreamClient, self).__init__()
+        threading.Thread.__init__(self)
         """Inicjalizacja socekta """
         self.port = SIM_STREAM_ADDRESS[1]
         self.ip = SIM_STREAM_ADDRESS[0]
@@ -21,6 +21,7 @@ class SimulationStreamClient(cameraStream):
 
     def run(self):
         self.socket.connect((self.ip, self.port))
+        logging.debug("Connected with simulation stream")
         while self.active:
             self.receive_frame()
             #around 40 fps
