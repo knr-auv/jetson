@@ -3,7 +3,7 @@ from quaternions import Quaternion
 import threading
 import logging
 import time, random
-import PID
+from tools.PID.PID import PID
 import numpy as np
 import math
 
