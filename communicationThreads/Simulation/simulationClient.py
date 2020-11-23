@@ -6,6 +6,7 @@ import time
 import json
 import variable as var
 
+
 class SimulationClient:
     """Klasa Tworzy clienta do sterowania łódką w symulacji"""
     def __init__(self, port=var.SIM_CONTROL_ADDRESS[1], ip=var.SIM_CONTROL_ADDRESS[0]):
@@ -13,7 +14,11 @@ class SimulationClient:
         self.port = port
         self.ip = ip
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        self.socket.connect((self.ip, self.port))
+        try:
+            self.socket.connect((self.ip, self.port))
+        except:
+            logging.error("Could't connect to simulation.")
+            exit()
         logging.debug("Connected with simulation on port:{}".format(port))
         self.motors_data = {"FL":0.0,"FR":0.0,"ML":0.0,"MR":0.0,"B":0.0}
         self.data =  b""

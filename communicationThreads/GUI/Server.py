@@ -4,7 +4,7 @@ import threading
 from .Parser import Parser
 from .Sender import Sender
 from .Callbacks import Callbacks
-from .DataCollector import DataCollector
+from .Callbacks import DataCollector
 
 
 class JetsonServer():
@@ -15,12 +15,12 @@ class JetsonServer():
         self.__host = address[0]
         self.__port = address[1]
         self.__parser = Parser(self)
-        self.__sender = Sender();
+        self.sender = Sender();
         self.telemetry_thread = None
 
     def SetCallbacks(self, callbacks = Callbacks(), dataCollector = DataCollector()):
         self.__parser.SetCallbacks(callbacks)
-        self.__sender.SetDataCollector(dataCollector)
+        self.sender.SetDataCollector(dataCollector)
 
     def StartServer(self):
         logging.debug("Starting server");
@@ -28,11 +28,14 @@ class JetsonServer():
         x.start();
 
     def StartSendingTelemetry(self, interval_ms = 500):
-        logging.debug("Starting telemetry")
-        self.telemetry_thread =threading.Thread(target = lambda: self.__sender.TelemetryLoop(interval_ms))
+        
+        self.telemetry_thread =threading.Thread(target = lambda: self.sender.TelemetryLoop(interval_ms))
         self.telemetry_thread.start()
+        logging.debug("Starting telemetry")
 
     def __ClientHandler(self, client):
+        self.StartSendingTelemetry(50)
+        self.sender.SendPIDs()
         HEADER = 0
         DATA =1
         rx_state = HEADER
@@ -42,15 +45,23 @@ class JetsonServer():
                 data = client.recv(4)
                 if(data == b''):
                     logging.debug("Control client disconnected")
-                    self.__sender.ShouldSend = False
+                    self.sender.ShouldSend = False
                     self.telemetry_thread.join()                    
                     break;
-                rx_len = struct.unpack("<L",data)[0]
-                rx_state = DATA
+                try:
+                    rx_len = struct.unpack("<L",data)[0]
+                    rx_state = DATA
+                except:
+                    rx_state = HEADER;
+                
             elif(rx_state == DATA):
                 data = client.recv(rx_len)
-                self.__parser.HandleData(data);
+                if(data != b''):
+                    self.__parser.HandleData(data);
+                else:
+                    pass
                 rx_state = HEADER
+
             
 
     def __StartServer(self):
@@ -63,7 +74,7 @@ class JetsonServer():
             logging.debug("Waiting for control client")
             conn, addr = s.accept()
             logging.debug("control connected with: "+str(addr))
-            self.__sender.SetConnection(conn);
+            self.sender.SetConnection(conn);
             try:
                 self.__ClientHandler(conn)
             except ConnectionResetError:

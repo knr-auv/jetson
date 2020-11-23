@@ -1,14 +1,15 @@
 
 from communicationThreads.Simulation.simulationClient import SimulationClient
 from tools.PID.pid_thread import PIDThread
-from controlThread.controlThread import controlThread
+from controlThread.controlThread import ControlThread
 import threading
 
 
-class SimulationControlThread(controlThread):
+class SimulationControlThread(ControlThread):
     def __init__(self):
         self.client = SimulationClient()
         self.PIDThread = PIDThread(self.client)
+        self.mode = "stable"
 
     def arm(self):
         self.PIDThread.arm()
@@ -44,38 +45,38 @@ class SimulationControlThread(controlThread):
 
 #mode 1
     def setAngle(self, roll, pitch):
-        self.PIDThread.roll_setpoint = roll
-        self.PIDThread.pitch_setpoint = pitch
-
+        self.PIDThread.SetAttitude(roll, pitch)
 
     def setHeading(self, heading):
-        self.PIDThread.heading_setpoint = heading
-        pass
+        self.PIDThread.SetHeading(heading)
     
     def setDepth(self, depth):
-        self.PIDThread.depth_setpoint= depth
+        self.PIDThread.SetDepth(depth)
 
 #comunication stuff
 
     def getHeading(self):
-        return self.PIDThread.imu_data[2]
+        return self.PIDThread.GetHeading()
 
     def getImuData(self):
-        return self.PIDThread.imu_data
+        ret = self.PIDThread.GetAttitude()
+        ret+=self.PIDThread.acc
+        ret+=self.PIDThread.gyro
+        ret+=self.PIDThread.mag
+        ret.append(self.getDepth())
+        
+        return ret
     
     def getDepth(self):
-        return self.PIDThread.imu_data[3]
+        return self.PIDThread.GetDepth()
 
     def getMotors(self):
-        return self.PIDThread.getMotors()
+        return self.PIDThread.GetMotors()
 
 #PID stuff
     def setPIDs(self, arg):
-        self.PIDThread.setPIDs(arg)
+        self.PIDThread.SetPIDs(arg)
        
-    def getPIDs(self, arg):
-        print(arg)
-        val = self.PIDThread.getPIDs(arg)
-        print(val)
-        return self.PIDThread.getPIDs(arg)
+    def getPIDs(self):
+        return self.PIDThread.GetPIDs()
 

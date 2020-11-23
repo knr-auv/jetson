@@ -4,11 +4,11 @@
 from communicationThreads.odroidClient import OdroidClient
 from communicationThreads.GUIServer import comunicator
 from tools.PID.pid_thread import PIDThread
-from controlThread.controlThread import controlThread
+from controlThread.controlThread import ControlThread
 import threading
 
 
-class odroidConnection(controlThread):
+class odroidConnection(ControlThread):
     def __init__(self, comunicator = comunicator()):
         self.comunicator = comunicator
         self.client = OdroidClient()

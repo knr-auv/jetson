@@ -1,5 +1,6 @@
 from .Callbacks import Callbacks
 from .Protocol import Protocol
+import struct
 
 class Parser:
     def __init__(self, server):
@@ -13,7 +14,8 @@ class Parser:
         p = Protocol.FROM_GUI
         key = data[0]
         data = data[1:]
-
+        if(len(data)==0):
+            return
         if key==p.CONTROL:
             self.HandleControl(data);
 
@@ -21,7 +23,7 @@ class Parser:
             self.HandleRequest(data)
 
         elif key==p.STEERING:
-            self.HandleSettings(data)
+            self.HandleSteering(data)
 
         elif key==p.SETTINGS:
             self.HandleSettings(data)
@@ -32,22 +34,40 @@ class Parser:
         p= Protocol.FROM_GUI.CONTROL_MSG
         if key==p.ARM:
             self.cb.ArmCallback();
+            self.server.sender.SendArmCallback()
 
         elif key==p.DISARM:
             self.cb.DisarmCallback();
+            self.server.sender.SendDisarmCallback()
 
         elif key==p.START_TELEMETRY:
             self.server.StartSendingTelemetry()
     def HandleRequest(self, data):
-        pass
+        key = data[0]
+        p=Protocol.FROM_GUI.REQUEST_MSG
+        if key==p.PID:
+            self.server.sender.SendPIDs()
+        elif key==p.CONFIG:
+        
+            pass
 
     def HandleSteering(self,data):
         p =Protocol.FROM_GUI.STEERING_MSG
-        key = bytes([data[0]])
+        key =data[0]
         data = data[1:]
         if key==p.PAD:
-            self.cb.SteeringDataCallback(data);
+
+            l = int(len(data)/4)
+            val = struct.unpack(str(l)+"i", data)
+            self.cb.SteeringDataCallback(val);
+            
         elif key== p.MODE:
             self.cb.ChangeModeCallback(data);
     def HandleSettings(self,data):
-        pass
+        key = data[0]
+        p=Protocol.FROM_GUI.SETTINGS_MSG
+        if key==p.PID:
+            data = data[1:]
+            l = int(len(data)/8)
+            val = struct.unpack(str(l)+"d", data)
+            self.cb.SetPIDs(val)

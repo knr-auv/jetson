@@ -17,6 +17,7 @@ class SimulationStreamClient(cameraStream):
         self.data = b""
         self.frame = None
         self.newFrame = False
+        self.lastframe =0
         self.lock = threading.Lock()
 
     def run(self):
@@ -24,19 +25,21 @@ class SimulationStreamClient(cameraStream):
         logging.debug("Connected with simulation stream")
         while self.active:
             self.receive_frame()
-            #around 40 fps
-            time.sleep(0.01)
+            #around 50 fps
+            time.sleep(0.02)
             
     def stop(self):
         self.socket.close()
 
     def __del__(self):
         self.socket.close()
-
+    
     def getFrame(self):
 
         return self.frame
+        
     """Metdoa zwraca klatke OpenCV uzyskana z Symulacji"""
+
     def receive_frame(self):
         self.newFrame = False
         self.data = b""
@@ -48,5 +51,6 @@ class SimulationStreamClient(cameraStream):
         lenght = struct.unpack('<I', lenght)[0]
         while not(len(self.data) >= lenght):
             self.data += self.socket.recv(4096)
-        self.frame = self.data
+        self.frame=self.data
+        
         self.newFrame = True

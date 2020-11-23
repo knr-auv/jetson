@@ -1,4 +1,4 @@
-from .DataCollector import DataCollector
+from .Callbacks import DataCollector
 from .Protocol import Protocol
 import struct, time
 
@@ -25,17 +25,39 @@ class Sender:
                     self.SendIMU()
                     last_time = time.time()
                 else:
-                    time.sleep(0.001)
+                    time.sleep(sleep_time)
         except:
             pass
 
 
-
+    def SendArmCallback(self):
+        key = bytes([Protocol.TO_GUI.REQUEST_RESPONCE_MSG.ARMED])
+        self.SendRequestResponceMsg(bytes(), key)
+        print("arm confirmed")
+    def SendDisarmCallback(self):
+        key = bytes([Protocol.TO_GUI.REQUEST_RESPONCE_MSG.DISARMED])
+        self.SendRequestResponceMsg(bytes(), key)
+        print("disarm confirmed")
     def SendIMU(self):
         data = self.dataColector.GetIMU() #roll, pitch,yaw,depth
-        msg = struct.pack('<4f', *(data))
+        msg = struct.pack(str(len(data))+'f', *(data))
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.IMU])
         self.Send_Telemetry_msg(msg, key)
+    def SendPIDs(self):
+        data = self.dataColector.GetPIDs()
+        msg = struct.pack(str(len(data))+'f', *(data))
+        key = bytes([Protocol.TO_GUI.REQUEST_RESPONCE_MSG.PID])
+        self.SendRequestResponceMsg(msg, key)
+        pass
+
+    def SendAutonomyMsg(self, data, type):
+        data = type+data
+        self.__Send_msg(data,bytes([Protocol.TO_GUI.AUTONOMY]))
+
+    def SendRequestResponceMsg(self,data,type):
+        data = type+data
+        self.__Send_msg(data,bytes([Protocol.TO_GUI.REQUEST_RESPONCE]))
+
     def Send_Telemetry_msg(self, data, type):
         data = type+data
         self.__Send_msg(data,bytes([Protocol.TO_GUI.TELEMETRY]))

@@ -7,6 +7,22 @@ class Quaternion():
         self.b=Q[1]
         self.c=Q[2]
         self.d=Q[3]
+    @staticmethod
+    def fromEuler(roll, pitch, yaw):
+        cy = math.cos(yaw * 0.5*3.1415/180);
+        sy = math.sin(yaw * 0.5*3.1415/180);
+        cp = math.cos(pitch * 0.5*3.1415/180);
+        sp = math.sin(pitch * 0.5*3.1415/180);
+        cr = math.cos(roll * 0.5*3.1415/180);
+        sr = math.sin(roll * 0.5*3.1415/180);
+        q = Quaternion([0]*4)
+        q.a = cr * cp * cy + sr * sp * sy;
+        q.b = sr * cp * cy - cr * sp * sy;
+        q.c = cr * sp * cy + sr * cp * sy;
+        q.d = cr * cp * sy - sr * sp * cy;
+        return q.normalize()
+    def toList(self):
+        return [self.a, self.b, self.c, self.d]
     def sum(Q1, Q2):
         Qw=[Q1.a+Q2.a, Q1.b+Q2.b, Q1.c+Q2.c, Q1.d+Q2.d]
         Qw=Quaternion(Qw)
@@ -59,7 +75,7 @@ class Quaternion():
         gamma=math.atan2(2*(q_1*q_2+q_0*q_3),q_0**2+q_1**2-q_2**2-q_3**2)
         beta=math.asin(-2*(q_1*q_3-q_0*q_2))
         alfa=math.atan2(2*(q_2*q_3 + q_0*q_1), q_0*q_0 - q_1*q_1 - q_2*q_2 + q_3*q_3)
-        return np.array([gamma,beta,alfa])
+        return [gamma,beta,alfa]
     def print(self):
         print(self.a)
         print(self.b)

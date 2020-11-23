@@ -2,7 +2,7 @@
 #class for controlling AUV
 #all methods should be implemented acording to communicationThreads
 
-class controlThread:    
+class ControlThread:    
     def __init__(self):
         pass
 
@@ -19,12 +19,12 @@ class controlThread:
 #here we are implementing 2 controll methods 
     def setControlMode(self, mode):
         #mode 1 --> 'acro' (cant find better name). --> in this mode our boat is trying to maintain orientation. We are controlling it by setting angular velocity
-        #mode 2 --> horizontal --> here boat will try to be leveled. We can set roll/pitch setpoints
+        #mode 2 --> 'stable' --> here boat will try to be leveled. We can set roll/pitch setpoints
         pass
     def getControlMode(self):
         pass
     def moveForward(self, value):
-        #lets say that 500 is neutral, 0 is max backward and 1000 is max forward (almost like in pwm)
+        #lets say that 0 is neutral, -1000 is max backward and 1000 is max forward
         pass
 
 #how to control boat in mode 1
@@ -36,11 +36,17 @@ class controlThread:
     def setAngle(self, pitch, roll):
         #this function should send angle setpoints to odro/stm
         pass
+    #add value to heading in deg
+    def addHeading(self, val):
+        pass
 
     def setHeading(self, heading):
         #here we set heading... north, east, west etc.
         pass
-    
+    #add value to depth
+    def addDepth(self, val):
+        pass
+
     def setDepth(self, depth):
         pass
 
@@ -48,7 +54,7 @@ class controlThread:
     def getHeading(self):
         #return heading
         pass
-
+    #attitude mag gyro acc
     def getImuData(self):
         #return euler angles + angular velocity
         pass
