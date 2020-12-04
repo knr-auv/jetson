@@ -3,7 +3,7 @@ from communicationThreads.GUI.Server import JetsonServer
 from communicationThreads.GUI.Setup import PrepareCallbacks
 import cameraStream.SimulationWAPIStreamClient as sc
 from cameraStream.ToGuiStream import ToGuiStream
-from autonomy.AutonomyThread import AutonomyThread
+from autonomy.autonomyThread import AutonomyThread
 from config.ConfigLoader import ConfigLoader
 import logging
 import variable
