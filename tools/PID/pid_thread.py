@@ -117,7 +117,7 @@ class PIDThread:
                     if(self.direct_depth):
                         self.depth_diff = self.vertical
                     else:
-                        self.depth_diff = self.depth_PID.update(self.depth, self.ref_depth*self.depth_PID.Kl)
+                        self.depth_diff = -self.depth_PID.update(self.depth, self.ref_depth)
 
                     self.controll_motors(self.roll_diff,self.pitch_diff,self.yaw_diff,self.depth_diff)
 
@@ -148,9 +148,9 @@ class PIDThread:
             motors[0] +=self.forward+yaw_error
             motors[1] -= -self.forward+yaw_error
         def control_depth():
-            motors[2] += depth_error/2
+            motors[2] += depth_error
             motors[3] += depth_error
-            motors[4] += depth_error/2
+            motors[4] += depth_error
 
         control_roll()
         control_pitch()
@@ -171,8 +171,11 @@ class PIDThread:
         self.yaw_ref = yaw
         self.forward = forward
         self.vertical = vertical
-        a=self.client.get_sample('attitude')
-        self.ref_attitude = q.fromEuler(self.roll_ref,self.pitch_ref,a[2])
+        try:
+            a=self.client.get_sample('attitude')
+            self.ref_attitude = q.fromEuler(self.roll_ref,self.pitch_ref,a[2])
+        except:
+            pass
 
     def SetDepth(self, depth):
         self.ref_depth = depth

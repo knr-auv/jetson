@@ -1,21 +1,9 @@
-import autonomy.AutonomyThread as at
+
 import controlThread.controlThread as ct
 from .Callbacks import  Callbacks, DataCollector
 
-def ConvertPad(data, controlThread = ct.ControlThread()):
-    mode = controlThread.getControlMode()
-    roll = data[0]*30/1000;
-    pitch = data[1]*30/1000;
-    yaw = data[2]*30/1000;
-    if(mode=="stable"):
-        controlThread.setAttitude(roll,pitch,yaw)
-        controlThread.addHeading(data[2])
-        controlThread.moveForward(data[3])
-        controlThread.addDepth(data[4]/100)
-    elif(mode=="acro"):
-        pass
 
-def PrepareCallbacks(autonomyThread = at.AutonomyThread(), controlThread = ct.ControlThread()):
+def PrepareCallbacks(autonomyThread, controlThread = ct.ControlThread()):
     dc = DataCollector()
     cb = Callbacks()
 

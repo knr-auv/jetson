@@ -97,7 +97,7 @@ class SimulationClient:
     def get_pos(self):
 
         temp = self.get_packet(Types.POSITION)
-        if(temp!=None):
+        if(temp==None):
             return self.prev_pos
         flag, data = temp
         self.prev_pos = data
