@@ -27,6 +27,12 @@ class Protocol(object):
         class TELEMETRY_MSG:
             MOTORS = 0x01
             IMU = 0x02
+            POSITION =0x03
+            BATTERY = 0x04
+            HUMMIDITY = 0x05
+            TEMPERATURE = 0X06
+            JETSON_STATUS = 0X07
+
 
         REQUEST_RESPONCE = 0x02
         class REQUEST_RESPONCE_MSG:
@@ -36,10 +42,10 @@ class Protocol(object):
 
         AUTONOMY = 0x03
         class AUTONOMY_MSG:
-            pass
+            DETECTION = 0x01
 
-        ERROR = 0x04
-        class ERROR_MSG:
+        STATUS = 0x04
+        class STATUS_MSG:
             pass
 
 
