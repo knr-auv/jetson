@@ -1,4 +1,3 @@
-
 from communicationThreads.Simulation.simulationClient import SimulationClient
 from tools.PID.pid_thread import PIDThread
 from controlThread.controlThread import ControlThread
@@ -6,77 +5,59 @@ import threading
 
 
 class SimulationControlThread(ControlThread):
+   
     def __init__(self):
+        ControlThread.__init__(self)
         self.client = SimulationClient()
-        self.PIDThread = PIDThread(self.client)
-        self.mode = "stable"
+        self.PIDThread = PIDThread(self.client, self.HandleNewData)
+
+    def HandleSteeringInput(self, data):
+        self.PIDThread.HandleSteeringInput(data)
+
+#common methods for mode 1 and 2
+    def disarm(self):
+        self.PIDThread.disarm()
 
     def arm(self):
         self.PIDThread.arm()
-        pass
-
-    def disarm(self):
-        self.PIDThread.disarm()
-        
 
     def setControlMode(self, mode):
+        super().setControlMode(mode)
         print("mode changed to:"+str(mode))
         self.PIDThread.mode = mode
         self.PIDThread.heading_setpoint = self.PIDThread.client.get_sample('yaw')
         self.mode = mode
 
-    def getControlMode(self):
-        return self.mode
-
     def moveForward(self, value):
         self.PIDThread.forward = value
-
-    #temporary methods
-
-
-
+    
 #mode 0
-    def setAngularVelocity(self, roll,pitch, yaw):
-        self.PIDThread.vel_pitch_setpoint = pitch
-        self.PIDThread.vel_roll_setpoint = roll
-        self.PIDThread.vel_yaw_setpoint = yaw
+    def setAngularVelocity(self, roll, pitch, yaw):
+        super().setAngularVelocity(roll, pitch, yaw)
+        self.PIDThread.velocity_setpoints = [roll, pitch,yaw]
+
+    #TODO zachowanie głębokości w tym trybie
     def vertical(self, arg):
         self.PIDThread.vertical = arg
 
 #mode 1
-    def setAngle(self, roll, pitch):
-        self.PIDThread.SetAttitude(roll, pitch)
-
-    def setHeading(self, heading):
-        self.PIDThread.SetHeading(heading)
+    def setAttitude(self, roll, pitch, yaw):
+        super().setAttitude(roll, pitch, yaw)
+        self.PIDThread.SetAttitude(roll, pitch,yaw)
     
     def setDepth(self, depth):
+        super().setDepth(depth)
         self.PIDThread.SetDepth(depth)
 
-#comunication stuff
-
-    def getHeading(self):
-        return self.PIDThread.GetHeading()
-
-    def getImuData(self):
-        ret = self.PIDThread.GetAttitude()
-        ret+=self.PIDThread.acc
-        ret+=self.PIDThread.gyro
-        ret+=self.PIDThread.mag
-        ret.append(self.getDepth())
-        
-        return ret
-    
-    def getDepth(self):
-        return self.PIDThread.GetDepth()
-
-    def getMotors(self):
-        return self.PIDThread.GetMotors()
-
-#PID stuff
     def setPIDs(self, arg):
         self.PIDThread.SetPIDs(arg)
        
     def getPIDs(self):
         return self.PIDThread.GetPIDs()
 
+    def HandleNewData(self, data):
+        attitude, gyro, acc, mag, depth, angular_velocity, position, velocity, acceleration, motors = data
+        val = {}
+        for i in self.keys:
+            val[i]=eval(i)
+        self.NewDataCallback.Invoke(val)

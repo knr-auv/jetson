@@ -169,3 +169,4 @@ dmypy.json
 /autonomy/darknet/avformat-58.dll
 /autonomy/darknet/avcodec-58.dll
 /autonomy/op9_best.weights
+/GUITest.py

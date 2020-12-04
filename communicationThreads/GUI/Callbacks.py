@@ -1,11 +1,10 @@
-import autonomy.AutonomyThread as at
-import controlThread.controlThread as ct
+
 
 class Callbacks:
 
     def __init__(self):
         pass
-
+    
     def ArmCallback(self):
         pass
 
@@ -28,7 +27,10 @@ class DataCollector:
         pass
     def GetControlMode(self):
         pass
-    
+
+    def GetHummidity(self):
+        pass
+
     def GetDepth(self):
         pass
 
@@ -36,9 +38,6 @@ class DataCollector:
         pass
 
     def GetMotors(self):
-        pass
-
-    def GetDetections(self):
         pass
 
     def GetPIDs(self):
@@ -50,33 +49,8 @@ class DataCollector:
     def GetPosition(self):
         pass
 
-def ConvertPad(data, controlThread = ct.ControlThread()):
-    mode = controlThread.getControlMode()
-    if(mode=="stable"):
-        controlThread.setAngle(data[1],data[0])
-        controlThread.addHeading(data[2])
-        controlThread.moveForward(data[3])
-        controlThread.addDepth(data[4])
-    elif(mode=="acro"):
+    def GetBattery(self):
         pass
 
-def PrepareCallbacks(autonomyThread = at.AutonomyThread(), controlThread = ct.ControlThread()):
-    dc = DataCollector()
-    cb = Callbacks()
-
-    dc.GetControlMode = controlThread.getControlMode
-    dc.GetDepth = controlThread.getDepth
-    dc.GetIMU = controlThread.getImuData
-    dc.GetMotors = controlThread.getMotors
-    dc.GetPIDs = controlThread.getPIDs
-    dc.GetHumidity = controlThread.getHumidity
-    dc.GetPosition = controlThread.getPosition
-
-    cb.ArmCallback = controlThread.arm
-    cb.DisarmCallback = controlThread.disarm
-    cb.ChangeModeCallback = controlThread.setControlMode
-    cb.SteeringDataCallback = lambda x:ConvertPad(x, controlThread)
-    cb.SetPIDs = controlThread.setPIDs
-    return cb,dc
-
-
+    def GetJetsonStatus(self):
+        pass

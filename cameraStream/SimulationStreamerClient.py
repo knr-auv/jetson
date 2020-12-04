@@ -5,7 +5,7 @@ from variable import SIM_STREAM_ADDRESS
 from cameraStream.stream import cameraStream
 
 
-class SimulationStreamClient(cameraStream):
+class SimulationStreamerClient(cameraStream):
     """Klasa Tworzy clienta do odbierania ramek zdjec z symulacji"""
     def __init__(self):
         threading.Thread.__init__(self)
@@ -21,6 +21,7 @@ class SimulationStreamClient(cameraStream):
         self.lock = threading.Lock()
 
     def run(self):
+        logging.debug("Connecting to stream from simulation")
         self.socket.connect((self.ip, self.port))
         logging.debug("Connected with simulation stream")
         while self.active:
