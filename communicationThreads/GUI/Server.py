@@ -5,6 +5,7 @@ from .Parser import Parser
 from .Sender import Sender
 from .Callbacks import Callbacks
 from .Callbacks import DataCollector
+import tools.Logger as Logger
 
 
 class JetsonServer():
@@ -39,6 +40,7 @@ class JetsonServer():
         HEADER = 0
         DATA =1
         rx_state = HEADER
+        Logger.write('Connected with GUI', 'ServerThread')
         while self.__ListenToClient:
             
             if(rx_state==HEADER):

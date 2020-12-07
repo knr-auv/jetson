@@ -15,7 +15,8 @@ class Protocol(object):
             ARM = 0x01
             DISARM = 0x02
             START_AUTONOMY=0x03
-            START_TELEMETRY=0x04
+            STOP_AUTONOMY=0x04
+            START_TELEMETRY=0x05
 
         SETTINGS = 0x04
         class SETTINGS_MSG:
@@ -31,7 +32,7 @@ class Protocol(object):
             BATTERY = 0x04
             HUMMIDITY = 0x05
             TEMPERATURE = 0X06
-            JETSON_STATUS = 0X07
+
 
 
         REQUEST_RESPONCE = 0x02
@@ -40,13 +41,17 @@ class Protocol(object):
             ARMED = 0x02
             DISARMED =0x03
 
+
         AUTONOMY = 0x03
         class AUTONOMY_MSG:
             DETECTION = 0x01
+            AUTONOMY_STARTED = 0x02
+            AUTONOMY_STOPED = 0x03
 
         STATUS = 0x04
         class STATUS_MSG:
-            pass
+            LOGGER = 0x01
+            SENSOR_STATUS = 0x02
 
 
 

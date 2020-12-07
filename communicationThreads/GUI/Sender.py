@@ -33,11 +33,15 @@ class Sender:
             else:
                 time.sleep(sleep_time)
 
+    def SendLog(self, msg):
+        data = msg.encode()
+        key = bytes([Protocol.TO_GUI.STATUS_MSG.LOGGER])
+        self.SendStatusMsg(data, key)
 
     def SendJetsonStatus(self):
         data = self.dataColector.GetJetsonStatus()
         msg = struct.pack(str(len(data))+'f', *(data))
-        key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.JETSON_STATUS])
+        key = bytes([Protocol.TO_GUI.STATUS_MSG.SENSOR_STATUS])
 
     def SendTemperature(self):
         data = self.dataColector.GetTemperature()
@@ -60,6 +64,13 @@ class Sender:
         key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTION])
         data = json.dumps([detectionList, lastDetection])
         self.SendAutonomyMsg(data, key)
+    def SendAutonomyStart(self, val):
+        
+        if(val):
+            key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.AUTONOMY_STARTED])
+        else:
+            key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.AUTONOMY_STOPED])
+        self.SendAutonomyMsg(None, key)
 
     def SendArmCallback(self):
         key = bytes([Protocol.TO_GUI.REQUEST_RESPONCE_MSG.ARMED])
@@ -92,10 +103,13 @@ class Sender:
 
     def SendStatusMsg(self,data, type):
         data = type+data
-        self.__Send_msg(data, byte([Protocol.TO_GUI.STATUS]))
+        self.__Send_msg(data, bytes([Protocol.TO_GUI.STATUS]))
 
     def SendAutonomyMsg(self, data, type):
-        data = type+data
+        if data == None:
+            data = type
+        else:
+            data = type+data
         self.__Send_msg(data,bytes([Protocol.TO_GUI.AUTONOMY]))
 
     def SendRequestResponceMsg(self,data,type):

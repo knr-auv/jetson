@@ -42,6 +42,14 @@ class Parser:
 
         elif key==p.START_TELEMETRY:
             self.server.StartSendingTelemetry()
+
+        elif key == p.START_AUTONOMY:
+            self.cb.StartAutonomyCallback()
+            self.server.sender.SendAutonomyStart(True)
+
+        elif key == p.STOP_AUTONOMY:
+            self.cb.StopAutonomyCallback()
+            self.server.sender.SendAutonomyStart(False)
     def HandleRequest(self, data):
         key = data[0]
         p=Protocol.FROM_GUI.REQUEST_MSG
