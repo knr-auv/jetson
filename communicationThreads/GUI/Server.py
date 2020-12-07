@@ -27,7 +27,7 @@ class JetsonServer():
         x =threading.Thread(target = lambda: self.__StartServer())
         x.start();
 
-    def StartSendingTelemetry(self, interval_ms = 500):
+    def StartSendingTelemetry(self, interval_ms = 50):
         
         self.telemetry_thread =threading.Thread(target = lambda: self.sender.TelemetryLoop(interval_ms))
         self.telemetry_thread.start()
@@ -82,7 +82,7 @@ class JetsonServer():
             conn.close()
 
 if __name__=="__main__":
-    server = Server(("localhost", 6969))
+    server = Server(("localhost", 44210))
     server.StartServer()
     
     a =input()

@@ -1,87 +1,121 @@
-
+from tools.Delegate import Delegate
 #class for controlling AUV
 #all methods should be implemented acording to communicationThreads
 
-class ControlThread:    
-    def __init__(self):
-        pass
+class ControlThread:
+    __mode = "stable"
+    __acc = [0]*3
+    __mag = [0]*3
+    __gyro =[0]*3
+    __depth =0
+    __attitude= [0]*3
+    __angular_velocity = [0]*3
 
+    __position = [0]*3
+    __acceleration = [0]*3
+    __velocity = [0]*3
+    __motors = [0]*5
+    __battery = [0]*2
+
+    __depth_setpoint = 0
+    __attitude_setpoint = [0]*3
+    __angular_vel_setpoint = [0]*3
+    keys = ["attitude","gyro", "acc", "mag", "depth",\
+            "angular_velocity", "position", "velocity",\
+            "acceleration","motors"]
+    NewDataCallback = Delegate()
+    NewDataNotification = Delegate()
+    def __init__(self):
+        self.NewDataCallback+=self.__update_local_var
+
+    def __update_local_var(self, data):
+        self.__attitude = data["attitude"]
+        self.__gyro = data["gyro"]
+        self.__acc = data["acc"]
+        self.__mag = data["mag"]
+        self.__depth = data["depth"]
+        self.__position = data["position"]
+        self.__velocity = data["velocity"]
+        self.__angular_velocity = data["angular_velocity"]
+        self.__acceleration = data["acceleration"]
+        self.__motors = data["motors"]
+
+    def HandleSteeringInput(self, data):
+        pass
+#common methods for mode 1 and 2
     def arm(self):
         pass
 
     def disarm(self):
         pass
 
-    #PID thread should constantly integrate ACC data to obtain position. 
-    def setPosition(self, x,y,z):
-        pass
-
-#here we are implementing 2 controll methods 
-    def setControlMode(self, mode):
-        #mode 1 --> 'acro' (cant find better name). --> in this mode our boat is trying to maintain orientation. We are controlling it by setting angular velocity
-        #mode 2 --> 'stable' --> here boat will try to be leveled. We can set roll/pitch setpoints
-        pass
     def getControlMode(self):
-        pass
+        return self.__mode
+
+    def setControlMode(self, mode):
+        self.__mode = mode
+
     def moveForward(self, value):
-        #lets say that 0 is neutral, -1000 is max backward and 1000 is max forward
         pass
+#mode 0 -> zadane są prędkości kątowe -> łódka się sama nie poziomuje
 
-#how to control boat in mode 1
-    #velocity is in deg/sec. 
     def setAngularVelocity(self, roll,pitch, yaw):
+        self.__angular_vel_setpoint = [roll, pitch,yaw]
+
+    def vertical(self, arg):
         pass
 
-#how to control boat in mode 2
-    def setAngle(self, pitch, roll):
-        #this function should send angle setpoints to odro/stm
-        pass
-    #add value to heading in deg
-    def addHeading(self, val):
-        pass
-
-    def setHeading(self, heading):
-        #here we set heading... north, east, west etc.
-        pass
-    #add value to depth
-    def addDepth(self, val):
-        pass
-
+#mode 1 -> łódka się poziomuje
+    def setAttitude(self, roll, pitch,yaw):
+        self.__attitude_setpoint = [roll.pitch,yaw]
+    
     def setDepth(self, depth):
-        pass
+        self.__depth_setpoint = depth
 
-#methods for obtaining data from jetson/stm/simulation
-    def getHeading(self):
-        #return heading
-        pass
-    #attitude mag gyro acc
-    def getImuData(self):
-        #return euler angles + angular velocity
-        pass
+#lepiej brać setpoint niż dane z łódki
+    def getAttitudeSetpoint(self):
+        return self.__attitude_setpoint
+
+    def getDepthSetpoint(self):
+        return self.__depth_setpoint
+
+    def getAngularVelocitySetpoint(self):
+        return self.__angular_vel_setpoint
 
     def getPosition(self):
-        #returns position
-        pass
-    
+        return self.__position
+
+    def getAttitude(self):
+        return self.__attitude
+
     def getDepth(self):
-        #return depth
-        pass
+        return self.__depth
+
+    #only for sending data to gui
+    def getIMUData(self):
+        ret = self.__attitude
+        ret+=self.__acc
+        ret+=self.__gyro
+        ret+=self.__mag
+        ret.append(self.__depth)
+
+        return ret
+
+    def getPosData(self):
+        ret = self.__position
+        ret+= self.__velocity
+        ret+=self.__acceleration
+        return ret
 
     def getMotors(self):
-        pass
+        return self.__motors
 
-    def getHumidity(self):
-        pass
+    def getBattery(self):
+        return self.__battery
 
-#PID stuff
-    def setPIDs(self):
+    def setPIDs(self, arg):
         pass
-
+       
     def getPIDs(self):
-        #return P, I, D
-        pass
-#in case of any problem with humidity, IMU or whatever we can pass it to GUI or Autonomy thread with this callback.
-#callbacks
-    def IMU_problem(self):
         pass
 
