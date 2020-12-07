@@ -33,4 +33,7 @@ if __name__ == '__main__':
     #żeby wysyłać dane do GUI trzeba zaimportować logger i wywołać Logger.write(wiadomosc, autor), gdzie autor to np MainThread, AutonomyThread, detector etc...
     Logger.setStream(server.sender.SendLog, None)
 
+    #method for wincior
+    #server.sender.SendTaskManagerInfo('{"name": "b", "whatever": "x", "sth important":"or not"}')
+
     

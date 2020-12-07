@@ -41,6 +41,7 @@ class JetsonServer():
         DATA =1
         rx_state = HEADER
         Logger.write('Connected with GUI', 'ServerThread')
+        self.sender.SendTaskManagerInfo('{"name": "b", "whatever": "x", "sth important":"or not"}')
         while self.__ListenToClient:
             
             if(rx_state==HEADER):
