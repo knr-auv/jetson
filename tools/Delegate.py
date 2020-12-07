@@ -1,6 +1,7 @@
 class Delegate(object):
     __callbackList = list()
-
+    def __call__(self, *args,**kwargs):
+        self.Invoke(*args, **kwargs)
     def __init__(self):
         self.__callbackList = list()
 

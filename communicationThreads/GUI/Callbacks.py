@@ -1,28 +1,17 @@
-
+from tools.Delegate import Delegate
 
 class Callbacks:
+    ArmCallback = Delegate()
+    DisarmCallback = Delegate()
+    SteeringDataCallback= Delegate()
+    ChangeModeCallback = Delegate()
+    SetPIDs = Delegate()
+    StartAutonomyCallback= Delegate()
+    StopAutonomyCallback= Delegate()
 
-    def __init__(self):
-        pass
-    
-    def ArmCallback(self):
-        pass
-
-    def DisarmCallback(self):
-        pass
-
-    #data is int[5] roll, pitch, yaw, throttle, up/down
-    def SteeringDataCallback(self, data = list()):
-        pass
-
-    def ChangeModeCallback(self,mode = str()):
-        pass
-
-    def SetPIDs(self, data):
-        pass
     
 class DataCollector:
-
+    
     def __init__(self):
         pass
     def GetControlMode(self):

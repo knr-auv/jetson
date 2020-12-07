@@ -7,6 +7,7 @@ from autonomy.autonomyThread import AutonomyThread
 from config.ConfigLoader import ConfigLoader
 import logging
 import variable
+import tools.Logger as Logger
 
 
 if __name__ == '__main__':
@@ -26,4 +27,10 @@ if __name__ == '__main__':
     c,d =PrepareCallbacks(autonomyThread, controlThread)
     server.SetCallbacks(c,d)
     server.StartServer()
+
+    #setting up logger
+    #pierwszy argument to funkjca,która przyjmuje tekst jako argument
+    #żeby wysyłać dane do GUI trzeba zaimportować logger i wywołać Logger.write(wiadomosc, autor), gdzie autor to np MainThread, AutonomyThread, detector etc...
+    Logger.setStream(server.sender.SendLog, None)
+
     

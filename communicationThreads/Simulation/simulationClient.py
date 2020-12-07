@@ -57,9 +57,9 @@ class SimulationClient:
             lenght = pack('<I', len(msg))
         else:
             lenght = b'\x00\x00\x00\x00'
-        self.socket.send(packetType)
-        self.socket.send(flag)
-        self.socket.send(lenght)
+        self.socket.sendall(packetType)
+        self.socket.sendall(flag)
+        self.socket.sendall(lenght)
         if msg!=None:
             self.socket.sendall(msg)
         
@@ -116,7 +116,6 @@ class SimulationClient:
         return  data
 
     def set_motors(self):
-
         serialized = json.dumps(self.motors_data).encode('ascii')
         self.get_packet(Types.MOTORS,msg = serialized,toJson = False, response = False)
 
@@ -171,11 +170,11 @@ class SimulationClient:
 
     def _run_motors(self, motors_data):
         if len(motors_data) == 5:
-            self.motors_data["FL"] = motors_data[4] / 1000
-            self.motors_data["FR"] = motors_data[2] / 1000
-            self.motors_data["ML"] = motors_data[0] / 1000
-            self.motors_data["MR"] = motors_data[1] / 1000
-            self.motors_data["B"] = motors_data[3] / 1000
+            self.motors_data["FL"] = motors_data[4] / 1000#round(motors_data[4] / 1000,8)
+            self.motors_data["FR"] = motors_data[2] / 1000#round(motors_data[2] / 1000,8)
+            self.motors_data["ML"] = motors_data[0] / 1000#round(motors_data[0] / 1000,8)
+            self.motors_data["MR"] = motors_data[1] / 1000#round(motors_data[1] / 1000,8)
+            self.motors_data["B"] = motors_data[3] / 1000#round(motors_data[3] / 1000,8)
             #print(self.motors_data)
         self.set_motors()
 
