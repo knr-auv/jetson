@@ -32,6 +32,11 @@ class Sender:
                 last_time = time.time()
             else:
                 time.sleep(sleep_time)
+                #msg should be json
+    def SendTaskManagerInfo(self, msg):
+        data = msg.encode()
+        key = bytes([Protocol.TO_GUI.STATUS_MSG.TASK_MANAGER])
+        self.SendStatusMsg(data, key)
 
     def SendLog(self, msg):
         data = msg.encode()

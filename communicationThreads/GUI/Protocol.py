@@ -52,6 +52,7 @@ class Protocol(object):
         class STATUS_MSG:
             LOGGER = 0x01
             SENSOR_STATUS = 0x02
+            TASK_MANAGER = 0x03
 
 
 
