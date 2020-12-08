@@ -1,4 +1,7 @@
 class Delegate(object):
+    """Class that holds reference to methods, so they can be called collectively.
+       It is ment to use for implementing events and call-backs.
+    """
     __callbackList = list()
     def __call__(self, *args,**kwargs):
         self.Invoke(*args, **kwargs)
@@ -8,7 +11,7 @@ class Delegate(object):
     def __iadd__(self, other):
         self.Register(other)
         return self
-        
+
     def __isub__(self, other):
         self.Remove(other)
         return self
@@ -20,18 +23,17 @@ class Delegate(object):
         self.__callbackList.append(fun)
         
     def Remove(self, fun):
-        l = len(self.__callbackList)
-        for i in range(l):
-            if(self.__callbackList[i]==fun):
+        lenght = len(self.__callbackList)
+        for i in range(lenght):
+            if self.__callbackList[i]==fun:
                 self.__callbackList.pop(i)
                 return
 
     def Invoke(self, *args,**kwargs):
-        l= len(args)
-        k = len(kwargs)
+        args_lenght= len(args)
+        kwargs_lenght = len(kwargs)
         for i in self.__callbackList:
-            
-            if l==0 and k == 0:
+            if args_lenght==0 and kwargs_lenght == 0:
                 i()
             else:
                 i(*args,**kwargs)

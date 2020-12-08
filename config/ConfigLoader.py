@@ -1,6 +1,9 @@
 import json
 import pathlib
+
 class ConfigLoader:
+    """Class for loading configuration files"""
+
     @staticmethod
     def LoadPIDs(FileName):
         with open(FileName) as fd:
@@ -15,6 +18,3 @@ class ConfigLoader:
 if __name__=="__main__":
     data = ConfigLoader.LoadPIDs("config/PID_simulation.json")
     print(data)
-
-
-

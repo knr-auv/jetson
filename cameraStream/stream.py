@@ -1,6 +1,8 @@
 import threading
 
 class cameraStream(threading.Thread):
+    """Camera stream base class"""
+
     active = True
     def __init__(self):
 
@@ -10,5 +12,4 @@ class cameraStream(threading.Thread):
     def run(self):
         pass
     def getFrame(self):
-        
         pass

@@ -1,5 +1,8 @@
+"""Quaternion math implementation"""
+
 import numpy as np
 import math
+
 
 def multiply(Q1, Q2):
         new_a=(Q1.a*Q2.a-Q1.b*Q2.b-Q1.c*Q2.c-Q1.d*Q2.d)

@@ -1,16 +1,15 @@
-import tools.PID.Quaternion as q
-import threading
-import logging
-import time, random
-from tools.PID.PID import PID
-import numpy as np
 import math
+import threading
+import time
+import tools.PID.Quaternion as q
+from tools.PID.PID import PID
 
 class PIDThread:
+    """PID controller for okon. For more informations refer to readme"""
+
     def __init__(self, client, data_receiver):
         self.setMotors = client._run_motors
         self.client = client
-
         self.data_receiver = data_receiver
         self.armed = False
         self.position = [0,0,0]
@@ -32,7 +31,6 @@ class PIDThread:
         self.pitch_diff = 0
         self.yaw_diff = 0
         self.depth_diff = 0
-
         self.ref_ang_vel = [0]*3
         self.ref_attitude = q.Quaternion([1,0,0,0])
         self.velocity_setpoints = [0]*3
@@ -42,7 +40,6 @@ class PIDThread:
         self.pitch_PID = PID()
         self.yaw_PID = PID()
         self.depth_PID = PID()
-
         self.x = threading.Thread(target = self.PIDLoop)
         self.x.start()
 
@@ -59,30 +56,23 @@ class PIDThread:
     def PIDLoop(self):
         last_data = 0
         data_t = 1/10
-
         loop_T = 1/50
         sleep_time = loop_T/10 #sounds reasonable...
         loop_time = 0
         last_time =time.time()
-     
         self.ref_depth = self.client.get_sample('depth')
-
-
-        while(1):
+        while True:
             dt = time.time()-last_time
-            if(dt>=loop_T):
+            if dt>=loop_T:
                 self.client.catch_sample()
                 s = self.client.get_pos()
                 self.acc = self.client.get_sample('acc')
                 self.gyro = self.client.get_sample('gyro')
                 self.depth=self.client.get_sample('depth')
                 at = self.client.get_sample('attitude')
-                
                 self.attitude = q.fromEuler(*at)
                 error = self.attitude.conj()*self.ref_attitude
-                
                 #TODO position integration
-                
                 try:
                     new_pos = [s["pos"]["x"],s["pos"]["y"],s["pos"]["z"]]
                     for i in range(3):
@@ -96,7 +86,6 @@ class PIDThread:
                     self.position[i]+=self.velocity[i]*dt
                     self.velocity[i]+=self.acc[i]*dt
                 """
-                
                 if self.mode == 0 and self.pad_input:
                     self.pad_input = False
                 elif self.mode==0:
@@ -118,18 +107,16 @@ class PIDThread:
                         self.direct_depth = False
 
                 #pid base
-                if(self.armed):
+                if self.armed:
                     self.roll_diff=self.roll_PID.update(self.gyro[0],self.ref_ang_vel[0])
                     self.pitch_diff=self.pitch_PID.update(self.gyro[1],self.ref_ang_vel[1])
                     self.yaw_diff = self.yaw_PID.update(self.gyro[2],self.ref_ang_vel[2])
 
-                    if(self.direct_depth):
+                    if self.direct_depth:
                         self.depth_diff = self.vertical
                     else:
                         self.depth_diff = -self.depth_PID.update(self.depth, self.ref_depth)
-
                     self.controll_motors(self.roll_diff,self.pitch_diff,self.yaw_diff,self.depth_diff)
-
                 last_time = time.time()
             else:
                 if(time.time()-last_data>=data_t):
@@ -146,7 +133,6 @@ class PIDThread:
     def controll_motors(self, roll_error, pitch_error, yaw_error, depth_error):
         motors = [0]*5
         def control_roll():
-
             motors[4]+=roll_error
             motors[2]-=roll_error
         def control_pitch():
@@ -223,11 +209,11 @@ class PIDThread:
         return self.position
 
     def GetMotors(self):
-        def map(input,in_min,in_max,out_min,out_max):
+        def map_value(input,in_min,in_max,out_min,out_max):
             return int((input-in_min)*(out_max-out_min)/(in_max-in_min)+out_min)
         ret=[]
         for i in self.m:
-            ret.append(map(i, -1000,1000,0,100))
+            ret.append(map_value(i, -1000,1000,0,100))
         return ret
 
 

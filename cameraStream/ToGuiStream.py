@@ -1,9 +1,10 @@
 import socket, logging, threading, struct, time
 from variable import GUI_STREAM
 class ToGuiStream():
+    """Stream server intended for sending video feed to GUI"""
+
     def __init__(self, stream):
         self.stream = stream
-        
         self.__ListenToClient = True
     lastframe =0
     def __ClientHandler(self, connection):
@@ -43,6 +44,3 @@ class ToGuiStream():
             except ConnectionResetError:
                 pass
             conn.close()
-
-
-

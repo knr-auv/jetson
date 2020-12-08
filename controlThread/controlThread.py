@@ -1,8 +1,10 @@
 from tools.Delegate import Delegate
-#class for controlling AUV
-#all methods should be implemented acording to communicationThreads
+
 
 class ControlThread:
+    """Base class for comunication with Okon controller"""
+
+    #data that can be obtained from controller
     __mode = "stable"
     __acc = [0]*3
     __mag = [0]*3
@@ -23,10 +25,19 @@ class ControlThread:
     keys = ["attitude","gyro", "acc", "mag", "depth",\
             "angular_velocity", "position", "velocity",\
             "acceleration","motors"]
+
+#Invoke after receiving new data, as argument pass a dictionary with keys defined above.
+#You can subscribe to this callback, but it is prefered to use NewDataNotification
     NewDataCallback = Delegate()
+
+#Prefered way of notifying about new data.
+#It takes no arguments, but it might be used for settings flag
+#F.e: NewDataNotyfication+=lambda: NewDataDlag = true
     NewDataNotification = Delegate()
+
     def __init__(self):
         self.NewDataCallback+=self.__update_local_var
+        self.NewDataCallback+=self.NewDataNotification
 
     def __update_local_var(self, data):
         self.__attitude = data["attitude"]
@@ -40,6 +51,7 @@ class ControlThread:
         self.__acceleration = data["acceleration"]
         self.__motors = data["motors"]
 
+#Interface to control the boat
     def HandleSteeringInput(self, data):
         pass
 #common methods for mode 1 and 2
@@ -91,7 +103,6 @@ class ControlThread:
     def getDepth(self):
         return self.__depth
 
-    #only for sending data to gui
     def getIMUData(self):
         ret = self.__attitude
         ret+=self.__acc
@@ -118,4 +129,3 @@ class ControlThread:
        
     def getPIDs(self):
         pass
-

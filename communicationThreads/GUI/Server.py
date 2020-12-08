@@ -9,6 +9,8 @@ import tools.Logger as Logger
 
 
 class JetsonServer():
+    """Class that comunicates with GUI"""
+
     def __init__(self, address):
         logging.basicConfig(level=logging.DEBUG)
         self.__server = None;
@@ -29,7 +31,6 @@ class JetsonServer():
         x.start();
 
     def StartSendingTelemetry(self, interval_ms = 50):
-        
         self.telemetry_thread =threading.Thread(target = lambda: self.sender.TelemetryLoop(interval_ms))
         self.telemetry_thread.start()
         logging.debug("Starting telemetry")
@@ -43,7 +44,6 @@ class JetsonServer():
         Logger.write('Connected with GUI', 'ServerThread')
         self.sender.SendTaskManagerInfo('{"name": "b", "whatever": "x", "sth important":"or not"}')
         while self.__ListenToClient:
-            
             if(rx_state==HEADER):
                 data = client.recv(4)
                 if(data == b''):
@@ -55,24 +55,20 @@ class JetsonServer():
                     rx_len = struct.unpack("<L",data)[0]
                     rx_state = DATA
                 except:
-                    rx_state = HEADER;
-                
+                    rx_state = HEADER;              
             elif(rx_state == DATA):
                 data = client.recv(rx_len)
                 if(data != b''):
                     self.__parser.HandleData(data);
                 else:
                     pass
-                rx_state = HEADER
-
-            
+                rx_state = HEADER          
 
     def __StartServer(self):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.bind((self.__host, self.__port))
         s.listen()
         logging.debug("Control server initialized, listening on: "+ str((self.__host, self.__port)))
-
         while (self.__ListenToClient):
             logging.debug("Waiting for control client")
             conn, addr = s.accept()
@@ -87,5 +83,3 @@ class JetsonServer():
 if __name__=="__main__":
     server = Server(("localhost", 44210))
     server.StartServer()
-    
-    a =input()

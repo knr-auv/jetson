@@ -4,11 +4,12 @@ from cameraStream.stream import cameraStream
 import variable
 
 class SimulationWAPIStreamClient(cameraStream):
+    """Stream client which use simulation web API"""
+
     def __init__(self):
         threading.Thread.__init__(self)
         self.frame = None
         self.client = sc.SimulationClient()
-
 
     def run(self):
         while self.active:

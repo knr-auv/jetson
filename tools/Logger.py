@@ -1,12 +1,13 @@
-import time, math
+"""Module similar to logging. It is thread safe and allows to log data from anywhere in the code"""
+
+import time
+import math
 from threading import Lock
 
 __logger_lock = Lock()
 __start_time = time.time()
 __streamWrite = print
 __streamClose = None
-
-
 
 def setStream(stream, streamClose):
     global __streamWrite
@@ -15,14 +16,15 @@ def setStream(stream, streamClose):
     __streamClose= streamClose
 
 def write(msg, caller):
-    t = (time.time()-__start_time)
-    h = m = math.floor(t/3600)
-    t-=h*3600
-    m = math.floor(t/60)
-    t-=m*60
-    s=math.floor(t)
-    t-=s
-    t=math.floor(t*10)
-    t = "%02d:%02d:%02d.%1d" % ( h,m, s, t) 
+    """ For example: Logger.write('hello','autonomyThread') """
+    current_time = (time.time()-__start_time)
+    hours= math.floor(current_time/3600)
+    current_time-=hours*3600
+    minutes = math.floor(current_time/60)
+    current_time-=minutes*60
+    seconds=math.floor(current_time)
+    current_time-=seconds
+    current_time=math.floor(current_time*10)
+    time_str = "%02d:%02d:%02d.%1d" % (hours,minutes,seconds,current_time)
     with __logger_lock:
-        __streamWrite(t+' '+str(caller)+': '+msg)
+        __streamWrite(time_str+' '+str(caller)+': '+msg)
