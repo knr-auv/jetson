@@ -34,6 +34,7 @@ class Sender:
                 time.sleep(sleep_time)
                 #msg should be json
     def SendTaskManagerInfo(self, msg):
+        msg = json.dumps(msg)
         data = msg.encode()
         key = bytes([Protocol.TO_GUI.STATUS_MSG.TASK_MANAGER])
         self.SendStatusMsg(data, key)
@@ -65,9 +66,10 @@ class Sender:
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.BATTERY])
         self.Send_Telemetry_msg(msg, key)
 
-    def SendDetection(self, detectionList, lastDetection):
+    def SendDetection(self,fps, detectionList, lastDetection):
         key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTION])
-        data = json.dumps([detectionList, lastDetection])
+        data = json.dumps({'fps':fps,'ObjectsList':detectionList,'LastDetections':lastDetection})
+        data = data.encode()
         self.SendAutonomyMsg(data, key)
     def SendAutonomyStart(self, val):
         

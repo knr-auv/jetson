@@ -19,7 +19,7 @@ def PrepareCallbacks(autonomyThread, controlThread = ct.ControlThread()):
     dc.GetBattery = lambda: [12.1,13.1]
     #callbacks
     cb.StartAutonomyCallback += lambda: Logger.write('Autonomy started', 'AutonomyThread')
-    cb.StopAutonomyCallback += lambda: Logger.write('AutonomyStoped', 'yo mama')
+    cb.StopAutonomyCallback += lambda: Logger.write('AutonomyStoped', 'AutonomyThread')
     cb.ArmCallback += controlThread.arm
     cb.DisarmCallback += controlThread.disarm
     cb.ChangeModeCallback += controlThread.setControlMode
