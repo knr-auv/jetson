@@ -72,7 +72,7 @@ class JetsonServer():
                 data = data = self.recvall(client, rx_len)
 
                 if(data != b'' and data != None):
-                    self._parser.HandleData(data);
+                    self.__parser.HandleData(data);
                 else:
                     pass
                 rx_state = HEADER          
