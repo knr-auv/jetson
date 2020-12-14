@@ -35,6 +35,19 @@ class JetsonServer():
         self.telemetry_thread.start()
         logging.debug("Starting telemetry")
 
+    def recvall(self, sock, n):
+        # Helper function to recv n bytes or return None if EOF is hit
+        data = bytearray()
+        while len(data) < n:
+            try:
+                packet = sock.recv(n - len(data))
+            except ConnectionAbortedError:
+                return None
+            if not packet:
+                return None
+            data.extend(packet)
+        return data
+
     def __ClientHandler(self, client):
         self.StartSendingTelemetry(50)
         self.sender.SendPIDs()
@@ -44,8 +57,8 @@ class JetsonServer():
         Logger.write('Connected with GUI', 'ServerThread')
         while self.__ListenToClient:
             if(rx_state==HEADER):
-                data = client.recv(4)
-                if(data == b''):
+                data = self.recvall(client, 4)
+                if(data == b'' or data == None):
                     logging.debug("Control client disconnected")
                     self.sender.ShouldSend = False
                     self.telemetry_thread.join()                    
@@ -56,9 +69,10 @@ class JetsonServer():
                 except:
                     rx_state = HEADER;              
             elif(rx_state == DATA):
-                data = client.recv(rx_len)
-                if(data != b''):
-                    self.__parser.HandleData(data);
+                data = data = self.recvall(client, rx_len)
+
+                if(data != b'' and data != None):
+                    self._parser.HandleData(data);
                 else:
                     pass
                 rx_state = HEADER          
