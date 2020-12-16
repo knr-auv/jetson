@@ -1,18 +1,27 @@
-import cameraStream.stream as cs
-import controlThread.controlThread as ct
-#import autonomy.Detectors as Detectors
+import autonomy.Detectors.DetectorBaseClass as Detector
+from autonomy.Controller import Controller
+import tools.Logger as Logger
 
 class AutonomyThread:
-    """
-    This class should be responsible for creating and managing autonomy and vision system
-    """
-    def __init__(self, controlThread = ct.ControlThread(), cameraStream= cs.cameraStream()):#, detector = Detectors.Detector()):
-        self.cameraStream = cameraStream
-        self.controlThread = controlThread
-       # self.detector = detector
-        
-    def StartAutonomy(self):
-        pass
+    detector = Detector.DetectorBaseClass()
+    controller = Controller(None)
+    def __init__(self, detector, controller):#, detector = Detectors.Detector()):
+     self.detector = detector
+     self.controller = controller
+     self.name = "AutonomyThread"
 
-    def StartDetections(self, callback):
-        pass
+    def StartAutonomy(self):
+        Logger.write('Autonomy started', self.name)
+ 
+    def StopAutonomy(self):
+        Logger.write('AutonomyStoped', self.name)
+
+    def StartDetector(self):
+        if(not self.detector.isDetecting()):
+            self.detector.StartDetecting()
+            Logger.write("Detector started",self.name)
+
+    def StopDetector(self):
+        if(self.detector.isDetecting):
+            self.detector.StopDetecting()
+            Logger.write("Detector stoped",self.name)

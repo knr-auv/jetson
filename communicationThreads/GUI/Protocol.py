@@ -17,6 +17,8 @@ class Protocol(object):
             START_AUTONOMY=0x03
             STOP_AUTONOMY=0x04
             START_TELEMETRY=0x05
+            START_DETECTOR = 0x06
+            STOP_DETECTOR = 0x07
 
         SETTINGS = 0x04
         class SETTINGS_MSG:
@@ -47,6 +49,8 @@ class Protocol(object):
             DETECTION = 0x01
             AUTONOMY_STARTED = 0x02
             AUTONOMY_STOPED = 0x03
+            DETECTOR_STARTED = 0x04
+            DETECTOR_STOPED = 0x05
 
         STATUS = 0x04
         class STATUS_MSG:

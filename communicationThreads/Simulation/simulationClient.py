@@ -10,7 +10,7 @@ class Types:
     DEPTH_MAP = b'\xb1'
     POSITION = b'\xC2'
     SENSORS = b'\xB0'
-    DETECTION = b'\xb2'
+    DETECTION = b'\xDE'
     VIDEO_STREAM = b'\xB3'
     ACK = b'\xC1'
     MOTORS = b'\xA0'
@@ -85,7 +85,7 @@ class SimulationClient:
         return data
 
     def get_depth_map(self):
-        flag, data = self.get_packet(Types.DEPTH_MAP)
+        flag, data = self.get_packet(Types.DEPTH_MAP,False)
         data = base64.b64decode(data["depth"])
         return  data
 
@@ -107,7 +107,11 @@ class SimulationClient:
         return  data
 
     def get_detection(self):
-        flag, data = self.get_packet(Types.DETECTION)
+        try:
+            flag, data = self.get_packet(Types.DETECTION)
+        except:
+            logging.debug('error while getting detection')
+            data = "error"
         return  data
 
     def set_motors(self):

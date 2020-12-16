@@ -71,6 +71,15 @@ class Sender:
         data = json.dumps({'fps':fps,'ObjectsList':detectionList,'LastDetections':lastDetection})
         data = data.encode()
         self.SendAutonomyMsg(data, key)
+
+    def SendDetectionStart(self, val):
+        if(val):
+            key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTOR_STARTED])
+        else:
+            key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTOR_STOPED])
+        self.SendAutonomyMsg(None, key)
+
+
     def SendAutonomyStart(self, val):
         
         if(val):
@@ -130,4 +139,7 @@ class Sender:
     def __Send_msg(self, data, type):
         header = struct.pack('<i', len(data)+ 1)
         msg = bytearray(header+type+data)
-        self.connection.send(msg)
+        try:
+            self.connection.send(msg)
+        except:
+            pass

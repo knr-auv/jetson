@@ -8,6 +8,10 @@ class Callbacks:
     SetPIDs = Delegate()
     StartAutonomyCallback= Delegate()
     StopAutonomyCallback= Delegate()
+    StartDetectorCallback = Delegate()
+    StopDetectorCallback = Delegate()
+
+    GUIDisconnected = Delegate()
 
     
 class DataCollector:

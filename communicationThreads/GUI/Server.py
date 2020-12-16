@@ -60,6 +60,7 @@ class JetsonServer():
                 data = self.recvall(client, 4)
                 if(data == b'' or data == None):
                     logging.debug("Control client disconnected")
+                    self.__parser.cb.GUIDisconnected()
                     self.sender.ShouldSend = False
                     self.telemetry_thread.join()                    
                     break;

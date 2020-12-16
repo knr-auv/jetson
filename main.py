@@ -1,35 +1,64 @@
 import logging
 import variable
+
+#controlThread
 from controlThread.controlThread_simulation import SimulationControlThread
-from communicationThreads.GUI.Server import JetsonServer
-from communicationThreads.GUI.Setup import PrepareCallbacks
-import cameraStream.SimulationWAPIStreamClient as sc
-from cameraStream.ToGuiStream import ToGuiStream
+#cameraStream
+from cameraStream.SimulationWAPIStreamClient import SimulationWAPIStreamClient
+#detector
+from autonomy.Detectors.simulation_noGPU import Simulation_noGPU_detector
+
 from autonomy.autonomyThread import AutonomyThread
+from autonomy.Controller import Controller
+
 from config.ConfigLoader import ConfigLoader
 import tools.Logger as Logger
 
-if __name__ == '__main__':
-    logging.basicConfig(level=logging.DEBUG)
+#for GUI only
+from communicationThreads.GUI.Server import JetsonServer
+from communicationThreads.GUI.Setup import PrepareCallbacks
+from cameraStream.ToGuiStream import ToGuiStream
 
+
+if __name__ == '__main__':
+
+    logging.basicConfig(level=logging.DEBUG)
+    #init cameraStream
+    cameraStream = SimulationWAPIStreamClient()
+    #init control thread
     controlThread = SimulationControlThread()
+
+    #init autonomy helpers
+    #we can switch them according to environment
+    detector = Simulation_noGPU_detector(cameraStream, controlThread)
+    controller = Controller(controlThread)
+
+    #init autonomy
+    autonomyThread = AutonomyThread(detector, controller)
+
+    #load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
-    #obraz z kamery + pełna komunikacja z symulacją
-    #można np. użyc cameraStream.client.get_detection
-    cameraStream = sc.SimulationWAPIStreamClient()
-    autonomyThread = AutonomyThread(controlThread, cameraStream)
     cameraStream.start()
-#lines only for gui (comment them if u are not using it)
+    #from now we should be able to use autonomyThread.StartAutonomy()
+
+#lines only for gui
     guiStream = ToGuiStream(cameraStream)
     server = JetsonServer(variable.GUI_ADDRESS)
     guiStream.Start()
-    c,d =PrepareCallbacks(autonomyThread, controlThread)
+
+    #after receiving a msg server invokes a callback
+    #for sending telemetry server uses 'dataCollector' marked below as 'd'
+    c,d =PrepareCallbacks(detector,autonomyThread, controlThread)
     server.SetCallbacks(c,d)
+
+    #event handling - make sure that arguments are matching
+    detector.RegisterDetectionCallback(server.sender.SendDetection)
+
+    #start when ready
     server.StartServer()
-    #setting up logger
-    #pierwszy argument to funkjca,która przyjmuje tekst jako argument
-    #żeby wysyłać dane do GUI trzeba zaimportować logger i wywołać Logger.write(wiadomosc, autor)
-    #autor to np MainThread, AutonomyThread, detector etc...
+
+#setup logger. F.e. Logger.setStream(print, None) or:
+#fd = open("log.txt","a")
+#Logger.setStream(fd.write, None)
     Logger.setStream(server.sender.SendLog, None)
-    #method for wincior
-    #server.sender.SendTaskManagerInfo('{"name": "b", "whatever": "x", "sth important":"or not"}')
+

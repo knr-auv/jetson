@@ -1,30 +1,29 @@
-from tools.PID.pid_thread import PIDThread
-from communicationThreads.Simulation.simulationClient import SimulationClient
-from tools.Delegate import Delegate
-from controlThread.controlThread_simulation import SimulationControlThread as sct
-from controlThread.controlThread import ControlThread as ct
 import numpy as np
-
+import tools.Logger
+from tools.Delegate import Delegate
+from controlThread.controlThread import ControlThread as ct
 
 class Controller:
-    def __init__(self):
-        self.client = SimulationClient()
+    controlThread = ct()
+    def __init__(self, controlThread):
+        self.controlThread = controlThread
         self.xyz_reached_callback = Delegate()
         self.current_position = [0] * 3  # x y z
         self.current_orientation = [0] * 3  # roll pitch yaw
         self.xyz_reached=False
+        #Logger.write("wiadomosc", "controller")
 
     def arm(self):
-        sct.arm()
+        self.controlThread.arm()
 
     def disarm(self):
-        sct.disarm()
+        self.controlThread.disarm()
 
     def get_current_position(self):
         self.current_position=ct.getPosition()
 
     def set_orientation(self, roll,pitch, yaw):
-        sct.setAttitude(roll,pitch,yaw)
+        self.controlThread.setAttitude(roll,pitch,yaw)
 
     def get_current_orientation(self):
         self.current_orientation=ct.getAttitudeSetpoint()
@@ -33,13 +32,13 @@ class Controller:
         self.move_forward(0)
 
     def move_forward(self, value):
-        sct.moveForward(value)
+        self.controlThread.moveForward(value)
 
     def move_backward(self, value):
-        sct.moveForward(-value)#tutaj nie jestem pewien czy to zadziała
+        self.controlThread.moveForward(-value)#tutaj nie jestem pewien czy to zadziała
 
     def setDepth(self, depth):
-        sct.setDepth(depth)
+        self.controlThread.setDepth(depth)
 
     #skrecanie odbywa sie przez obrot wokol osi z czyli kat yaw
     #nie wiem tylko jak jest zorientowany ukłąd, więc mozliwe ze trzeba zmienic + z - w turn_right/turn_left
