@@ -26,6 +26,8 @@ class Sender:
                     self.SendIMU()
                     self.SendPosition()
                     self.SendBattery()
+                    self.SendMotors()
+                    
                 except:
                     self.ShouldSend = False
                     
@@ -33,6 +35,7 @@ class Sender:
             else:
                 time.sleep(sleep_time)
                 #msg should be json
+
     def SendTaskManagerInfo(self, msg):
         msg = json.dumps(msg)
         data = msg.encode()
@@ -102,6 +105,11 @@ class Sender:
         data = self.dataColector.GetPosition()
         msg = struct.pack(str(len(data))+'f', *(data))
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.POSITION])
+        self.Send_Telemetry_msg(msg, key)
+    def SendMotors(self):
+        data = self.dataColector.GetMotors()
+        msg = struct.pack(str(len(data))+'f', *(data))
+        key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.MOTORS])
         self.Send_Telemetry_msg(msg, key)
 
     def SendIMU(self):

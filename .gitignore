@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+/coordinates.svg
 # Distribution / packaging
 .Python
 build/

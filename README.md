@@ -29,3 +29,6 @@ In both cases it is nessecary to launch simulation first, than you can launch ma
 ### Important notes
 Launching jetson without running simulation will fail. If program can't establish connection with simulation or GUI please make sure that IP adresses are corect. If problem still occurs try disabling your firewall.
 If you have low performance PC it is recomended to launch simulation on another desktop in LAN.
+
+## Coordinates system
+![coordinates](https://github.com/knr_auv/jetson_v2/blob/develop/okonCoordinates.png?raw=true)

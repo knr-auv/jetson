@@ -56,7 +56,7 @@ class PIDThread:
     def PIDLoop(self):
         last_data = 0
         data_t = 1/10
-        loop_T = 1/50
+        loop_T = 1/25
         sleep_time = loop_T/10 #sounds reasonable...
         loop_time = 0
         last_time =time.time()
@@ -70,15 +70,18 @@ class PIDThread:
                 self.gyro = self.client.get_sample('gyro')
                 self.depth=self.client.get_sample('depth')
                 at = self.client.get_sample('attitude')
+
                 self.attitude = q.fromEuler(*at)
                 error = self.attitude.conj()*self.ref_attitude
                 #TODO position integration
                 try:
-                    new_pos = [s["pos"]["x"],s["pos"]["y"],s["pos"]["z"]]
+                    new_pos = [s["pos"]["z"],s["pos"]["x"],s["pos"]["y"]]
+
                     for i in range(3):
                        # self.position[i]+=self.velocity[i]
                        self.velocity[i]=(new_pos[i]-self.position[i])/dt
                     self.position= new_pos
+
                 except:
                     pass
                 """
@@ -133,12 +136,12 @@ class PIDThread:
     def controll_motors(self, roll_error, pitch_error, yaw_error, depth_error):
         motors = [0]*5
         def control_roll():
-            motors[4]+=roll_error
-            motors[2]-=roll_error
+            motors[4]-=roll_error
+            motors[2]+=roll_error
         def control_pitch():
-            motors[2]+=pitch_error
-            motors[4]+=pitch_error
-            motors[3]-=pitch_error
+            motors[2]-=pitch_error
+            motors[4]-=pitch_error
+            motors[3]+=pitch_error
         def control_yaw():
             motors[0] +=self.forward+yaw_error
             motors[1] -= -self.forward+yaw_error
@@ -161,8 +164,8 @@ class PIDThread:
 
     def HandleSteeringInput(self, data):
         roll, pitch, yaw, forward, vertical = data
-        self.roll_ref = roll*30/1000
-        self.pitch_ref = pitch*30/1000
+        self.roll_ref = -roll*30/1000
+        self.pitch_ref = -pitch*30/1000
         self.yaw_ref = yaw
         self.forward = forward
         self.vertical = vertical

@@ -21,7 +21,7 @@ class Object(object):
     height = None
     def toDictionary(self):
         ret = {}
-        for i in keys:
+        for i in self.keys:
             a = eval('self.'+i)
             if a !=None:
                 ret[i]=a
@@ -39,6 +39,8 @@ class DetectorBaseClass(object):
     def isDetecting(self):
         return self.__isDetecting
     def StartDetecting(self):
+        self.ObjectsList = list()
+        self.LastDetections = list()
         self.detectionThread = threading.Thread(target = self.__DetectorLoop, name="DetectorThread")
         self.shouldDetect = True
         self.detectionThread.start();

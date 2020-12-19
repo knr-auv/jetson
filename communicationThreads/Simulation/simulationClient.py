@@ -130,19 +130,22 @@ class SimulationClient:
             return [temp["z"], temp['x'], temp['y']]
         elif sample == 'depth':
             return self.samples["baro"]["pressure"]/9800
+
         elif sample =='attitude':
             if self.samples['gyro']['z'] >= 180:
-                ret.append(360 - self.samples['gyro']['z'])
+                ret.append(-360 + self.samples['gyro']['z'])
             elif self.samples['gyro']['z'] < -180:
-                ret.append(-360 - self.samples['gyro']['z'])
+                ret.append(360 + self.samples['gyro']['z'])
             else:
-                ret.append(-self.samples['gyro']['z'])
+                ret.append(self.samples['gyro']['z'])
+
             if self.samples['gyro']['x'] >= 180:
-                ret.append(360 - self.samples['gyro']['x'])
+                ret.append(-360 + self.samples['gyro']['x'])
             elif self.samples['gyro']['x'] < -180:
-                ret.append(-360 - self.samples['gyro']['x'])
+                ret.append(360 + self.samples['gyro']['x'])
             else:
-                ret.append(-self.samples['gyro']['x'])
+                ret.append(self.samples['gyro']['x'])
+
             if self.samples['gyro']['y'] >= 180:
                  ret.append(-360 + self.samples['gyro']['y'])
             elif self.samples['gyro']['y'] < -180:

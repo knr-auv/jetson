@@ -2,6 +2,12 @@ import math
 import tools.PID.Quaternion as Q
 import numpy as np
 
+def vec_length(vec):
+    sum = 0
+    for i in vec:
+        sum+=i*i
+    return math.sqrt(sum)
+
 def get_real_size(h_fov, v_fov,width, height, distance):
     """
     wymiary szer. i wys. musza byc przeskalowane od 0 do 1, gdzie 1 to szerokosc/wysokosc obrazu
@@ -25,18 +31,21 @@ def object_position(h_fov, v_fov, distance,center_width, center_height,okon_pos,
     v_fov = math.radians(v_fov)
     center_width-=0.5
     center_height-=0.5
-    a = h_fov/2*center_width
-    x = distance*math.sin(a)
-    y =distance*math.cos(a)
+    a = h_fov*center_width
+    x = distance*math.cos(a)
+    y =distance*math.sin(a)
     #b is angle between okon pitch and object
-    b = v_fov/2*center_height
+    b = v_fov*center_height
     z= distance*math.sin(b)
 
+    # to here it is working
     #frame to world coordinartes
     rot = Q.fromEuler(*okon_attitude)
-    x,y,z = np.matmul(rot,[x,y,z])
-    okon_pos[0]+=x
-    okon_pos[1]+=y
-    okon_pos[2]+=z
-    return okon_pos
-    
+    q = Q.Quaternion([0,x,y,z])
+    r = rot*q*rot.conj()
+    x = r.b
+    y =r.c
+    z=r.d
+    return [okon_pos[0]+x, okon_pos[1]+y, okon_pos[2]+z]
+
+  
