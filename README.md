@@ -31,4 +31,4 @@ Launching jetson without running simulation will fail. If program can't establis
 If you have low performance PC it is recomended to launch simulation on another desktop in LAN.
 
 ## Coordinates system
-![coordinates](https://github.com/knr_auv/jetson_v2/blob/develop/okonCoordinates.png?raw=true)
+![coordinates](https://github.com/knr-auv/jetson-v2/blob/develop/okonCoordinates.png?raw=true)
