@@ -37,7 +37,6 @@ def object_position(h_fov, v_fov, distance,center_width, center_height,okon_pos,
     #b is angle between okon pitch and object
     b = v_fov*center_height
     z= distance*math.sin(b)
-
     # to here it is working
     #frame to world coordinartes
     rot = Q.fromEuler(*okon_attitude)

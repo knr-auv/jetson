@@ -10,6 +10,7 @@ class Object(object):
     index = None
     type_index = None
     type = None
+    angle = None
     #polozenie obiektu
     x = None
     y=None

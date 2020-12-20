@@ -58,6 +58,8 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         
         a,b,c = [self.controlThread.getAttitude()[0],self.controlThread.getAttitude()[1],self.controlThread.getAttitude()[2]]
         obj.x , obj.y, obj.z = h.object_position(107,60,dist,center_width,center_height,[x,y,z], [a,b,c])
+        obj.width = 1;
+        obj.height =1;
 
         #more smart stuff
         return obj
