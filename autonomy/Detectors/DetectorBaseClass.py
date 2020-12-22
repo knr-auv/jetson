@@ -3,23 +3,20 @@ import threading
 import json
 
 class Object(object):
-    #keys must match class properties names
-    #if you need something new just add property and key. for now gui is ignoring distance, height, width 
-    #nie każdy paramter musi mieć nadaną wartość
-    keys = ["type","x","y","z","accuracy","distance","height","width"]
-    index = None
-    type_index = None
+    keys = ["type","index","accuracy","boundingBox","position","angle","distance","height","width"]
+
     type = None
-    angle = None
-    #polozenie obiektu
-    x = None
-    y=None
-    z=None
-    #
-    distance = None
+    index = None
     accuracy = None
-    width = None
+    boundingBox = None #must by list [minX,minY,maxX,maxY]
+
+    position = None #must be list
+    angle = None
+    distance = None
     height = None
+    width = None
+    
+
     def toDictionary(self):
         ret = {}
         for i in self.keys:

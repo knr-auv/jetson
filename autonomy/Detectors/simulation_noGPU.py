@@ -15,6 +15,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
 
     def DetectorTask(self):
         time.sleep(1)
+        self.LastDetections.clear()
         detection = self.get_detection()
         detection = detection["detected"]
         for i in detection:
@@ -23,9 +24,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
                 self.check_if_seen(o)
                 self.LastDetections.append(o)
 
-        #########only for testing ###########
-        if(len(self.LastDetections)>=5):
-            self.LastDetections.pop(0)
+
 
         ####################################
         fps = 1
@@ -55,9 +54,9 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         obj = base.Object()
         obj.type = name
         obj.accuracy = 1
-        
+        obj.boundingBox = [minx,miny,maxx,maxy]
         a,b,c = [self.controlThread.getAttitude()[0],self.controlThread.getAttitude()[1],self.controlThread.getAttitude()[2]]
-        obj.x , obj.y, obj.z = h.object_position(107,60,dist,center_width,center_height,[x,y,z], [a,b,c])
+        obj.position = h.object_position(107,60,dist,center_width,center_height,[x,y,z], [a,b,c])
         obj.width = 1;
         obj.height =1;
 
@@ -65,13 +64,13 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         return obj
 
     def check_if_seen(self, o):
-        pos = [o.x,o.y,o.z]
+        pos = o.position
         ap = True
         l = h.vec_length(pos)
         if len(self.ObjectsList)!=0:
             ap = False
             for i in self.ObjectsList:
-                pos = [i.x,i.y,i.z]
+                pos = i.position
                 li = h.vec_length(pos)
                 if abs(l-li)>2:
                     self.ObjectsList.append(o)
