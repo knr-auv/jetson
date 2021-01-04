@@ -182,7 +182,8 @@ class PIDThread:
         self.pitch_ref = pitch
         self.yaw_ref = yaw
         self.ref_attitude =q.fromEuler(roll, pitch, yaw)
-
+    def moveForward(self, value):
+        self.forward = value
 
     def SetHeading(self, heading):
         

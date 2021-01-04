@@ -13,10 +13,12 @@ class AutonomyThread:
 
     def StartAutonomy(self):
         Logger.write('Autonomy started', self.name)
-        x = threading.Thread(target = lambda: self.controller.swim_to_xyz([0,0,0]))
+        #x = threading.Thread(target = lambda: self.controller.swim_to_xyz([0,0,0]))
+        x = threading.Thread(target= self.controller.plyn_i_stop)
         self.controller.arm()
         x.start()
-       # self.controller.swim_to_xyz([0,0,0])
+        #self.controller.swim_to_xyz([0,0,0])
+
 
     def StopAutonomy(self):
         self.controller.disarm()
