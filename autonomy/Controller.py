@@ -49,6 +49,14 @@ class Controller:
                 break
             time.sleep(0.1)
         self.stop()
+    def plyn_i_stop(self):
+        self.move_forward(700)
+        t=time.time()
+        while time.time()-t<10:
+            a=1
+        print("stop")
+        self.controlThread.moveForward(0)
+
     def turn_left(self,angle):
         self.get_current_orientation()
         error = 1.5
