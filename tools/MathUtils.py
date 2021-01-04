@@ -25,8 +25,7 @@ def get_angle(real_size, size_from_angle):
         return 0 
     return math.asin(size_from_angle/real_size)
 
-def object_position(h_fov, v_fov, distance,center_width, center_height,okon_pos,okon_attitude):
-    #zamienia pozycje obiektu z okonia na globalną, zwraca pozycje obiektu w globalnych wsp.
+def posFromPicture(h_fov, v_fov, distance,center_width, center_height):
     h_fov = math.radians(h_fov)
     v_fov = math.radians(v_fov)
     center_width-=0.5
@@ -37,14 +36,15 @@ def object_position(h_fov, v_fov, distance,center_width, center_height,okon_pos,
     #b is angle between okon pitch and object
     b = v_fov*center_height
     z= distance*math.sin(b)
-    # to here it is working
-    #frame to world coordinartes
-    rot = Q.fromEuler(*okon_attitude)
-    q = Q.Quaternion([0,x,y,z])
-    r = rot*q*rot.conj()
-    x = r.b
-    y =r.c
-    z=r.d
-    return [okon_pos[0]+x, okon_pos[1]+y, okon_pos[2]+z]
+    return [x,y,z]
 
+def toGlobalRef(pos, attitude):
+     rot = Q.fromEuler(*attitude)
+     x,y,z=pos
+     q = Q.Quaternion([0,x,y,z])
+     r = rot*q*rot.conj()
+     x = r.b
+     y =r.c
+     z=r.d
+     return [x,y,z]
   

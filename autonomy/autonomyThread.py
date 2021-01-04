@@ -1,6 +1,7 @@
 import autonomy.Detectors.DetectorBaseClass as Detector
 from autonomy.Controller import Controller
 import tools.Logger as Logger
+import threading
 
 class AutonomyThread:
     detector = Detector.DetectorBaseClass()
@@ -12,8 +13,13 @@ class AutonomyThread:
 
     def StartAutonomy(self):
         Logger.write('Autonomy started', self.name)
- 
+        x = threading.Thread(target = lambda: self.controller.swim_to_xyz([0,0,0]))
+        self.controller.arm()
+        x.start()
+       # self.controller.swim_to_xyz([0,0,0])
+
     def StopAutonomy(self):
+        self.controller.disarm()
         Logger.write('AutonomyStoped', self.name)
 
     def StartDetector(self):

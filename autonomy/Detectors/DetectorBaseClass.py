@@ -3,28 +3,16 @@ import threading
 import json
 
 class Object(object):
-    keys = ["type","index","accuracy","boundingBox","position","angle","distance","height","width"]
-
     type = None
-    index = None
     accuracy = None
     boundingBox = None #must by list [minX,minY,maxX,maxY]
 
-    position = None #must be list
-    angle = None
+    boundingBox3D = None
+    position = None #object position relative to boat attitude
     distance = None
     height = None
     width = None
     
-
-    def toDictionary(self):
-        ret = {}
-        for i in self.keys:
-            a = eval('self.'+i)
-            if a !=None:
-                ret[i]=a
-        return ret
-
 class DetectorBaseClass(object):
     ObjectsList = list()
     LastDetections = list()

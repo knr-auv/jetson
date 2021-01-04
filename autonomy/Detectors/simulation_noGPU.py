@@ -1,5 +1,5 @@
 import time, math
-import autonomy.Detectors.Helpers as h
+import tools.MathUtils as h
 import autonomy.Detectors.DetectorBaseClass as base
 from communicationThreads.Simulation.simulationClient import SimulationClient
 class Simulation_noGPU_detector(base.DetectorBaseClass):
@@ -56,33 +56,14 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         obj.accuracy = 1
         obj.boundingBox = [minx,miny,maxx,maxy]
         a,b,c = [self.controlThread.getAttitude()[0],self.controlThread.getAttitude()[1],self.controlThread.getAttitude()[2]]
-        obj.position = h.object_position(107,60,dist,center_width,center_height,[x,y,z], [a,b,c])
+        pos = h.posFromPicture(107,60,dist,center_width,center_height)
+        obj.pos = h.toGlobalRef(pos,[a,b,c])
         obj.width = 1;
         obj.height =1;
 
         #more smart stuff
         return obj
 
-    def check_if_seen(self, o):
-        pos = o.position
-        ap = True
-        l = h.vec_length(pos)
-        if len(self.ObjectsList)!=0:
-            ap = False
-            for i in self.ObjectsList:
-                pos = i.position
-                li = h.vec_length(pos)
-                if abs(l-li)>2:
-                    self.ObjectsList.append(o)
-                    ap = True
-                else:
-                    ap = False
-        if ap:
-            self.ObjectsList.append(o)
-        #sprawdź, czy widziany
-        #jeśli tak to może popraw pozycje już wcześniej znalezionego obiektu
-        #cokolwiek
-        return False
     
     def prepareCb(self):
         a = list()
