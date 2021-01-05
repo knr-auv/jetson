@@ -35,6 +35,7 @@ if __name__ == '__main__':
 
     #init autonomy
     autonomyThread = AutonomyThread(detector, controller)
+    autonomyThread.StartAutonomy()
 
     #load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
