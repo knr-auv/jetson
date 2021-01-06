@@ -89,25 +89,30 @@ class PIDThread:
                     self.position[i]+=self.velocity[i]*dt
                     self.velocity[i]+=self.acc[i]*dt
                 """
+
+
                 if self.mode == 0 and self.pad_input:
                     self.pad_input = False
-                elif self.mode==0:
-                    #enlarging error to avoid L parameter being very big
                     t = 50
                     self.ref_ang_vel[0]= error.b*t*self.roll_PID.Kl
                     self.ref_ang_vel[1]= error.c*t*self.pitch_PID.Kl
-                    
-                #    if self.yaw_ref != 0:
-                #        self.ref_ang_vel[2] = self.yaw_ref
-                #       self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
-                #    else:                   
-                    self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
-
+                    if self.yaw_ref != 0:
+                        self.ref_ang_vel[2] = self.yaw_ref
+                        self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
+                    else:                   
+                        self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
                     if self.vertical!=0:
                         self.direct_depth = True
                         self.ref_depth = self.depth
                     else:
                         self.direct_depth = False
+
+                elif self.mode==0:
+                    #enlarging error to avoid L parameter being very big
+                    t = 50
+                    self.ref_ang_vel[0]= error.b*t*self.roll_PID.Kl
+                    self.ref_ang_vel[1]= error.c*t*self.pitch_PID.Kl                
+                    self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
 
                 #pid base
                 if self.armed:
@@ -122,10 +127,10 @@ class PIDThread:
                 last_time = time.time()
             else:
                 if(time.time()-last_data>=data_t):
-                    data = [self.attitude.toEuler(), self.gyro, self.acc,
-                            self.mag, self.depth, self.gyro,
-                            self.position, self.velocity,
-                            self.acc, self.motors]
+                    data = [self.attitude.toEuler(), self.gyro.copy(), self.acc.copy(),
+                            self.mag.copy(), self.depth, self.gyro.copy(),
+                            self.position.copy(), self.velocity.copy(),
+                            self.acc.copy(), self.motors.copy()]
                     self.data_receiver(data)
                     last_data = time.time()
                 else:
@@ -168,6 +173,7 @@ class PIDThread:
         self.yaw_ref = yaw
         self.forward = forward
         self.vertical = vertical
+        self.pad_input = True
         try:
             a=self.client.get_sample('attitude')
             self.ref_attitude = q.fromEuler(self.roll_ref,self.pitch_ref,a[2])
