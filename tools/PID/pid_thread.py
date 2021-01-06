@@ -97,11 +97,11 @@ class PIDThread:
                     self.ref_ang_vel[0]= error.b*t*self.roll_PID.Kl
                     self.ref_ang_vel[1]= error.c*t*self.pitch_PID.Kl
                     
-                    if self.yaw_ref != 0:
-                        self.ref_ang_vel[2] = self.yaw_ref
-                        self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
-                    else:                   
-                        self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
+                    %if self.yaw_ref != 0:
+                        %self.ref_ang_vel[2] = self.yaw_ref
+                        %self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
+                    %else:                   
+                    self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
 
                     if self.vertical!=0:
                         self.direct_depth = True
