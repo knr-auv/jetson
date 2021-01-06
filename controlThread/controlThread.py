@@ -79,7 +79,7 @@ class ControlThread:
 
 #mode 1 -> łódka się poziomuje
     def setAttitude(self, roll, pitch,yaw):
-        self.__attitude_setpoint = [roll.pitch,yaw]
+        self.__attitude_setpoint = [roll,pitch,yaw]
     
     def setDepth(self, depth):
         self.__depth_setpoint = depth

@@ -97,10 +97,10 @@ class PIDThread:
                     self.ref_ang_vel[0]= error.b*t*self.roll_PID.Kl
                     self.ref_ang_vel[1]= error.c*t*self.pitch_PID.Kl
                     
-                    %if self.yaw_ref != 0:
-                        %self.ref_ang_vel[2] = self.yaw_ref
-                        %self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
-                    %else:                   
+                #    if self.yaw_ref != 0:
+                #        self.ref_ang_vel[2] = self.yaw_ref
+                #       self.ref_attitude = q.fromEuler(self.roll_ref, self.pitch_ref, at[2])
+                #    else:                   
                     self.ref_ang_vel[2]= error.d*t*self.yaw_PID.Kl
 
                     if self.vertical!=0:
@@ -114,7 +114,6 @@ class PIDThread:
                     self.roll_diff=self.roll_PID.update(self.gyro[0],self.ref_ang_vel[0])
                     self.pitch_diff=self.pitch_PID.update(self.gyro[1],self.ref_ang_vel[1])
                     self.yaw_diff = self.yaw_PID.update(self.gyro[2],self.ref_ang_vel[2])
-
                     if self.direct_depth:
                         self.depth_diff = self.vertical
                     else:
@@ -183,7 +182,8 @@ class PIDThread:
         self.pitch_ref = pitch
         self.yaw_ref = yaw
         self.ref_attitude =q.fromEuler(roll, pitch, yaw)
-
+    def moveForward(self, value):
+        self.forward = value
 
     def SetHeading(self, heading):
         

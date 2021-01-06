@@ -29,7 +29,7 @@ class SimulationControlThread(ControlThread):
         self.mode = mode
 
     def moveForward(self, value):
-        self.PIDThread.forward = value
+        self.PIDThread.moveForward(value)
     
 #mode 0
     def setAngularVelocity(self, roll, pitch, yaw):
