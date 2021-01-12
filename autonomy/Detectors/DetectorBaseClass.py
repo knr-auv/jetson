@@ -45,8 +45,8 @@ class DetectorBaseClass(object):
     def DetectorTask(self):
         pass
     
-    def InvokeCallback(self, fps,objectList, NewDetection):
-        self.__callback.Invoke(fps,objectList, NewDetection)
+    def InvokeCallback(self, fps, NewDetection):
+        self.__callback.Invoke(fps, NewDetection)
 
     def RegisterDetectionCallback(self, callback):
         self.__callback.Register(callback)

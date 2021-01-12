@@ -13,8 +13,6 @@ class TaskManager(object):
     controller = None
     def __init__(self, detector, controller):
         self.__callback = Delegate()
-        self.tasksList = task_list
-        detector.RegisterDetectionCallback(self.HandleDetection)
         self.controller = controller
         self.detector = detector
 

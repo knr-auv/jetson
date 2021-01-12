@@ -21,14 +21,13 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         for i in detection:
             if(i['visibleInFrame']):
                 o = self.handle_detection(i)
-                self.check_if_seen(o)
                 self.LastDetections.append(o)
 
 
 
         ####################################
         fps = 1
-        self.InvokeCallback(fps,*self.prepareCb())
+        self.InvokeCallback(fps,self.LastDetections.copy())
         
     def handle_detection(self, detection):
         """
@@ -64,15 +63,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         #more smart stuff
         return obj
 
-    
-    def prepareCb(self):
-        a = list()
-        b = list()
-        for i in self.ObjectsList:
-            a.append(i.toDictionary())
-        for i in self.LastDetections:
-            b.append(i.toDictionary())
-        return a,b
+
 
     def get_detection(self):
         #camera stream is based on simulation web api.

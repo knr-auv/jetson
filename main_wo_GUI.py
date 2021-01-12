@@ -1,3 +1,5 @@
+#main without GUI
+
 import logging
 import variable
 
@@ -35,31 +37,10 @@ if __name__ == '__main__':
 
     #init autonomy
     autonomyThread = AutonomyThread(detector, controller)
-    autonomyThread.StartAutonomy()
+
 
     #load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    #from now we should be able to use autonomyThread.StartAutonomy()
-
-#lines only for gui
-    guiStream = ToGuiStream(cameraStream)
-    server = JetsonServer(variable.GUI_ADDRESS)
-    guiStream.Start()
-
-    #after receiving a msg server invokes a callback
-    #for sending telemetry server uses 'dataCollector' marked below as 'd'
-    c,d =PrepareCallbacks(detector,autonomyThread, controlThread)
-    server.SetCallbacks(c,d)
-
-    #event handling - make sure that arguments are matching
-    detector.RegisterDetectionCallback(server.sender.SendDetection)
-
-    #start when ready
-    server.StartServer()
-
-#setup logger. F.e. Logger.setStream(print, None) or:
-#fd = open("log.txt","a")
-#Logger.setStream(fd.write, None)
-    Logger.setStream(server.sender.SendLog, None)
+    autonomyThread.StartAutonomy()
 

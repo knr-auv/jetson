@@ -105,7 +105,7 @@ class Controller:
                 self.turn_left(math.degrees(abs(angle)))
             self.stop()
         velocity=700
-        time.sleep(1.5)
+        time.sleep(5)
         self.__get_current_position()
         position_error = np.subtract(reference_position,
         [self.current_position[0], self.current_position[1], self.current_position[2]])
@@ -132,7 +132,8 @@ class Controller:
                 Logger.write("Point XYZ reached", "controller")
                 self.__xyz_callback()
         self.xyz_reached=False
-        self.__set_orientation(0,0,0)
+        #self.__set_orientation(0,0,0)
+        self.stop()
     def test_swim(self):
         self.swim_to_xyz([3,5,1])
         self.stop()
