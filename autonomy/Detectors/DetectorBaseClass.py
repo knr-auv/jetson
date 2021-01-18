@@ -3,6 +3,8 @@ import threading
 import json
 
 class Object(object):
+    keys = ["type","accuracy","boundingBox","boundingBox3D","position","distance","height","width"]
+
     type = None
     accuracy = None
     boundingBox = None #must by list [minX,minY,maxX,maxY]
@@ -12,10 +14,16 @@ class Object(object):
     distance = None
     height = None
     width = None
-    
+
+    def toDictionary(self):
+        ret = {}
+        for i in self.keys:
+            a = eval('self.'+i)
+            if a !=None:
+                ret[i]=a
+        return ret
+
 class DetectorBaseClass(object):
-    ObjectsList = list()
-    LastDetections = list()
     __callback = Delegate()
     shouldDetect= False
     detectionThread = None
@@ -25,8 +33,6 @@ class DetectorBaseClass(object):
     def isDetecting(self):
         return self.__isDetecting
     def StartDetecting(self):
-        self.ObjectsList = list()
-        self.LastDetections = list()
         self.detectionThread = threading.Thread(target = self.__DetectorLoop, name="DetectorThread")
         self.shouldDetect = True
         self.detectionThread.start();

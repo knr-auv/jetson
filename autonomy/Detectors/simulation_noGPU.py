@@ -15,19 +15,17 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
 
     def DetectorTask(self):
         time.sleep(1)
-        self.LastDetections.clear()
+        LastDetections = list()
         detection = self.get_detection()
         detection = detection["detected"]
         for i in detection:
             if(i['visibleInFrame']):
                 o = self.handle_detection(i)
-                self.LastDetections.append(o)
-
-
+                LastDetections.append(o.toDictionary())
 
         ####################################
         fps = 1
-        self.InvokeCallback(fps,self.LastDetections.copy())
+        self.InvokeCallback(fps,LastDetections)
         
     def handle_detection(self, detection):
         """

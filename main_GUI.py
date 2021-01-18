@@ -54,7 +54,7 @@ if __name__ == '__main__':
     server.SetCallbacks(c,d)
 
     #event handling - make sure that arguments are matching
-   # detector.RegisterDetectionCallback(server.sender.SendDetection)
+    detector.RegisterDetectionCallback(server.sender.SendDetection)
 
     #start when ready
     server.StartServer()

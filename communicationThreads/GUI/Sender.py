@@ -69,9 +69,11 @@ class Sender:
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.BATTERY])
         self.Send_Telemetry_msg(msg, key)
 
-    def SendDetection(self,fps, detectionList, lastDetection):
+    def SendDetection(self,fps, detectionList):
         key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTION])
-        data = json.dumps({'fps':fps,'ObjectsList':detectionList,'LastDetections':lastDetection})
+        test = {'fps':fps,'ObjectsList':detectionList}
+        print(test)
+        data = json.dumps({'fps':fps,'ObjectsList':detectionList})
         data = data.encode()
         self.SendAutonomyMsg(data, key)
 
