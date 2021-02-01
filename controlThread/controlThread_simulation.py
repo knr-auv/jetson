@@ -16,9 +16,11 @@ class SimulationControlThread(ControlThread):
 
 #common methods for mode 1 and 2
     def disarm(self):
+        super().disarm()
         self.PIDThread.disarm()
 
     def arm(self):
+        super().arm()
         self.PIDThread.arm()
 
     def setControlMode(self, mode):

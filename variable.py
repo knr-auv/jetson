@@ -1,10 +1,10 @@
 """This module holds global variables"""
 
 #Address for server that sends telemetry to GUI
-GUI_ADDRESS = ('localhost',8080)
+GUI_ADDRESS = ('0.0.0.0',8080)
 
 #Addres for stream server that sends video feed to GUI
-GUI_STREAM = ('127.0.0.1', 8090) #todo sending this address to gui. Now is hardcoded
+GUI_STREAM = ('0.0.0.0', 8090) #todo sending this address to gui. Now is hardcoded
 
 GUI_DEPTH_MAP = ('127.0.0.1', 6969)
 

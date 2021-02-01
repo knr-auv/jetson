@@ -34,11 +34,11 @@ class Parser:
         p= Protocol.FROM_GUI.CONTROL_MSG
         if key==p.ARM:
             self.cb.ArmCallback();
-            self.server.sender.SendArmCallback()
+            #self.server.sender.SendArmCallback()
 
         elif key==p.DISARM:
             self.cb.DisarmCallback();
-            self.server.sender.SendDisarmCallback()
+           # self.server.sender.SendDisarmCallback()
 
         elif key==p.START_TELEMETRY:
             self.server.StartSendingTelemetry()

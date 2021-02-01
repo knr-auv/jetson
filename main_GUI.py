@@ -44,8 +44,11 @@ if __name__ == '__main__':
 
 
 #lines only for gui
+
     guiStream = ToGuiStream(cameraStream)
     server = JetsonServer(variable.GUI_ADDRESS)
+    controlThread.ArmNotificator+=server.sender.SendArmCallback
+    controlThread.DisarmNotificator+=server.sender.SendDisarmCallback
     guiStream.Start()
 
     #after receiving a msg server invokes a callback

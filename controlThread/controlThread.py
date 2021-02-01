@@ -34,10 +34,13 @@ class ControlThread:
 #It takes no arguments, but it might be used for settings flag
 #F.e: NewDataNotyfication+=lambda: NewDataDlag = true
     NewDataNotification = Delegate()
-
+    DisarmNotificator = Delegate()
+    ArmNotificator = Delegate()
     def __init__(self):
         self.NewDataCallback+=self.__update_local_var
         self.NewDataCallback+=self.NewDataNotification
+        self.DisarmNotificator = Delegate()
+        self.ArmNotificator = Delegate()
 
     def __update_local_var(self, data):
         self.__attitude = data["attitude"]
@@ -56,10 +59,10 @@ class ControlThread:
         pass
 #common methods for mode 1 and 2
     def arm(self):
-        pass
+        self.ArmNotificator()
 
     def disarm(self):
-        pass
+        self.DisarmNotificator()
 
     def getControlMode(self):
         return self.__mode
