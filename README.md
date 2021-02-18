@@ -13,6 +13,14 @@ Software includes:
 - [Usage](#usage)
   - [Startup](#startup)
   - [Important notes](#important-notes)
+* [Networking](#networking)
+  - [Packet structure](#packet-structure)
+      - [Request packet](#request-packet)
+      - [Steering packet](#steering-packet)
+      - [Control packet](#control-packet)
+      - [Settings packet](#settings-packet)
+  - [Packet types to jetson](#packet-types-to-jetson)
+  - [Packet types from jetson](#packet-types-from-jetson)
 
 
 ## Usage
@@ -32,3 +40,77 @@ If you have low performance PC it is recomended to launch simulation on another 
 
 ## Coordinates system
 ![coordinates](https://github.com/knr-auv/jetson-v2/blob/develop/okonCoordinates.png?raw=true)
+
+## Networking
+App comunicates with Jetson using TCP sockets:
+ - video default port is 8090
+ - control default port is 8080
+ 
+Both ports can be adjusted in settings.
+
+### Packet structure
+All control packets consist of header and data. Header is defined in following way:
+
+| Data length | Packet type |
+| ----------- | ----------- |
+| 4 bytes (uint32)| 1 byte|
+
+TODO: describe stream header
+
+### Packet types to jetson
+- Request `0x01`
+- Steering `0x02`
+- Control `0x03`
+- Settings `0x04`
+
+#### Request packet
+Packet used for requesting data from jetson. Jetson should respond with appropriate data.
+- `0x01` PID request
+- `0x02` config request - wtf?
+
+#### Steering packet
+Packet used for controlling jetson movement.
+- `0x01` pad data - int[5] - roll, pitch, yaw , forward, vertical
+- `0x02` mode acro - sending this packet will change PID controller mode to acro
+- `0x03` mode stable - sending this packet will change PID controller mode to stable
+
+#### Control packet
+- `0x01` arm 
+- `0x02` disarm
+- `0x03` start autonomy
+- `0x04` stop autonomy
+- `0x05` start telemetry
+- `0x06` start detector
+- `0x07` stop detector
+
+#### Settings packet
+  - `0x01` PID - data is double[16] with pid values in order: roll, pitch,yaw, depth
+
+### Packet types from jetson
+- Telemetry `0x01`
+- Request responce `0x02`
+- Autonomy `0x03`
+- Status `0x04`
+- Setting `0x05`
+
+#### Telemetry packet
+- `0x01` motors
+- `0x02` IMU
+- `0x03` movement info
+- `0x04` Battery
+
+#### Request responce packet
+- `0x01` PID
+- `0x02` arm confirm
+- `0x03` disarm confirm
+
+#### Autonomy packet
+- `0x01` detection
+- `0x02` autonomy started
+- `0x03' autonomy stoped
+- `0x04` detector started
+- `0x05` detector stoped
+
+#### Status packet
+- `0x01` loggs
+- `0x02` 
