@@ -10,9 +10,11 @@ class TaskBaseClass(object):
     def __init__(self):
         self.__callback = Delegate()
 
-    def StartTask(self, task_id):
+    def Start(self, *args):
         pass
 
+    def Stop(self):
+        pass
     
     def InvokeCallback(self, index, status):
         self.__callback.Invoke(index, status)

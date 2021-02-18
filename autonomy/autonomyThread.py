@@ -1,5 +1,5 @@
 import autonomy.Detectors.DetectorBaseClass as Detector
-import autonomy.TaskManagers.FindGate as task
+import autonomy.TaskManagers.TestMission as task
 from autonomy.Controller import Controller
 import tools.Logger as Logger
 import threading

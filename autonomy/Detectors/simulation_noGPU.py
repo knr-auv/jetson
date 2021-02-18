@@ -48,15 +48,17 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         maxy = max["y"]
         center_width = (minx+maxx)/2
         center_height = (miny+maxy)/2
+
         obj = base.Object()
         obj.type = name
         obj.accuracy = 1
+        obj.distance = dist;
         obj.boundingBox = [minx,miny,maxx,maxy]
         a,b,c = [self.controlThread.getAttitude()[0],self.controlThread.getAttitude()[1],self.controlThread.getAttitude()[2]]
         pos = h.posFromPicture(107,60,dist,center_width,center_height)
-        obj.pos = h.toGlobalRef(pos,[a,b,c])
-        obj.width = 1;
-        obj.height =1;
+        obj.position = h.toGlobalRef(pos,[a,b,c])
+        obj.width = 1.2;
+        obj.height =1.4;
 
         #more smart stuff
         return obj

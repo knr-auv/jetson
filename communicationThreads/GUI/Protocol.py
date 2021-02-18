@@ -8,8 +8,8 @@ class Protocol(object):
         STEERING = 0x02
         class STEERING_MSG:
             PAD = 0x01
-            MODE = 0x02
-
+            MODE_ACRO = 0x02
+            MODE_STABLE =0x03
         CONTROL = 0x03
         class CONTROL_MSG:
             ARM = 0x01
@@ -35,8 +35,6 @@ class Protocol(object):
             HUMMIDITY = 0x05
             TEMPERATURE = 0X06
 
-
-
         REQUEST_RESPONCE = 0x02
         class REQUEST_RESPONCE_MSG:
             PID = 0x01
@@ -57,7 +55,13 @@ class Protocol(object):
             LOGGER = 0x01
             SENSOR_STATUS = 0x02
             TASK_MANAGER = 0x03
+            MODE_PC_SIMULATION = 0x04
+            MODE_JETSON_STM = 0x05
+            MODE_JETSON_SIMULATION = 0x06
 
+        SETTINGS = 0x05
+        class SETTINGS_MSG:
+            pass
 
 
 

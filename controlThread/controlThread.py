@@ -57,8 +57,8 @@ class ControlThread:
 #Interface to control the boat
     def HandleSteeringInput(self, data):
         pass
-#common methods for mode 1 and 2
-    def arm(self):
+#common methods for mode 1 and 2. Control mode is either 0 -> manual or 1-> autonomy
+    def arm(self, controlMode=0):
         self.ArmNotificator()
 
     def disarm(self):

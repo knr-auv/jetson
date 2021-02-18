@@ -75,10 +75,12 @@ class Parser:
 
             l = int(len(data)/4)
             val = struct.unpack(str(l)+"i", data)
-            self.cb.SteeringDataCallback(val);
+            self.cb.SteeringDataCallback(val)
             
-        elif key== p.MODE:
-            self.cb.ChangeModeCallback(data);
+        elif key== p.MODE_ACRO:
+            self.cb.ChangeModeCallback(1)
+        elif key == p.MODE_STABLE:
+            self.cb.ChangeModeCallback(0)
     def HandleSettings(self,data):
         key = data[0]
         p=Protocol.FROM_GUI.SETTINGS_MSG

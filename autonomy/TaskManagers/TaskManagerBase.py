@@ -22,11 +22,12 @@ class TaskManager(object):
 
     def StartTask(self,task,*args):
         self.currentTask = task
+        self.currentTask.Start(*args)
         pass
 
     def StopCurrentTask(self):
         if self.currentTask:
-            self.currentTask.stop()
+            self.currentTask.Stop()
         pass
     
     def MissionCompleted(self):

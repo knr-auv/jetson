@@ -19,9 +19,9 @@ class SimulationControlThread(ControlThread):
         super().disarm()
         self.PIDThread.disarm()
 
-    def arm(self):
+    def arm(self, mode = 0):
         super().arm()
-        self.PIDThread.arm()
+        self.PIDThread.arm(mode)
 
     def setControlMode(self, mode):
         super().setControlMode(mode)

@@ -39,7 +39,7 @@ class Controller:
         self.xyz_reached=False
         Logger.write("DEBUG CONTROLER ACTIVE", "controller")
     def arm(self):
-        self.controlThread.arm()
+        self.controlThread.arm(1)
 
     def disarm(self):
         self.controlThread.disarm()
@@ -83,8 +83,8 @@ class Controller:
         # funkcja do wywołania callbacku po osiągnieciu pozycji xyz
         self.xyz_reached=True
         self.xyz_reached_callback.Invoke(self.xyz_reached)
-
-    def swim_to_xyz(self,reference_position,error=0.3):
+    
+    def swim_to_xyz(self,reference_position,error=1):
         self.__get_current_position()
         position_error = np.subtract(reference_position,[self.current_position[0], self.current_position[1], self.current_position[2]])
         self.__set_depth(reference_position[2])
@@ -134,6 +134,7 @@ class Controller:
         self.xyz_reached=False
         #self.__set_orientation(0,0,0)
         self.stop()
+
     def test_swim(self):
         self.swim_to_xyz([3,5,1])
         self.stop()
