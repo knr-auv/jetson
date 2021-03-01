@@ -82,6 +82,7 @@ Packet used for controlling jetson movement.
 - `0x05` start telemetry
 - `0x06` start detector
 - `0x07` stop detector
+- `0x08` set motors int[6]
 
 #### Settings packet
   - `0x01` PID - data is double[16] with pid values in order: roll, pitch,yaw, depth
@@ -94,23 +95,28 @@ Packet used for controlling jetson movement.
 - Setting `0x05`
 
 #### Telemetry packet
-- `0x01` motors
-- `0x02` IMU
-- `0x03` movement info
+Packets for sending telemetry data.
+- `0x01` motors  - float[6]
+- `0x02` IMU - float[13], attitude, acc, gyro, mag, depth
+- `0x03` movement info - float[9], position, velocity, acceleration
 - `0x04` Battery
 
 #### Request responce packet
-- `0x01` PID
+- `0x01` PID -double[16] with pid values in order: roll, pitch,yaw, depth
 - `0x02` arm confirm
 - `0x03` disarm confirm
 
 #### Autonomy packet
 - `0x01` detection
 - `0x02` autonomy started
-- `0x03' autonomy stoped
+- `0x03` autonomy stoped
 - `0x04` detector started
 - `0x05` detector stoped
 
 #### Status packet
 - `0x01` loggs
-- `0x02` 
+- `0x02` sensor statur
+- `0x03` task_manager
+- `0x04` mode pc_simulation
+- `0x05` mode jetson_stm
+- `0x06` mode jetson_simulation

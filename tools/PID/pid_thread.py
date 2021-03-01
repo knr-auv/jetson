@@ -82,12 +82,9 @@ class PIDThread:
              ref_vel.append(error.b*t*self.roll_PID.Kl)
              ref_vel.append(error.c*t*self.pitch_PID.Kl)
              ref_vel.append(error.d*t*self.yaw_PID.Kl)
-             if depth==0:
-                pass
-                 #depth_diff = -self.depth_PID.update(self.depth, self.ref_depth) -> xd so stupid
-             else:
-                depth_diff = depth
-                self.ref_depth = self.depth
+            
+             depth_diff = depth
+             self.ref_depth = self.depth
         else:
              self.ref_attitude = self.attitude
              ref_vel.append(-roll*2)
@@ -128,7 +125,7 @@ class PIDThread:
     def PIDLoop(self):
         last_data = 0
         data_t = 1/10
-        loop_T = 1/25
+        loop_T = 1/100
         sleep_time = loop_T/10 #sounds reasonable...
         loop_time = 0
         last_time =time.time()

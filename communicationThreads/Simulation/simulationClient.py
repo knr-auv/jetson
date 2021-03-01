@@ -4,7 +4,7 @@ import base64
 import logging
 import time
 import json
-#import variable as var
+import variable as var
 
 class Types:
     DEPTH_MAP = b'\xb1'
@@ -17,7 +17,7 @@ class Types:
 
 class SimulationClient:
     """Simulation web API client. For detailed informations please refer to https://github.com/knr-auv/simulation"""
-    def __init__(self, port=44210, ip='localhost'):
+    def __init__(self, port=44210, ip=var.SIM_CONTROL_ADDRESS[0]):
         self.port = port
         self.ip = ip
         self.createConnection()

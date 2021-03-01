@@ -19,7 +19,7 @@ class Protocol(object):
             START_TELEMETRY=0x05
             START_DETECTOR = 0x06
             STOP_DETECTOR = 0x07
-
+            SET_MOTORS = 0x08
         SETTINGS = 0x04
         class SETTINGS_MSG:
             PID = 0x01
