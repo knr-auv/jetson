@@ -26,6 +26,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     #init cameraStream
     cameraStream = SimulationWAPIStreamClient()
+    cameraStream.setFov(60,60);
     #init control thread
     controlThread = SimulationControlThread()
 

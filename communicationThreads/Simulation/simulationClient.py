@@ -85,8 +85,10 @@ class SimulationClient:
         return data
 
     def get_depth_map(self):
-        flag, data = self.get_packet(Types.DEPTH_MAP,False)
-        data = base64.b64decode(data["depth"])
+        flag, data = self.get_packet(Types.DEPTH_MAP,True)
+
+        data = data["depth"]
+        data = base64.b64decode(data)
         return  data
 
     prev_pos = None

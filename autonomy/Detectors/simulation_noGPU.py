@@ -26,6 +26,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         ####################################
         fps = 1
         self.InvokeCallback(fps,LastDetections)
+
         
     def handle_detection(self, detection):
         """
@@ -68,4 +69,6 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
     def get_detection(self):
         #camera stream is based on simulation web api.
         return self.client.get_detection()
+
+
 

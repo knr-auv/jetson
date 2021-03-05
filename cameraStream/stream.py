@@ -13,3 +13,5 @@ class cameraStream(threading.Thread):
         pass
     def getFrame(self):
         pass
+    def getPointCloud(self):
+        pass
