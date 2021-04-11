@@ -20,13 +20,17 @@ class Controller:
     They take angle as a parameter (angle must be in degrees)
 
     Mainly function
-    swim_to_xyz - Okon is swimming to the choosen point. In this version after arriving
-    to xyz Okon sets orientation to (0,0,0). In next versions it will be facing the gate or etc.
-    This function takes as a parameters list of coordinates [x,y,z] and optional error. In default it is set to 0.3
-    ([x,y,z],error)
+    swim_to_xyz - Okon is swimming to the choosen point.
+    This function takes as a parameters list of coordinates [x,y,z] and optional error and velocity. In default error = 0.5, velocity =700
+    ([x,y,z],error,velocity). Okon coordinate system: https://github.com/knr-auv/jetson-v2/blob/develop/okonCoordinates.png?raw=true
 
-    test_swim is used to show how controller works. User have to remember to use sleep function
-    between swim_to_xyz calls. Otherwise it won't work because of "turbulece"
+    test_swim and test_swim_2 are used to show how controller works. User have to remember to use sleep function
+    between swim_to_xyz calls. Otherwise it may not work properly because of "turbulence"
+
+    If you want to set orientation of a stationary boat use set_heading function. Takes the angle as an argument (0-360) measured clockwise.
+    Boat cannot be turned 180 degrees due to some kind of bug. If you choose (177-183) boat will rotate endlessly.
+
+    set_depth function is used to set depth of boat. Take 1 argument. Value of argument must be positive
 
     '''
 
@@ -39,7 +43,7 @@ class Controller:
         self.xyz_reached=False
         Logger.write("DEBUG CONTROLER ACTIVE", "controller")
     def arm(self):
-        self.controlThread.arm()
+        self.controlThread.arm(1)
 
     def disarm(self):
         self.controlThread.disarm()
@@ -61,9 +65,10 @@ class Controller:
 
     def stop(self):
         self.controlThread.moveForward(0)
+        self.move_backward(1000)
         self.controlThread.moveForward(0)
 
-    def __set_depth(self, depth):
+    def set_depth(self, depth):
         self.controlThread.setDepth(depth)
 
     def __get_motors(self):
@@ -72,73 +77,89 @@ class Controller:
     def turn_right(self,angle):
         self.__get_current_orientation()
         self.__set_orientation(0,0,self.current_orientation[2]+angle)
-        time.sleep(1.5)
 
     def turn_left(self,angle):
         self.__get_current_orientation()
         self.__set_orientation(0,0,self.current_orientation[2]-angle)
-        time.sleep(1.5)
+
+    def set_heading(self,angle):
+        if (angle>=180 and angle<=360):
+            self.turn_left(abs(angle-360))
+        elif(angle>=0):
+            self.turn_right(angle)
+        self.stop()
 
     def __xyz_callback(self):
         # funkcja do wywołania callbacku po osiągnieciu pozycji xyz
         self.xyz_reached=True
         self.xyz_reached_callback.Invoke(self.xyz_reached)
 
-    def swim_to_xyz(self,reference_position,error=0.3):
+    def __calculate_direction(self,reference_position):
         self.__get_current_position()
-        position_error = np.subtract(reference_position,[self.current_position[0], self.current_position[1], self.current_position[2]])
-        self.__set_depth(reference_position[2])
-        # trzeba ustalic w ktora strone i o ile mamy skrecac
-        angle = math.atan2(position_error[1], position_error[0])  # kat o który należy się obrócić
-        if (angle <= math.pi and angle > 0):
-            if math.degrees(angle)>=177:
-                self.turn_right(177)
-                reference_position[1]=reference_position[1]+0.4
-            else:
-                self.turn_right(math.degrees(angle))
-            self.stop()
-        elif (angle < 0 and angle >= -math.pi):
-            if math.degrees(angle)<=-177:
-                self.turn_left(177)
-                reference_position[1] = reference_position[1] - 0.4
-            else:
-                self.turn_left(math.degrees(abs(angle)))
-            self.stop()
-        velocity=700
-        time.sleep(1.5)
-        self.__get_current_position()
-        position_error = np.subtract(reference_position,
-        [self.current_position[0], self.current_position[1], self.current_position[2]])
-        angle = math.atan2(position_error[1], position_error[0])
-        while (self.xyz_reached != True):
-            self.move_forward(velocity)
-            self.__get_current_orientation()
-            self.__get_current_position()
-            position_error = np.subtract(reference_position, self.current_position)
-            orientation_error=self.current_orientation[2]-math.degrees(angle)
-            if angle>0:
-                if orientation_error>0.05:
-                    self.turn_left(2)
-                elif orientation_error<-0.05:
-                    self.turn_right(2)
-            elif angle<0:
-                if orientation_error>0.05:
-                    self.turn_left(2)
-                elif orientation_error<0.05:
-                    self.turn_right(2)
-            time.sleep(0.1)
-            if(math.sqrt(position_error[0]*position_error[0]+position_error[1]*position_error[1])<error):
+        self.__get_current_orientation()
+        position_error=np.subtract(reference_position,self.current_position)
+        angle=math.atan2(position_error[1],position_error[0])
+        angle=angle-math.radians(self.current_orientation[2])
+        if angle>math.pi:
+            angle=angle-2*math.pi
+        elif angle<-math.pi:
+            angle=angle+2*math.pi
+        return angle,position_error
+
+    def swim_to_xyz(self,reference_position,error=0.5,velocity=700):
+        self.set_depth(-reference_position[2])
+        angle,position_error=self.__calculate_direction(reference_position)
+        self.move_forward(velocity)
+        while (self.xyz_reached!=True):
+            if (math.sqrt(position_error[0] * position_error[0] + position_error[1] * position_error[1]) < error):
                 self.stop()
                 Logger.write("Point XYZ reached", "controller")
                 self.__xyz_callback()
-        self.xyz_reached=False
-        self.__set_orientation(0,0,0)
+            if (angle <= math.pi and angle > 0):
+                self.turn_right(math.degrees(angle))
+            elif (angle < 0 and angle >= -math.pi):
+                self.turn_left(math.degrees(abs(angle)))
+            angle, position_error = self.__calculate_direction(reference_position)
+            time.sleep(0.1)
+        self.__get_current_orientation()
+        self.__get_current_position()
+        Logger.write("pozycja: "+str(self.current_position),"swim to xyz")
+        Logger.write("orientacja: "+str(self.current_orientation),"swim to xyz")
+        self.xyz_reached = False
+
     def test_swim(self):
-        self.swim_to_xyz([3,5,1])
-        self.stop()
+        self.swim_to_xyz([0,5,-1],0.4)
         time.sleep(3)
-        self.swim_to_xyz([3,0,1],0.4)
+        Logger.write("kolejny odcinek","autonomia")
+        self.swim_to_xyz([5,5,-1],0.4)
         time.sleep(3)
-        self.swim_to_xyz([0,-3,1],0.4)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([5, -5, -1],0.4)
         time.sleep(3)
-        self.swim_to_xyz([0, 0, 1],0.4)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([0, -5, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([0,0, -1], 0.4)
+
+    def test_swim_2(self):
+        Logger.write("pierwszy odcinek", "autonomia")
+        self.swim_to_xyz([1, 2, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([5, 1, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([5, 5, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([2, 5, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([2, 8, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([7, 12, -1], 0.4)
+        time.sleep(3)
+        Logger.write("kolejny odcinek", "autonomia")
+        self.swim_to_xyz([6, 13, -1], 0.4)
