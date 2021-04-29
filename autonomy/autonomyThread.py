@@ -15,17 +15,13 @@ class AutonomyThread:
      self.manager = task.Mission(self.detector, self.controller)
     def StartAutonomy(self):
         Logger.write('Autonomy started', self.name)
-        #x = threading.Thread(target= self.controller.test_swim())
-        #self.controller.arm()
-        #x.start()
+        x = threading.Thread(target= self.controller.test_swim())
+        self.controller.arm()
+        x.start()
         #self.controller.swim_to_xyz([0,0,0])
-
-        self.manager.run()
 
 
     def StopAutonomy(self):
-        self.controller.disarm()
-        self.manager.MissionCompleted()
         Logger.write('AutonomyStoped', self.name)
 
     def StartDetector(self):
