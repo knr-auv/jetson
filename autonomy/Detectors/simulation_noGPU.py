@@ -1,5 +1,5 @@
 import time, math
-import autonomy.Detectors.Helpers as h
+import tools.MathUtils as h
 import autonomy.Detectors.DetectorBaseClass as base
 from communicationThreads.Simulation.simulationClient import SimulationClient
 class Simulation_noGPU_detector(base.DetectorBaseClass):
@@ -12,23 +12,32 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         self.client = SimulationClient()
         if(cameraStream==None):
             return None
-
+    j =0
     def DetectorTask(self):
         time.sleep(1)
-        self.LastDetections.clear()
+        LastDetections = list()
         detection = self.get_detection()
         detection = detection["detected"]
         for i in detection:
             if(i['visibleInFrame']):
                 o = self.handle_detection(i)
-                self.check_if_seen(o)
-                self.LastDetections.append(o)
-
-
+                LastDetections.append(o.toDictionary())
 
         ####################################
+        """
+        fdd = open("depth"+str(self.j)+".jpg","wb");
+        fdc = open("color"+str(self.j)+".jpg","wb");
+        depth =self.client.get_depth_map()
+        color =self.cameraStream.getFrame()
+        fdd.write(depth)
+        fdc.write(color)
+        fdd.close()
+        fdc.close()
+        self.j +=1
+        """
         fps = 1
-        self.InvokeCallback(fps,*self.prepareCb())
+        self.InvokeCallback(fps,LastDetections)
+
         
     def handle_detection(self, detection):
         """
@@ -51,49 +60,26 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         maxy = max["y"]
         center_width = (minx+maxx)/2
         center_height = (miny+maxy)/2
+
         obj = base.Object()
         obj.type = name
         obj.accuracy = 1
+        obj.distance = dist;
         obj.boundingBox = [minx,miny,maxx,maxy]
         a,b,c = [self.controlThread.getAttitude()[0],self.controlThread.getAttitude()[1],self.controlThread.getAttitude()[2]]
-        obj.position = h.object_position(107,60,dist,center_width,center_height,[x,y,z], [a,b,c])
-        obj.width = 1;
-        obj.height =1;
+        pos = h.posFromPicture(107,60,dist,center_width,center_height)
+        obj.position = h.toGlobalRef(pos,[a,b,c])
+        obj.width = 1.2;
+        obj.height =1.4;
 
         #more smart stuff
         return obj
 
-    def check_if_seen(self, o):
-        pos = o.position
-        ap = True
-        l = h.vec_length(pos)
-        if len(self.ObjectsList)!=0:
-            ap = False
-            for i in self.ObjectsList:
-                pos = i.position
-                li = h.vec_length(pos)
-                if abs(l-li)>2:
-                    self.ObjectsList.append(o)
-                    ap = True
-                else:
-                    ap = False
-        if ap:
-            self.ObjectsList.append(o)
-        #sprawdź, czy widziany
-        #jeśli tak to może popraw pozycje już wcześniej znalezionego obiektu
-        #cokolwiek
-        return False
-    
-    def prepareCb(self):
-        a = list()
-        b = list()
-        for i in self.ObjectsList:
-            a.append(i.toDictionary())
-        for i in self.LastDetections:
-            b.append(i.toDictionary())
-        return a,b
+
 
     def get_detection(self):
         #camera stream is based on simulation web api.
         return self.client.get_detection()
+
+
 

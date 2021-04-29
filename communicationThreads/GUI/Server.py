@@ -11,13 +11,14 @@ import tools.Logger as Logger
 class JetsonServer():
     """Class that comunicates with GUI"""
 
-    def __init__(self, address):
+    def __init__(self, address,mode):
         logging.basicConfig(level=logging.DEBUG)
         self.__server = None;
         self.__ListenToClient = True;
         self.__host = address[0]
         self.__port = address[1]
         self.__parser = Parser(self)
+        self.__mode = mode
         self.sender = Sender();
         self.telemetry_thread = None
 
@@ -30,7 +31,7 @@ class JetsonServer():
         x =threading.Thread(target = lambda: self.__StartServer())
         x.start();
 
-    def StartSendingTelemetry(self, interval_ms = 50):
+    def StartSendingTelemetry(self, interval_ms = 10):
         self.telemetry_thread =threading.Thread(target = lambda: self.sender.TelemetryLoop(interval_ms))
         self.telemetry_thread.start()
         logging.debug("Starting telemetry")
@@ -49,8 +50,9 @@ class JetsonServer():
         return data
 
     def __ClientHandler(self, client):
-        self.StartSendingTelemetry(50)
+        self.StartSendingTelemetry(10)
         self.sender.SendPIDs()
+        self.sender.SendOperationMode(self.__mode)
         HEADER = 0
         DATA =1
         rx_state = HEADER

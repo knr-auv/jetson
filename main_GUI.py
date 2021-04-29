@@ -1,3 +1,4 @@
+#main  with GUI
 import logging
 import variable
 
@@ -25,6 +26,7 @@ if __name__ == '__main__':
     logging.basicConfig(level=logging.DEBUG)
     #init cameraStream
     cameraStream = SimulationWAPIStreamClient()
+    cameraStream.setFov(60,60);
     #init control thread
     controlThread = SimulationControlThread()
 
@@ -37,14 +39,19 @@ if __name__ == '__main__':
     autonomyThread = AutonomyThread(detector, controller)
     autonomyThread.StartAutonomy()
 
+
     #load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    #from now we should be able to use autonomyThread.StartAutonomy()
+    #detector.StartDetecting()
 
 #lines only for gui
+    mode = "simulation"
+    #mode = "jetson_stm"
     guiStream = ToGuiStream(cameraStream)
-    server = JetsonServer(variable.GUI_ADDRESS)
+    server = JetsonServer(variable.GUI_ADDRESS,mode)
+    controlThread.ArmNotificator+=server.sender.SendArmCallback
+    controlThread.DisarmNotificator+=server.sender.SendDisarmCallback
     guiStream.Start()
 
     #after receiving a msg server invokes a callback
@@ -54,7 +61,7 @@ if __name__ == '__main__':
 
     #event handling - make sure that arguments are matching
     detector.RegisterDetectionCallback(server.sender.SendDetection)
-
+    
     #start when ready
     server.StartServer()
 

@@ -1,4 +1,5 @@
 import autonomy.Detectors.DetectorBaseClass as Detector
+import autonomy.TaskManagers.TestMission as task
 from autonomy.Controller import Controller
 import tools.Logger as Logger
 import threading
@@ -6,11 +7,12 @@ import threading
 class AutonomyThread:
     detector = Detector.DetectorBaseClass()
     controller = Controller(None)
+    menager = None
     def __init__(self, detector, controller):#, detector = Detectors.Detector()):
      self.detector = detector
      self.controller = controller
      self.name = "AutonomyThread"
-
+     self.manager = task.Mission(self.detector, self.controller)
     def StartAutonomy(self):
         Logger.write('Autonomy started', self.name)
         x = threading.Thread(target= self.controller.test_swim())
@@ -20,7 +22,6 @@ class AutonomyThread:
 
 
     def StopAutonomy(self):
-        self.controller.disarm()
         Logger.write('AutonomyStoped', self.name)
 
     def StartDetector(self):

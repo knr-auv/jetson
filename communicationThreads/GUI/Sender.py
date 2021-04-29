@@ -47,6 +47,18 @@ class Sender:
         key = bytes([Protocol.TO_GUI.STATUS_MSG.LOGGER])
         self.SendStatusMsg(data, key)
 
+    def SendOperationMode(self,mode):
+        key = None;
+        if mode == "jetson_stm":
+            key =  Protocol.TO_GUI.STATUS_MSG.MODE_JETSON_STM
+        elif mode == "pc_simulation":
+            key =  Protocol.TO_GUI.STATUS_MSG.MODE_PC_SIMULATION
+        elif mode == "jetson_simulation":
+            key = Protocol.TO_GUI.STATUS_MSG.MODE_JETSON_SIMULATION
+        if key!=None:
+            self.SendStatusMsg(None, bytes([key]))
+
+
     def SendJetsonStatus(self):
         data = self.dataColector.GetJetsonStatus()
         msg = struct.pack(str(len(data))+'f', *(data))
@@ -69,9 +81,11 @@ class Sender:
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.BATTERY])
         self.Send_Telemetry_msg(msg, key)
 
-    def SendDetection(self,fps, detectionList, lastDetection):
+    def SendDetection(self,fps, detectionList):
         key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTION])
-        data = json.dumps({'fps':fps,'ObjectsList':detectionList,'LastDetections':lastDetection})
+        test = {'fps':fps,'ObjectsList':detectionList}
+        print(test)
+        data = json.dumps({'fps':fps,'ObjectsList':detectionList})
         data = data.encode()
         self.SendAutonomyMsg(data, key)
 
@@ -106,6 +120,7 @@ class Sender:
         msg = struct.pack(str(len(data))+'f', *(data))
         key = bytes([Protocol.TO_GUI.TELEMETRY_MSG.POSITION])
         self.Send_Telemetry_msg(msg, key)
+
     def SendMotors(self):
         data = self.dataColector.GetMotors()
         msg = struct.pack(str(len(data))+'f', *(data))
@@ -126,7 +141,10 @@ class Sender:
         pass
 
     def SendStatusMsg(self,data, type):
-        data = type+data
+        if data == None:
+            data = type
+        else:
+            data = type+data
         self.__Send_msg(data, bytes([Protocol.TO_GUI.STATUS]))
 
     def SendAutonomyMsg(self, data, type):

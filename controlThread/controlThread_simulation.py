@@ -16,10 +16,12 @@ class SimulationControlThread(ControlThread):
 
 #common methods for mode 1 and 2
     def disarm(self):
+        super().disarm()
         self.PIDThread.disarm()
 
-    def arm(self):
-        self.PIDThread.arm()
+    def arm(self, mode = 0):
+        super().arm()
+        self.PIDThread.arm(mode)
 
     def setControlMode(self, mode):
         super().setControlMode(mode)
@@ -29,7 +31,7 @@ class SimulationControlThread(ControlThread):
         self.mode = mode
 
     def moveForward(self, value):
-        self.PIDThread.forward = value
+        self.PIDThread.moveForward(value)
     
 #mode 0
     def setAngularVelocity(self, roll, pitch, yaw):
