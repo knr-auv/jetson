@@ -13,5 +13,7 @@ class cameraStream(threading.Thread):
         pass
     def getFrame(self):
         pass
+    def getDepthMap(self):
+        pass
     def getPointCloud(self):
         pass

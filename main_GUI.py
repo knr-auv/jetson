@@ -42,10 +42,11 @@ if __name__ == '__main__':
     #load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-
+    #detector.StartDetecting()
 
 #lines only for gui
-    mode = "jetson_stm"
+    mode = "simulation"
+    #mode = "jetson_stm"
     guiStream = ToGuiStream(cameraStream)
     server = JetsonServer(variable.GUI_ADDRESS,mode)
     controlThread.ArmNotificator+=server.sender.SendArmCallback
@@ -59,7 +60,7 @@ if __name__ == '__main__':
 
     #event handling - make sure that arguments are matching
     detector.RegisterDetectionCallback(server.sender.SendDetection)
-
+    
     #start when ready
     server.StartServer()
 

@@ -12,7 +12,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         self.client = SimulationClient()
         if(cameraStream==None):
             return None
-
+    j =0
     def DetectorTask(self):
         time.sleep(1)
         LastDetections = list()
@@ -24,6 +24,17 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
                 LastDetections.append(o.toDictionary())
 
         ####################################
+        """
+        fdd = open("depth"+str(self.j)+".jpg","wb");
+        fdc = open("color"+str(self.j)+".jpg","wb");
+        depth =self.client.get_depth_map()
+        color =self.cameraStream.getFrame()
+        fdd.write(depth)
+        fdc.write(color)
+        fdd.close()
+        fdc.close()
+        self.j +=1
+        """
         fps = 1
         self.InvokeCallback(fps,LastDetections)
 

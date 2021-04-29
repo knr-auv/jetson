@@ -59,7 +59,3 @@ class DetectorBaseClass(object):
 
     def RemoveDetectionCallback(self, callback):
         self.__callback.Remove(callback)
-
-    
-
-

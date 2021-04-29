@@ -44,6 +44,8 @@ class SimulationWAPIStreamClient(cameraStream):
         self.max_d = max
         self.min_d = min
         self.to_m = (max_d-min_d)/255
+    def getDepthMap(self):
+        return self.client.get_depth_map() #jpg bytes
 
     def getPointCloud(self):
         d_map = self.client.get_depth_map() #jpg bytes
