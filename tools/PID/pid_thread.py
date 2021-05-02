@@ -13,7 +13,7 @@ class PIDThread:
         self.data_receiver = data_receiver
         self.armed = False
        
-        self.motors = [0]*8
+        self.motors = [0]*5
         
 
         self.pad_active = True

@@ -31,7 +31,8 @@ class SimulationClient:
             logging.error("Could't connect to simulation.")
             exit()
         logging.debug("Connected with simulation on port:{}".format(self.port))
-        self.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+        #self.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+        self.motors_data = {"FL":0.0,"FR":0.0,"ML":0.0,"MR":0.0,"B":0.0}
         self.data =  b""
         self.samples = None
         pass
@@ -176,4 +177,5 @@ class SimulationClient:
 
 if __name__ == "__main__":
     a = SimulationClient()
-    a.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+    a.motors_data = {"FL":1.0,"FR":-1.0,"ML":0.0,"MR":0.0,"B":0.0}
+    #a.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}

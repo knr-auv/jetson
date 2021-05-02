@@ -46,8 +46,8 @@ if __name__ == '__main__':
     #detector.StartDetecting()
 
 #lines only for gui
-    mode = "simulation"
-    #mode = "jetson_stm"
+    #mode = "simulation"
+    mode = "jetson_stm"
     guiStream = ToGuiStream(cameraStream)
     server = JetsonServer(variable.GUI_ADDRESS,mode)
     controlThread.ArmNotificator+=server.sender.SendArmCallback
