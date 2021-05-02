@@ -13,7 +13,7 @@ class PIDThread:
         self.data_receiver = data_receiver
         self.armed = False
        
-        self.motors = [0]*8
+        self.motors = [0]*5
         
 
         self.pad_active = True
@@ -201,7 +201,7 @@ class PIDThread:
             motors[2] += depth_error
             motors[3] += depth_error
             motors[4] += depth_error
-        motors[7]=700;
+        #motors[7]=700;
         control_roll()
         control_pitch()
         control_yaw()

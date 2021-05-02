@@ -31,7 +31,8 @@ class SimulationClient:
             logging.error("Could't connect to simulation.")
             exit()
         logging.debug("Connected with simulation on port:{}".format(self.port))
-        self.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+        #self.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+        self.motors_data = {"FL":0.0,"FR":0.0,"ML":0.0,"MR":0.0,"B":0.0}
         self.data =  b""
         self.samples = None
         pass
@@ -163,6 +164,12 @@ class SimulationClient:
 
     def _run_motors(self, motors_data):
         if len(motors_data) == 8:
+            self.motors_data["FL"] = round(motors_data[4] / 1000,8)
+            self.motors_data["FR"] = round(motors_data[2] / 1000,8)
+            self.motors_data["ML"] = round(motors_data[0] / 1000,8)
+            self.motors_data["MR"] = round(motors_data[1] / 1000,8)
+            self.motors_data["B"] = round(motors_data[3] / 1000,8)
+            """
             self.motors_data["FLH"] = round(motors_data[4] / 1000,8)
             self.motors_data["FRH"] = round(motors_data[2] / 1000,8)
             self.motors_data["FRV"] = round(motors_data[0] / 1000,8)
@@ -171,9 +178,11 @@ class SimulationClient:
             self.motors_data["BLH"] = round(motors_data[3] / 1000,8)
             self.motors_data["BLV"] = round(motors_data[3] / 1000,8)
             self.motors_data["FLV"] = round(motors_data[3] / 1000,8)
+            """
             #print(self.motors_data)
         self.set_motors()
 
 if __name__ == "__main__":
     a = SimulationClient()
-    a.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
+    a.motors_data = {"FL":1.0,"FR":-1.0,"ML":0.0,"MR":0.0,"B":0.0}
+    #a.motors_data = {"FLH":0.0,"FRH":0.0,"FRV":0.0,"BRV":0.0,"BRH":0.0, "BLH":0.0, "BLV":0.0, "FLV":00}
