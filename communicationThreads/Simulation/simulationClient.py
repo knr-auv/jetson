@@ -163,14 +163,14 @@ class SimulationClient:
 
     def _run_motors(self, motors_data):
         if len(motors_data) == 8:
-            self.motors_data["FLH"] = round(motors_data[4] / 1000,8)
-            self.motors_data["FRH"] = round(motors_data[2] / 1000,8)
-            self.motors_data["FRV"] = round(motors_data[0] / 1000,8)
-            self.motors_data["BRV"] = round(motors_data[1] / 1000,8)
-            self.motors_data["BRH"] = round(motors_data[3] / 1000,8)
-            self.motors_data["BLH"] = round(motors_data[3] / 1000,8)
-            self.motors_data["BLV"] = round(motors_data[3] / 1000,8)
-            self.motors_data["FLV"] = round(motors_data[3] / 1000,8)
+            self.motors_data["FLH"] = round(motors_data[0] / 1000,8)
+            self.motors_data["FRH"] = round(motors_data[1] / 1000,8)
+            self.motors_data["FRV"] = round(motors_data[2] / 1000,8)
+            self.motors_data["BRV"] = round(motors_data[3] / 1000,8)
+            self.motors_data["BRH"] = round(motors_data[4] / 1000,8)
+            self.motors_data["BLH"] = round(motors_data[5] / 1000,8)
+            self.motors_data["BLV"] = round(motors_data[6] / 1000,8)
+            self.motors_data["FLV"] = round(motors_data[7] / 1000,8)
             #print(self.motors_data)
         self.set_motors()
 

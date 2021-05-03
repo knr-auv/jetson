@@ -188,25 +188,36 @@ class PIDThread:
     def controll_motors(self, roll_error, pitch_error, yaw_error, depth_error, forward):
         motors = [0]*8
         def control_roll():
-            motors[4]-=roll_error
             motors[2]+=roll_error
+            motors[3]+=roll_error
+            motors[6]-=roll_error
+            motors[7]-=roll_error
         def control_pitch():
             motors[2]-=pitch_error
-            motors[4]-=pitch_error
             motors[3]+=pitch_error
+            motors[6]+=pitch_error
+            motors[7]-=pitch_error
         def control_yaw():
-            motors[0] +=forward+yaw_error
-            motors[1] -= -forward+yaw_error
+            motors[0] += yaw_error
+            motors[1] -= yaw_error
+            motors[4] += yaw_error
+            motors[5] -= yaw_error
         def control_depth():
             motors[2] += depth_error
             motors[3] += depth_error
-            motors[4] += depth_error
-        motors[7]=700;
+            motors[6] += depth_error
+            motors[7] += depth_error
+        def control_forward():
+            motors[0] += forward
+            motors[1] += forward
+            motors[4] -= forward
+            motors[5] -= forward
         control_roll()
         control_pitch()
         control_yaw()
         control_depth()
-        for i in range(5):
+        control_forward()
+        for i in range(8):
             if abs(motors[i])>1000:
                 motors[i] = motors[i]/abs(motors[i])*1000
         self.motors=motors
