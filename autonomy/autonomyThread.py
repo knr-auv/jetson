@@ -13,6 +13,7 @@ class AutonomyThread:
      self.controller = controller
      self.name = "AutonomyThread"
      self.manager = task.Mission(self.detector, self.controller)
+
     def StartAutonomy(self):
         Logger.write('Autonomy started', self.name)
 
@@ -24,6 +25,7 @@ class AutonomyThread:
 
     def StopAutonomy(self):
         Logger.write('AutonomyStoped', self.name)
+
 
     def StartDetector(self):
         if(not self.detector.isDetecting()):

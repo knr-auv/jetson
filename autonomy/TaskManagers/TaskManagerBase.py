@@ -19,16 +19,6 @@ class TaskManager(object):
     def run(self):
         #do some non blocking stuff here
         pass
-
-    def StartTask(self,task,*args):
-        self.currentTask = task
-        self.currentTask.Start(*args)
-        pass
-
-    def StopCurrentTask(self):
-        if self.currentTask:
-            self.currentTask.Stop()
-        pass
     
     def MissionCompleted(self):
         self.controller.disarm()
