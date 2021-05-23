@@ -72,6 +72,8 @@ class ControlThread:
 
     def moveForward(self, value):
         pass
+    def moveSideway(self,value):
+        pass
 #mode 0 -> zadane są prędkości kątowe -> łódka się sama nie poziomuje
 
     def setAngularVelocity(self, roll,pitch, yaw):

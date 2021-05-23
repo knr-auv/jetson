@@ -26,6 +26,7 @@ class PIDThread:
         self.ref_depth = 0
         #these are ignored in manual modes
         self.forward =0
+        self.sideway=0
 
 
         #sensors info
@@ -71,7 +72,7 @@ class PIDThread:
         ref_vel.append(error.d*t*self.yaw_PID.Kl)
         depth_diff = -self.depth_PID.update(self.depth, self.ref_depth)
 
-        return ref_vel, self.forward, depth_diff
+        return ref_vel, self.forward, depth_diff, self.sideway
 
     def manual_acro(self):
         t=50
@@ -162,7 +163,7 @@ class PIDThread:
                     elif self.mode==1:
                         ref_ang_vel , forward, vertical = self.manual_acro()
                 elif  self.controlMode==1: #autonomy controll
-                    ref_ang_vel , forward, vertical = self.auto_stable()
+                    ref_ang_vel , forward, vertical,sideway = self.auto_stable()
                     pass
 
                 #pid base
@@ -170,7 +171,7 @@ class PIDThread:
                     roll_diff=self.roll_PID.update(self.gyro[0],ref_ang_vel[0])
                     pitch_diff=self.pitch_PID.update(self.gyro[1],ref_ang_vel[1])
                     yaw_diff = self.yaw_PID.update(self.gyro[2],ref_ang_vel[2])               
-                    self.controll_motors(roll_diff,pitch_diff,yaw_diff,vertical,forward)
+                    self.controll_motors(roll_diff,pitch_diff,yaw_diff,vertical,forward,sideway)
 
                 last_time = time.time()
             else:
@@ -185,7 +186,7 @@ class PIDThread:
                     time.sleep(sleep_time)
 
 
-    def controll_motors(self, roll_error, pitch_error, yaw_error, depth_error, forward):
+    def controll_motors(self, roll_error, pitch_error, yaw_error, depth_error, forward,sideway):
         motors = [0]*8
         def control_roll():
             motors[2]+=roll_error
@@ -212,11 +213,17 @@ class PIDThread:
             motors[1] += forward
             motors[4] -= forward
             motors[5] -= forward
+        def control_sideway():
+            motors[0] += sideway
+            motors[4] -= sideway
+            motors[1] -= sideway
+            motors[5] += sideway
         control_roll()
         control_pitch()
         control_yaw()
         control_depth()
         control_forward()
+        control_sideway()
         for i in range(8):
             if abs(motors[i])>1000:
                 motors[i] = motors[i]/abs(motors[i])*1000
@@ -239,6 +246,8 @@ class PIDThread:
         self.ref_attitude =q.fromEuler(roll, pitch, yaw)
     def moveForward(self, value):
         self.forward = value
+    def moveSideway(self,value):
+        self.sideway=value
 
     def SetHeading(self, heading):
         

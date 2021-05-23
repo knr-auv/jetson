@@ -63,8 +63,15 @@ class Controller:
     def move_backward(self, velocity):
         self.controlThread.moveForward(-velocity)
 
+    def move_right(self,velocity):
+        self.controlThread.moveSideway(velocity)
+
+    def move_left(self,velocity):
+        self.controlThread.moveSideway(-velocity)
+
     def stop(self):
         self.controlThread.moveForward(0)
+        self.controlThread.moveSideway(0)
         self.move_backward(1000)
         self.controlThread.moveForward(0)
 

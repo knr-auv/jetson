@@ -32,7 +32,8 @@ class SimulationControlThread(ControlThread):
 
     def moveForward(self, value):
         self.PIDThread.moveForward(value)
-    
+    def moveSideway(self,value):
+        self.PIDThread.moveSideway(value)
 #mode 0
     def setAngularVelocity(self, roll, pitch, yaw):
         super().setAngularVelocity(roll, pitch, yaw)
