@@ -1,0 +1,597 @@
+{
+  "version": "0.3.0",
+  "scope": "project",
+  "selectedTree": "5ae5c55c-0659-4e71-8e04-78692b8ef430",
+  "trees": [
+    {
+      "version": "0.3.0",
+      "scope": "tree",
+      "id": "5ae5c55c-0659-4e71-8e04-78692b8ef430",
+      "title": "My tree",
+      "description": "The root of this tree.  The title of this node sets the title of the tree.  You must have one tree called \"Root\".  You can set tree-wide properties on this node and reference them in other places with the following template syntax: `{{key_name}}`.",
+      "root": "5128077f-145f-488c-8cec-180f1be7451e",
+      "properties": {},
+      "nodes": {
+        "a68c7a53-75f4-4668-8b7f-25e951cf1dd2": {
+          "id": "a68c7a53-75f4-4668-8b7f-25e951cf1dd2",
+          "name": "wait",
+          "title": "wait(time)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -636
+          }
+        },
+        "9743d525-472d-4c4d-8c4a-03429164469a": {
+          "id": "9743d525-472d-4c4d-8c4a-03429164469a",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -396,
+            "y": -696
+          },
+          "children": [
+            "df4b2fcb-04d9-4986-8257-a17f6da07863",
+            "3e221546-0f3b-4537-889c-3e9fca6c084d",
+            "d36072b5-adae-47eb-86f0-1be0f047527e",
+            "f33d7b61-837c-486a-9ec8-5df02b0661a7",
+            "a68c7a53-75f4-4668-8b7f-25e951cf1dd2",
+            "81710659-33bf-4f25-a1c7-578bb1aa3abd",
+            "9f7b683f-bc9e-448f-8abf-6adbe488d7fb",
+            "cdb58c33-caa7-4704-9546-9f7ce4979a3b"
+          ]
+        },
+        "d36072b5-adae-47eb-86f0-1be0f047527e": {
+          "id": "d36072b5-adae-47eb-86f0-1be0f047527e",
+          "name": "done",
+          "title": "setVelocity(forward)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -732
+          }
+        },
+        "0aa4769b-c32b-407a-a2a5-4d326902e7c0": {
+          "id": "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
+          "name": "wait",
+          "title": "detect(gate)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -228,
+            "y": 300
+          }
+        },
+        "bf3e8148-2e35-4486-871e-f86163c46470": {
+          "id": "bf3e8148-2e35-4486-871e-f86163c46470",
+          "name": "wait",
+          "title": "rotate(yaw)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -228,
+            "y": 348
+          }
+        },
+        "134202c9-d4ea-43a0-af1e-00d2f62487e2": {
+          "id": "134202c9-d4ea-43a0-af1e-00d2f62487e2",
+          "name": "wait",
+          "title": "setVelocity(forward)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": 396
+          }
+        },
+        "81710659-33bf-4f25-a1c7-578bb1aa3abd": {
+          "id": "81710659-33bf-4f25-a1c7-578bb1aa3abd",
+          "name": "wait",
+          "title": "setVelocity(stop)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -588
+          }
+        },
+        "13a14a92-9ddc-4062-89e7-d641cb33f502": {
+          "id": "13a14a92-9ddc-4062-89e7-d641cb33f502",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -396,
+            "y": 348
+          },
+          "children": [
+            "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
+            "bf3e8148-2e35-4486-871e-f86163c46470",
+            "134202c9-d4ea-43a0-af1e-00d2f62487e2"
+          ]
+        },
+        "5128077f-145f-488c-8cec-180f1be7451e": {
+          "id": "5128077f-145f-488c-8cec-180f1be7451e",
+          "name": "select",
+          "title": "Select",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
+          "properties": {},
+          "display": {
+            "x": -600,
+            "y": -324
+          },
+          "children": [
+            "64f26cb6-abb2-469a-b318-e2a1686d58d8",
+            "9743d525-472d-4c4d-8c4a-03429164469a",
+            "ac438f71-1392-4bd1-8352-744f2d0afa56",
+            "13a14a92-9ddc-4062-89e7-d641cb33f502",
+            "969fafe6-4c3d-4ee9-90ae-5eeb0ca39df3"
+          ]
+        },
+        "9f7b683f-bc9e-448f-8abf-6adbe488d7fb": {
+          "id": "9f7b683f-bc9e-448f-8abf-6adbe488d7fb",
+          "name": "done",
+          "title": "setBlackboard(moved)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -540
+          }
+        },
+        "df4b2fcb-04d9-4986-8257-a17f6da07863": {
+          "id": "df4b2fcb-04d9-4986-8257-a17f6da07863",
+          "name": "done",
+          "title": "isNotBlackboard(moved)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -828
+          }
+        },
+        "3e221546-0f3b-4537-889c-3e9fca6c084d": {
+          "id": "3e221546-0f3b-4537-889c-3e9fca6c084d",
+          "name": "wait",
+          "title": "setDepth(currentDepth)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -780
+          }
+        },
+        "f33d7b61-837c-486a-9ec8-5df02b0661a7": {
+          "id": "f33d7b61-837c-486a-9ec8-5df02b0661a7",
+          "name": "wait",
+          "title": "setDepth(depth)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -684
+          }
+        },
+        "969fafe6-4c3d-4ee9-90ae-5eeb0ca39df3": {
+          "id": "969fafe6-4c3d-4ee9-90ae-5eeb0ca39df3",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -396,
+            "y": 504
+          },
+          "children": [
+            "faa6d6d8-c976-43bc-9836-cee962d824e8",
+            "174a5a6c-c688-4470-951d-1c5e063df019",
+            "0cd7a3f2-54e4-44bc-8917-e1e44f2c2a6b"
+          ]
+        },
+        "faa6d6d8-c976-43bc-9836-cee962d824e8": {
+          "id": "faa6d6d8-c976-43bc-9836-cee962d824e8",
+          "name": "wait",
+          "title": "wait(time)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": 456
+          }
+        },
+        "174a5a6c-c688-4470-951d-1c5e063df019": {
+          "id": "174a5a6c-c688-4470-951d-1c5e063df019",
+          "name": "wait",
+          "title": "setVelocity(stop)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": 504
+          }
+        },
+        "0cd7a3f2-54e4-44bc-8917-e1e44f2c2a6b": {
+          "id": "0cd7a3f2-54e4-44bc-8917-e1e44f2c2a6b",
+          "name": "done",
+          "title": "end()",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": 552
+          }
+        },
+        "56f719eb-7890-4141-8414-d272d43aa849": {
+          "id": "56f719eb-7890-4141-8414-d272d43aa849",
+          "name": "wait",
+          "title": "detect(gate)[and far enough]",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 276,
+            "y": 72
+          }
+        },
+        "36683598-a023-44e4-846d-27f8e1010cb9": {
+          "id": "36683598-a023-44e4-846d-27f8e1010cb9",
+          "name": "done",
+          "title": "setVelocity(forward)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": 132,
+            "y": 180
+          }
+        },
+        "449dd710-fceb-4c54-ad28-db76afb75c67": {
+          "id": "449dd710-fceb-4c54-ad28-db76afb75c67",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -36,
+            "y": 108
+          },
+          "children": [
+            "f8d6ad68-0b7c-45cc-8acf-69c37d7953eb",
+            "26d52dc6-77f0-4af6-a24f-b20aaa8dae1b",
+            "36683598-a023-44e4-846d-27f8e1010cb9"
+          ]
+        },
+        "f8d6ad68-0b7c-45cc-8acf-69c37d7953eb": {
+          "id": "f8d6ad68-0b7c-45cc-8acf-69c37d7953eb",
+          "name": "negate",
+          "title": "Negate",
+          "description": "Takes one child.  If that child succeeds, this node fails, and vice versa.",
+          "properties": {},
+          "display": {
+            "x": 72,
+            "y": 72
+          },
+          "child": "56f719eb-7890-4141-8414-d272d43aa849"
+        },
+        "cdb58c33-caa7-4704-9546-9f7ce4979a3b": {
+          "id": "cdb58c33-caa7-4704-9546-9f7ce4979a3b",
+          "name": "timer()",
+          "title": "timer(start)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -492
+          }
+        },
+        "5686adbe-9c73-41ed-8ed4-c67aa2f222cb": {
+          "id": "5686adbe-9c73-41ed-8ed4-c67aa2f222cb",
+          "name": "timer()",
+          "title": "timer(check) [still far from gate]",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": 336,
+            "y": -444
+          }
+        },
+        "53f3fb35-264a-4295-8a28-e7023de860b6": {
+          "id": "53f3fb35-264a-4295-8a28-e7023de860b6",
+          "name": "select",
+          "title": "Select",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
+          "properties": {},
+          "display": {
+            "x": -180,
+            "y": -312
+          },
+          "children": [
+            "3a04260e-4fbb-4fb1-ad29-8c1d1f53ddf9",
+            "449dd710-fceb-4c54-ad28-db76afb75c67",
+            "ee0a36b5-540f-4157-9618-fba0a9f94581"
+          ]
+        },
+        "4ca61792-4772-4ef4-8596-b0f629316ead": {
+          "id": "4ca61792-4772-4ef4-8596-b0f629316ead",
+          "name": "negate",
+          "title": "Negate",
+          "description": "Takes one child.  If that child succeeds, this node fails, and vice versa.",
+          "properties": {},
+          "display": {
+            "x": 120,
+            "y": -444
+          },
+          "child": "5686adbe-9c73-41ed-8ed4-c67aa2f222cb"
+        },
+        "3a04260e-4fbb-4fb1-ad29-8c1d1f53ddf9": {
+          "id": "3a04260e-4fbb-4fb1-ad29-8c1d1f53ddf9",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -60,
+            "y": -336
+          },
+          "children": [
+            "4ca61792-4772-4ef4-8596-b0f629316ead",
+            "84f9c721-72d5-4749-b389-e9944b33d9a4",
+            "d5f17e31-bd41-4d7f-9504-f95a07d5abfd",
+            "27b1c188-dabd-4db0-80ee-7f030153404b"
+          ]
+        },
+        "d5f17e31-bd41-4d7f-9504-f95a07d5abfd": {
+          "id": "d5f17e31-bd41-4d7f-9504-f95a07d5abfd",
+          "name": "timer()",
+          "title": "timer(stop)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": 156,
+            "y": -324
+          }
+        },
+        "86a48bfa-651f-46cc-a848-6c65b35ce701": {
+          "id": "86a48bfa-651f-46cc-a848-6c65b35ce701",
+          "name": "wait",
+          "title": "rotateLeft(yaw)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 276,
+            "y": -276
+          }
+        },
+        "970285bc-2902-4685-9403-d24f131f5904": {
+          "id": "970285bc-2902-4685-9403-d24f131f5904",
+          "name": "wait",
+          "title": "detect(gate)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 420,
+            "y": -216
+          }
+        },
+        "6ac560b7-8a40-43b9-8f25-ae2c14816e34": {
+          "id": "6ac560b7-8a40-43b9-8f25-ae2c14816e34",
+          "name": "negate",
+          "title": "Negate",
+          "description": "Takes one child.  If that child succeeds, this node fails, and vice versa.",
+          "properties": {},
+          "display": {
+            "x": 228,
+            "y": -216
+          },
+          "child": "970285bc-2902-4685-9403-d24f131f5904"
+        },
+        "37a5f325-e1aa-4747-9e62-795577786ee7": {
+          "id": "37a5f325-e1aa-4747-9e62-795577786ee7",
+          "name": "wait",
+          "title": "rotateRight(yaw)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 300,
+            "y": -156
+          }
+        },
+        "089c2fea-1e5b-447e-be9f-46dc93ca2d86": {
+          "id": "089c2fea-1e5b-447e-be9f-46dc93ca2d86",
+          "name": "wait",
+          "title": "detect(gate)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 432,
+            "y": -96
+          }
+        },
+        "8debdea0-cb64-4f06-897e-73f945c7b552": {
+          "id": "8debdea0-cb64-4f06-897e-73f945c7b552",
+          "name": "negate",
+          "title": "Negate",
+          "description": "Takes one child.  If that child succeeds, this node fails, and vice versa.",
+          "properties": {},
+          "display": {
+            "x": 240,
+            "y": -96
+          },
+          "child": "089c2fea-1e5b-447e-be9f-46dc93ca2d86"
+        },
+        "8731cf15-368f-407d-8d44-fbf2f046fb33": {
+          "id": "8731cf15-368f-407d-8d44-fbf2f046fb33",
+          "name": "log",
+          "title": "updateYawChange()",
+          "description": "Logs the specified message.",
+          "properties": {},
+          "display": {
+            "x": 384,
+            "y": -36
+          }
+        },
+        "27b1c188-dabd-4db0-80ee-7f030153404b": {
+          "id": "27b1c188-dabd-4db0-80ee-7f030153404b",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": 72,
+            "y": -144
+          },
+          "children": [
+            "86a48bfa-651f-46cc-a848-6c65b35ce701",
+            "6ac560b7-8a40-43b9-8f25-ae2c14816e34",
+            "37a5f325-e1aa-4747-9e62-795577786ee7",
+            "8debdea0-cb64-4f06-897e-73f945c7b552",
+            "a876a246-189b-4910-8e6e-588216351529"
+          ]
+        },
+        "a876a246-189b-4910-8e6e-588216351529": {
+          "id": "a876a246-189b-4910-8e6e-588216351529",
+          "name": "select",
+          "title": "Select",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
+          "properties": {},
+          "display": {
+            "x": 216,
+            "y": -12
+          },
+          "children": [
+            "8731cf15-368f-407d-8d44-fbf2f046fb33",
+            "f65b37f5-8756-4e6c-8ba1-abda0bdebd1e"
+          ]
+        },
+        "f65b37f5-8756-4e6c-8ba1-abda0bdebd1e": {
+          "id": "f65b37f5-8756-4e6c-8ba1-abda0bdebd1e",
+          "name": "log",
+          "title": "setBlackboard(failed to find)",
+          "description": "Logs the specified message.",
+          "properties": {},
+          "display": {
+            "x": 408,
+            "y": 12
+          }
+        },
+        "934db563-05cd-4aeb-b70b-645b72cc8296": {
+          "id": "934db563-05cd-4aeb-b70b-645b72cc8296",
+          "name": "done",
+          "title": "isBlackboard(failed to find)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -180,
+            "y": -936
+          }
+        },
+        "406bb33e-1022-4547-a058-eaf44f6df05d": {
+          "id": "406bb33e-1022-4547-a058-eaf44f6df05d",
+          "name": "done",
+          "title": "end()",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": -888
+          }
+        },
+        "ee0a36b5-540f-4157-9618-fba0a9f94581": {
+          "id": "ee0a36b5-540f-4157-9618-fba0a9f94581",
+          "name": "log",
+          "title": "setBlackboard(gateNotVisible+1)",
+          "description": "Logs the specified message.",
+          "properties": {},
+          "display": {
+            "x": 84,
+            "y": 228
+          }
+        },
+        "93f365dc-928f-4f9c-866e-caa95be47a1f": {
+          "id": "93f365dc-928f-4f9c-866e-caa95be47a1f",
+          "name": "done",
+          "title": "isBlackboard(gateNotVisible>3)",
+          "description": "Stops the behavior tree.",
+          "properties": {},
+          "display": {
+            "x": -180,
+            "y": -420
+          }
+        },
+        "84f9c721-72d5-4749-b389-e9944b33d9a4": {
+          "id": "84f9c721-72d5-4749-b389-e9944b33d9a4",
+          "name": "wait",
+          "title": "setVelocity(stop)",
+          "description": "\"Pauses\" the bot for the specified number of seconds.  You can specify two numbers (like `wait(1,10)`) to wait a random number of seconds between those numbers.",
+          "properties": {},
+          "display": {
+            "x": 156,
+            "y": -384
+          }
+        },
+        "64f26cb6-abb2-469a-b318-e2a1686d58d8": {
+          "id": "64f26cb6-abb2-469a-b318-e2a1686d58d8",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -396,
+            "y": -912
+          },
+          "children": [
+            "934db563-05cd-4aeb-b70b-645b72cc8296",
+            "406bb33e-1022-4547-a058-eaf44f6df05d"
+          ]
+        },
+        "ac438f71-1392-4bd1-8352-744f2d0afa56": {
+          "id": "ac438f71-1392-4bd1-8352-744f2d0afa56",
+          "name": "select",
+          "title": "Select",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
+          "properties": {},
+          "display": {
+            "x": -384,
+            "y": -336
+          },
+          "children": [
+            "93f365dc-928f-4f9c-866e-caa95be47a1f",
+            "53f3fb35-264a-4295-8a28-e7023de860b6"
+          ]
+        },
+        "26d52dc6-77f0-4af6-a24f-b20aaa8dae1b": {
+          "id": "26d52dc6-77f0-4af6-a24f-b20aaa8dae1b",
+          "name": "log",
+          "title": "setBlackboard(gateNotVisible=0)",
+          "description": "Logs the specified message.",
+          "properties": {},
+          "display": {
+            "x": 192,
+            "y": 132
+          }
+        }
+      },
+      "display": {
+        "camera_x": 966,
+        "camera_y": 919.5,
+        "camera_z": 1,
+        "x": -696,
+        "y": -324
+      }
+    }
+  ],
+  "custom_nodes": [
+    {
+      "version": "0.3.0",
+      "scope": "node",
+      "name": "timer()",
+      "category": "action",
+      "title": null,
+      "description": null,
+      "properties": {}
+    }
+  ]
+}
