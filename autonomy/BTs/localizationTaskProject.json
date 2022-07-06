@@ -15,12 +15,12 @@
         "0aa4769b-c32b-407a-a2a5-4d326902e7c0": {
           "id": "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
           "name": "wait",
-          "title": "detect(yellowFlare)",
+          "title": "tryDetectNTimes(yellowFlare,M)",
           "description": "",
           "properties": {},
           "display": {
-            "x": -36,
-            "y": -168
+            "x": -72,
+            "y": -396
           }
         },
         "bf3e8148-2e35-4486-871e-f86163c46470": {
@@ -30,8 +30,8 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -36,
-            "y": 12
+            "x": -108,
+            "y": -252
           }
         },
         "134202c9-d4ea-43a0-af1e-00d2f62487e2": {
@@ -41,8 +41,8 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -24,
-            "y": 84
+            "x": -120,
+            "y": -168
           }
         },
         "13a14a92-9ddc-4062-89e7-d641cb33f502": {
@@ -52,12 +52,11 @@
           "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
           "properties": {},
           "display": {
-            "x": -216,
-            "y": -84
+            "x": -300,
+            "y": -312
           },
           "children": [
             "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
-            "1442598f-3d42-4bd1-916e-8e9b2fea113d",
             "2bff74b3-3f69-4ae0-8399-dd8f5ba4e118",
             "bf3e8148-2e35-4486-871e-f86163c46470",
             "134202c9-d4ea-43a0-af1e-00d2f62487e2"
@@ -74,8 +73,9 @@
             "y": -324
           },
           "children": [
-            "7bf14cc0-dc90-450a-9af2-6ed0d126aae7",
-            "2738e78d-45f4-4f19-9a48-0144895e200b"
+            "92414a9f-e18c-404e-8833-9ebae8638aba",
+            "13a14a92-9ddc-4062-89e7-d641cb33f502",
+            "3a5e270c-b85f-4728-8626-6d52a1b6ba1b"
           ]
         },
         "2bff74b3-3f69-4ae0-8399-dd8f5ba4e118": {
@@ -85,47 +85,8 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -36,
-            "y": -48
-          }
-        },
-        "7bf14cc0-dc90-450a-9af2-6ed0d126aae7": {
-          "id": "7bf14cc0-dc90-450a-9af2-6ed0d126aae7",
-          "name": "sequence",
-          "title": "Sequence",
-          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
-          "properties": {},
-          "display": {
-            "x": -240,
-            "y": -624
-          },
-          "children": [
-            "71815b75-abde-4194-9f6f-dfac4b242589",
-            "fe236ca2-5bb5-477b-8608-deb65a05d513",
-            "ec29d74d-ba6c-42bb-9387-b4ae429c354b",
-            "16258a51-d4d8-4b4a-962e-23f5999f6e28"
-          ]
-        },
-        "71815b75-abde-4194-9f6f-dfac4b242589": {
-          "id": "71815b75-abde-4194-9f6f-dfac4b242589",
-          "name": "wait",
-          "title": "isNotBlackboard(initialized)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": -24,
-            "y": -684
-          }
-        },
-        "fe236ca2-5bb5-477b-8608-deb65a05d513": {
-          "id": "fe236ca2-5bb5-477b-8608-deb65a05d513",
-          "name": "wait",
-          "title": "setBlackboard(yellowFlareNotVisible = 0)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": 36,
-            "y": -636
+            "x": -120,
+            "y": -336
           }
         },
         "ec29d74d-ba6c-42bb-9387-b4ae429c354b": {
@@ -135,100 +96,9 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -48,
-            "y": -588
+            "x": 96,
+            "y": -564
           }
-        },
-        "16258a51-d4d8-4b4a-962e-23f5999f6e28": {
-          "id": "16258a51-d4d8-4b4a-962e-23f5999f6e28",
-          "name": "wait",
-          "title": "setBlackboard(initialized)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": -36,
-            "y": -540
-          }
-        },
-        "2738e78d-45f4-4f19-9a48-0144895e200b": {
-          "id": "2738e78d-45f4-4f19-9a48-0144895e200b",
-          "name": "select",
-          "title": "Select",
-          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
-          "properties": {},
-          "display": {
-            "x": -432,
-            "y": -336
-          },
-          "children": [
-            "595bfc63-ef99-4aaf-8466-709e0c82731d",
-            "bab46c7b-829b-4e8b-80b5-1034c8dbf3b1"
-          ]
-        },
-        "3826be0e-63a8-4671-9577-6832672df9d7": {
-          "id": "3826be0e-63a8-4671-9577-6832672df9d7",
-          "name": "wait",
-          "title": "isBlackboard(yellowFlareNotVisible > M)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": 36,
-            "y": -420
-          }
-        },
-        "1442598f-3d42-4bd1-916e-8e9b2fea113d": {
-          "id": "1442598f-3d42-4bd1-916e-8e9b2fea113d",
-          "name": "wait",
-          "title": "setBlackboard(yellowFlareNotVisible = 0)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": 48,
-            "y": -108
-          }
-        },
-        "18eb4d05-5cc6-4f58-bbf2-03992d7126c3": {
-          "id": "18eb4d05-5cc6-4f58-bbf2-03992d7126c3",
-          "name": "wait",
-          "title": "setBlackboard(gateNotVisible+1)",
-          "description": "",
-          "properties": {},
-          "display": {
-            "x": 36,
-            "y": 156
-          }
-        },
-        "bab46c7b-829b-4e8b-80b5-1034c8dbf3b1": {
-          "id": "bab46c7b-829b-4e8b-80b5-1034c8dbf3b1",
-          "name": "select",
-          "title": "Select",
-          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
-          "properties": {},
-          "display": {
-            "x": -312,
-            "y": -48
-          },
-          "children": [
-            "13a14a92-9ddc-4062-89e7-d641cb33f502",
-            "18eb4d05-5cc6-4f58-bbf2-03992d7126c3"
-          ]
-        },
-        "595bfc63-ef99-4aaf-8466-709e0c82731d": {
-          "id": "595bfc63-ef99-4aaf-8466-709e0c82731d",
-          "name": "sequence",
-          "title": "Sequence",
-          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
-          "properties": {},
-          "display": {
-            "x": -264,
-            "y": -384
-          },
-          "children": [
-            "3826be0e-63a8-4671-9577-6832672df9d7",
-            "3bd82b68-71fb-4321-8610-affe0bfa00a8",
-            "8f32762f-c28f-4894-9768-4eb79b99ff4a",
-            "e5619e13-b440-4187-8852-a1bd241d89f7"
-          ]
         },
         "3bd82b68-71fb-4321-8610-affe0bfa00a8": {
           "id": "3bd82b68-71fb-4321-8610-affe0bfa00a8",
@@ -237,8 +107,8 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -48,
-            "y": -372
+            "x": -96,
+            "y": -24
           }
         },
         "8f32762f-c28f-4894-9768-4eb79b99ff4a": {
@@ -248,8 +118,8 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -48,
-            "y": -324
+            "x": -96,
+            "y": 24
           }
         },
         "e5619e13-b440-4187-8852-a1bd241d89f7": {
@@ -259,14 +129,54 @@
           "description": "",
           "properties": {},
           "display": {
-            "x": -48,
-            "y": -276
+            "x": -96,
+            "y": 72
           }
+        },
+        "3a5e270c-b85f-4728-8626-6d52a1b6ba1b": {
+          "id": "3a5e270c-b85f-4728-8626-6d52a1b6ba1b",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -372,
+            "y": 0
+          },
+          "children": [
+            "3bd82b68-71fb-4321-8610-affe0bfa00a8",
+            "8f32762f-c28f-4894-9768-4eb79b99ff4a",
+            "e5619e13-b440-4187-8852-a1bd241d89f7"
+          ]
+        },
+        "92414a9f-e18c-404e-8833-9ebae8638aba": {
+          "id": "92414a9f-e18c-404e-8833-9ebae8638aba",
+          "name": "negate",
+          "title": "OneShot",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -384,
+            "y": -564
+          },
+          "child": "a26656ea-de1b-4e2d-85ef-fb92a0648b75"
+        },
+        "a26656ea-de1b-4e2d-85ef-fb92a0648b75": {
+          "id": "a26656ea-de1b-4e2d-85ef-fb92a0648b75",
+          "name": "negate",
+          "title": "SuccessIsFailure",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -564
+          },
+          "child": "ec29d74d-ba6c-42bb-9387-b4ae429c354b"
         }
       },
       "display": {
         "camera_x": 1083.5999999642372,
-        "camera_y": 764.3000000119209,
+        "camera_y": 764.5000000298023,
         "camera_z": 1,
         "x": -696,
         "y": -324
