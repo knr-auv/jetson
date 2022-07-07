@@ -193,7 +193,8 @@ class Okon {
 	}
 	
 	getDetection(className){
-		for(let d of this.sens.detection) if(d.className === className && d.visibleInFrame) return d;
+		return this.sens.detection.filter(d => d.className === className && d.visibleInFrame);
+		//for(let d of this.sens.detection) if(d.className === className && d.visibleInFrame) return d;
 	}
 	
 	setPID(name, parameter, val, stack){
@@ -381,7 +382,7 @@ class OkonClient extends EventEmitter {
 			case PacketType.GET_SENS:
 				let sens = JSON.parse(p.json);
 				sens.rot = angleNorm(sens.rot);
-				sens.baro = sens.baro.pressure;
+				this.okon.sens.baro = sens.baro.pressure;
 				this.okon.sens.imu = sens;
 				break;
 			case PacketType.GET_DEPTH:
