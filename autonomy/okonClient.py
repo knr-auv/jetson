@@ -1,3 +1,4 @@
+import queue
 import socket
 import time
 from _thread import *
@@ -93,11 +94,13 @@ class Okon:
         self.pids = None # pids get from syncing with the server
 
     def set_depth(self, depth : float, add : bool = False) -> None:
+        old_depth = self.control['stable']['depth']
         if add:
              self.control['stable']['depth'] += depth
         else:
             self.control['stable']['depth'] = depth
-        self._okon_client.send(PacketType.SET_STABLE, PacketFlag.DO_NOT_LOG_PACKET, json.dumps(self.control['stable'])) 
+        if old_depth != self.control['stable']['depth']:
+            self._okon_client.send(PacketType.SET_STABLE, PacketFlag.DO_NOT_LOG_PACKET, json.dumps(self.control['stable'])) 
     
     def set_stable_vel(self, x : float = None, y : float = None, z : float = None) -> None:
         if x is not None:
@@ -154,6 +157,14 @@ class Simulation:
     
     def reset(self) -> None:
         self._okon_client.send(PacketType.RST_SIM)
+    
+    def sync(self) -> None:
+        self._okon_client.send(PacketType.SET_ORIEN, PacketFlag.DO_NOT_LOG_PACKET)
+        self._okon_client.send(PacketType.GET_SENS, PacketFlag.DO_NOT_LOG_PACKET)
+        self._okon_client.send(PacketType.SET_PID, PacketFlag.DO_NOT_LOG_PACKET)
+        self._okon_client.send(PacketType.SET_CONTROL_MODE, PacketFlag.DO_NOT_LOG_PACKET)
+        self._okon_client.send(PacketType.SET_STABLE, PacketFlag.DO_NOT_LOG_PACKET)
+        self._okon_client.send(PacketType.GET_DETE, PacketFlag.DO_NOT_LOG_PACKET)
 
 def angle_difference(angle1 : float, angle2 : float) -> float:
     diff = abs(((angle1+360)%360) - ((angle2+360)%360))
@@ -188,6 +199,7 @@ class OkonClient:
         self._events = dict()
         self.syncTime = time.time()
         self.sync_interval = sync_interval
+        self._to_send = queue.Queue()
     
     def connect(self) -> bool:
         if self.debug:
@@ -211,16 +223,15 @@ class OkonClient:
              
     def _sync_thread(self) -> None:
         while self.connected:
+            while not self._to_send.empty():
+                packet = self._to_send.get()
+                self._send(packet)
+
             if time.time() > self.syncTime + self.sync_interval:
                 self.syncTime = time.time()
-                self.send(PacketType.SET_ORIEN, PacketFlag.DO_NOT_LOG_PACKET)
-                self.send(PacketType.GET_SENS, PacketFlag.DO_NOT_LOG_PACKET)
-                self.send(PacketType.SET_PID, PacketFlag.DO_NOT_LOG_PACKET)
-                self.send(PacketType.SET_CONTROL_MODE, PacketFlag.DO_NOT_LOG_PACKET)
-                self.send(PacketType.SET_STABLE, PacketFlag.DO_NOT_LOG_PACKET)
-                self.send(PacketType.GET_DETE, PacketFlag.DO_NOT_LOG_PACKET)
+                self.simulation.sync()
             else:
-                time.sleep(0.01)
+                time.sleep(0.001) # avg ping ~2.7ms
 
     def _receiveAll(self, n : int) -> bytes:
         buffer = b''
@@ -252,7 +263,7 @@ class OkonClient:
         elif packet_type == PacketType.DISARM_MTR:
             pass
         elif packet_type == PacketType.SET_CONTROL_MODE:
-            self.okon.control['mode'] = data_bytes.decode();
+            self.okon.control['mode'] = data_bytes.decode()
         elif packet_type == PacketType.SET_ACRO:
             acro = json.loads(data_bytes.decode())
             self.okon.control['acro'] = acro
@@ -314,17 +325,17 @@ class OkonClient:
         else:
             self._emit_event('packet', (packet_type, packet_flag, data_bytes))
             
-
     def disconnect(self) -> None:
         self.connected = False
-        pass
+        self.socket.close()
+        self._emit_event('disconnect')
 
     def send(self, packet_type : int, packet_flag : int= PacketFlag.NONE, json : str = None) -> None:
         if json == None:
-            self._send((packet_type, packet_flag, 0, []))
+            self._to_send.put((packet_type, packet_flag, 0))
         else:
             json_bytes = json.encode()   
-            self._send((packet_type, packet_flag, len(json_bytes), json_bytes))
+            self._to_send.put((packet_type, packet_flag, len(json_bytes), json_bytes))
 
     def on_event(self, name : str, func) -> None:
         if name in self._events:
@@ -336,8 +347,4 @@ class OkonClient:
     def _emit_event(self, name : str, args = None) -> None:
         if name in self._events:
             for e in self._events[name]:
-                e(args)
-
-
-# possible optimalizations based on link below	
-# https://blog.furas.pl/python-socket-send-and-receive-at-the-same-time-gb.html
+                start_new_thread(e, (args,))
