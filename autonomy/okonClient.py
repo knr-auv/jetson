@@ -213,14 +213,14 @@ class OkonClient:
         except Exception as err:
             print(f'failed to connect {err}')
             return False
-        
-    def _comm_thread(self) -> None:
-        while self.connected:
-            packet_typeFlag = self._receiveAll(2)
-            dataLength = int.from_bytes(self._receiveAll(4),"little")
-            data_bytes = self._receiveAll(dataLength)
-            self._handle_packet(packet_typeFlag[0], packet_typeFlag[1], data_bytes)
-             
+
+    def send(self, packet_type : int, packet_flag : int= PacketFlag.NONE, json : str = None) -> None:
+        if json == None:
+            self._to_send.put((packet_type, packet_flag, 0))
+        else:
+            json_bytes = json.encode()   
+            self._to_send.put((packet_type, packet_flag, len(json_bytes), json_bytes))     
+
     def _sync_thread(self) -> None:
         while self.connected:
             while not self._to_send.empty():
@@ -233,12 +233,6 @@ class OkonClient:
             else:
                 time.sleep(0.001) # avg ping ~2.7ms
 
-    def _receiveAll(self, n : int) -> bytes:
-        buffer = b''
-        while len(buffer) != n:
-            buffer += self.socket.recv(n-len(buffer))
-        return buffer
-
     def _send(self, packet : tuple) -> None:
         self.socket.sendall(packet[0].to_bytes(1, byteorder='little'))
         self.socket.sendall(packet[1].to_bytes(1, byteorder='little'))
@@ -250,7 +244,19 @@ class OkonClient:
         else:
             if self.debug and packet[1] & PacketFlag.DO_NOT_LOG_PACKET == 0:
                 print(f'SENT {PacketType.get(packet[0])} {PacketFlag.get(packet[1])}') 
-        
+    
+    def _receiveAll(self, n : int) -> bytes:
+        buffer = b''
+        while len(buffer) != n:
+            buffer += self.socket.recv(n-len(buffer))
+        return buffer
+    
+    def _comm_thread(self) -> None:
+        while self.connected:
+            packet_typeFlag = self._receiveAll(2)
+            dataLength = int.from_bytes(self._receiveAll(4),"little")
+            data_bytes = self._receiveAll(dataLength)
+            self._handle_packet(packet_typeFlag[0], packet_typeFlag[1], data_bytes)
     
     def _handle_packet(self, packet_type : int, packet_flag : int, data_bytes : bytes):
         if self.debug and packet_flag & PacketFlag.DO_NOT_LOG_PACKET == 0:
@@ -329,13 +335,6 @@ class OkonClient:
         self.connected = False
         self.socket.close()
         self._emit_event('disconnect')
-
-    def send(self, packet_type : int, packet_flag : int= PacketFlag.NONE, json : str = None) -> None:
-        if json == None:
-            self._to_send.put((packet_type, packet_flag, 0))
-        else:
-            json_bytes = json.encode()   
-            self._to_send.put((packet_type, packet_flag, len(json_bytes), json_bytes))
 
     def on_event(self, name : str, func) -> None:
         if name in self._events:
