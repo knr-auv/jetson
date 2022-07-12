@@ -1,8 +1,7 @@
-import queue
+from queue import Queue
 import socket
 import time
-from _thread import *
-import threading
+from threading import Thread
 import json
 
 from numpy import number
@@ -248,7 +247,7 @@ class OkonClient:
         self._events = dict()
         self.syncTime = time.time()
         self.sync_interval = sync_interval
-        self._to_send = queue.Queue()
+        self._to_send = Queue()
 
     def connect(self) -> bool:
         if self.debug:
@@ -256,8 +255,12 @@ class OkonClient:
         try:
             self.socket.connect((self.ip, self.port))
             self.connected = True
-            start_new_thread(self._comm_thread, ())
-            start_new_thread(self._sync_thread, ())
+            comm_thread = Thread(target=self._comm_thread)
+            sync_thread = Thread(target=self._sync_thread)
+            comm_thread.daemon = True
+            sync_thread.daemon = True
+            comm_thread.start()
+            sync_thread.start()
             return True
         except Exception as err:
             print(f"failed to connect {err}")
@@ -401,4 +404,6 @@ class OkonClient:
     def _emit_event(self, name: str, args=None) -> None:
         if name in self._events:
             for e in self._events[name]:
-                start_new_thread(e, (args,))
+                event_thread = Thread(target=e, args=(args,))
+                event_thread.daemon = True
+                event_thread.start()
