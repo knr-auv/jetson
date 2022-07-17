@@ -1,18 +1,12 @@
-"""ZED Camera streaming
+"""ZED Camera local streaming
 """
 import io
-import math
 import threading
-import time
 
-import cv2
 import numpy as np
 import pyzed.sl as sl
 from PIL import Image
-from typing_extensions import Self
 
-import communicationThreads.Simulation.simulationClient as sc
-import variable
 from cameraStream.stream import cameraStream
 
 
@@ -71,6 +65,7 @@ class ZEDStreamClient(cameraStream):
             exit(1)
 
         runtime = sl.RuntimeParameters()
+
         img = sl.Mat()
         depth_map = sl.Mat()
         point_cloud = sl.Mat()
@@ -82,24 +77,27 @@ class ZEDStreamClient(cameraStream):
                 cam.retrieve_measure(depth_map, sl.MEASURE.DEPTH)
                 cam.retrieve_measure(point_cloud, sl.MEASURE.XYZRGBA)
 
-                # save numpys ?
+                # save numpys
                 self.frame = img.get_data()
                 self.depth_map = depth_map.get_data()
                 self.point_cloud = point_cloud.get_data()
 
-    def getFrame(self):
+    def getFrame(self) -> bytes:
+        """Prepares byte representation of jpeg image"""
         img = Image.fromarray(self.frame)
         img_byte_arr = io.BytesIO()
         img.save(img_byte_arr, format="JPEG")
 
         return img_byte_arr.getvalue()
 
-    def get_depth_map(self):
+    def getDepthMap(self) -> bytes:
+        """Prepare byte representation of jpeg depth map"""
         depth = Image.fromarray(self.depth_map)
         depth_byte_arr = io.BytesIO()
         depth.save(depth_byte_arr, format="JPEG")
 
         return depth_byte_arr.getvalue()
 
-    def getPointCloud(self):
+    def getPointCloud(self) -> np.ndarray:
+        """Numpy array representing cloud of points with XYZ"""
         return self.point_cloud
