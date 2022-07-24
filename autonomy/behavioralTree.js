@@ -7,15 +7,15 @@ function consolelog(...x){
 	process.stdout.write("                     \n");
 }
 console.clear();
+let gokon;
 (async ()=>{
 const {OkonClient, PacketType, PacketFlag} = require('./okonClient');
 const {Wait, Blackboard, Tick, Action, InterruptSelector,InterruptSequence, Decorator, Sequence, Condition, Selector} = await import('./behavioralTree/BT.mjs');
 const fs = require('fs');
-const gamepad = require("gamepad");
 
 let okonClient = new OkonClient('127.0.0.1', '44210', {SHOW_PACKET_TIME:false,TOTAL_SYNC:50, GET_CPS:500});
-let {okon, simulation, missionControl} = okonClient;
-
+let {okon, simulation} = okonClient;
+gokon = okon;
 okonClient.on('connected', ()=>{
 	console.log('connected');
 	okon.setDepth(1.5);
@@ -28,6 +28,7 @@ simulation.on('hitNGZ', ()=>{
 
 simulation.on('reset', ()=>{
 	b.set('reset', true);
+    
 });
 
 simulation.on('hitFZ', ()=>{
@@ -133,6 +134,35 @@ class Runner extends Action{
 	}
 }
 
+class BooleanRunner extends Action{
+	constructor({name = 'Runner', func} = {}){
+		super({name});
+		this.func = func;
+	}
+	
+	tick(tick){
+		return this.func(tick) ? 'SUCCESS' : 'FAILURE';
+	}
+}
+
+class DunamicRotate extends Action{
+	constructor({name = 'Rotate <variable>', variable = ""} = {}){
+		super({name: name.replace("<variable>", variable)});
+        this.variable = variable;
+	}
+	
+	load(tick){
+		super.load(tick);
+		tick.blackboard.get('okon').setRot(null, tick.blackboard.get(this.variable), null, true);
+	}
+	
+	tick(tick){
+		if(tick.blackboard.get('okon').reachedTargetRotation(5))return 'SUCCESS';
+		else return 'RUNNING';
+	}
+}
+
+
 class RepeatUntilSuccess extends Decorator {
 	constructor({child, name = 'RepeatUntilSuccess'}={}){
 		super({
@@ -165,6 +195,8 @@ class Invert extends Decorator {
 		return 'RUNNING';
 	}
 }
+
+
 
 
 let b = new Blackboard();
@@ -350,6 +382,60 @@ new InterruptSelector({
 });
 
 
+root = new Selector({children:[
+    new Sequence({children:[
+        new BooleanRunner({name: "isBB failed to find", func: (t)=>t.blackboard.get('failed-to-find')===true}),
+       // new Runner({name: "disable motors", func: (t)=>t.blackboard.get('okon').disarmMotors()}),
+        new Succeed()
+    ]}),
+    new Sequence({name: "move from wall", children:[
+        new BooleanRunner({name: "isBB not moved", func: (t)=>t.blackboard.get('moved')!==true}),
+        new Runner({name: "setBB moved", func: (t)=>t.blackboard.set('moved', true)}),
+        new Runner({name: "set depth to current", func: (t)=>{t.blackboard.get('okon').setDepth(b.get('okon').sens.baro/1000/9.81)}}),
+        new Runner({name: "enable motors", func: (t)=>t.blackboard.get('okon').armMotors()}),
+        new Runner({name: "move forward", func: (t)=>{t.blackboard.get('okon').setStableVel(null, null, .5, false);}}),
+        new Runner({name: "set depth to current", func: (t)=>{t.blackboard.get('okon').setDepth(.8)}}),
+        new Wait({milliseconds:1000}),
+        new Runner({name: "stop", func: (t)=>{t.blackboard.get('okon').setStableVel(null, null, 0, false);}}),
+        new Wait({milliseconds:500}),
+    ]}),
+    new Selector({children:[
+        new Sequence({name: "target gate", children:[
+			new BooleanRunner({name: "calc target yaw", func: (t)=>{
+				let okon = t.blackboard.get('okon');
+				let hfov = 60;
+				let detection = okon.getDetection('gate')
+				if(detection.length === 1){
+					let gate = detection[0];
+					if(gate.distance < 1)return false;
+					let center = (gate.max.x + gate.min.x)/2*2 - 1;
+					let cameraPlaneX = 1.0/Math.tan(hfov/2/180*Math.PI)
+					let deltaYaw = Math.atan(center/cameraPlaneX)/Math.PI*180;
+					console.log('                                           mm',gate.max.x, gate.min.x);
+					console.log('                                           center',center);
+					console.log('                                           cameraPlaneX',cameraPlaneX);
+					console.log('                                           deltaYaw',deltaYaw);
+					t.blackboard.set('deltaYaw', deltaYaw);
+					return true;
+				}else return false;
+			}}),
+			new Runner({name: "setBB not visible 0", func: (t)=>t.blackboard.set('not-visible', 0)}),
+			new DunamicRotate({variable: 'deltaYaw'}),
+			new Runner({name: "move forward", func: (t)=>{t.blackboard.get('okon').setStableVel(null, null, .7, false);}}),
+			new Wait({milliseconds:100}),
+		]}),
+		new Sequence({name: "check vis", children:[
+			new Runner({name: "addBB not visible +1", func: (t)=>t.blackboard.set('not-visible', (t.blackboard.get('not-visible')||0) + 1)}),
+			new BooleanRunner({name: "isBB not visible > 3", func: (t)=>t.blackboard.get('not-visible') > 3}),
+		]}),
+    ]}),
+    new Sequence({name: "go through the gate", children: [
+        new Wait({milliseconds:2000}),
+        new Runner({name: "stop", func: (t)=>{t.blackboard.get('okon').setStableVel(null, null, 0, false);}}),
+        new Runner({name: "end", func: (t)=>{throw 3}}),
+    ]})
+]})
+
 
 let gateVisible2 = new Sequence({
 	name: 'Gate Visible',
@@ -402,122 +488,6 @@ let gateVisible2 = new Sequence({
 		})
 	]
 })
-/*
-
- 
-
-*/
-/*new InterruptSelector({
-	children:[
-		new Sequence({
-			children:[
-				new Condition({
-					name: 'Gate Visible',
-					condition: (tick)=>{
-						let d = tick.blackboard.get('okon').sens.detection;
-						for(let el of d){
-							if(el.className == 'gate' && el.visibleInFrame){
-								let gateMid = (el.min.x + el.max.x)/2;
-								if(Math.abs(0.5 - gateMid) < 0.1)
-								return true;
-							}
-						}
-						return false;
-					}
-				}),
-				new Rotate({delta:180}),
-				new Wait({milliseconds:1000})
-			]
-		}),
-		new Sequence({
-			children:[
-				new Rotate({name:'Rotate <delta> degrees', delta:5}),
-				new Wait({milliseconds:100})
-			]
-		})
-	]
-});*/
-
-let aiEnabled = false;
-gamepad.init()
-setInterval(gamepad.processEvents, 16);
-setInterval(gamepad.detectDevices, 500);
-
-const pad = {
-	LT:0,LB:false,RT:0,RB:false,
-	LX:0,LY:0,RX:0,RY:0,L:false,R:false,
-	DL:false,DU:false,DD:false,DR:false,
-	SELECT:false,START:false,
-	X:false,Y:false,A:false,B:false,
-	XBOX:false,
-	print: function(){
-		let tr = "";
-		for(let el in this)if(this[el] === true)tr+=el+' ';
-		console.log(tr);
-		console.log(this.LX.toFixed(1), this.LY.toFixed(1), this.RX.toFixed(1), this.RY.toFixed(1));
-		console.log(this.LT.toFixed(2), this.RT.toFixed(2));
-	}
-};
-
-//console.log(pad);
-
-gamepad.on("move", function (id, axis, value) {
-  if(axis === 0)pad.LX = value;
-  else if(axis === 1)pad.LY = value;
-  else if(axis === 2)pad.RX = value;
-  else if(axis === 3)pad.RY = value;
-  else if(axis === 4)pad.LT = (value+1)/2;
-  else if(axis === 5)pad.RT = (value+1)/2;
-});
- 
-gamepad.on("down", function (id, num) {
-  if(num === 0)pad.DU = true;
-  else if(num === 1)pad.DD = true;
-  else if(num === 2)pad.DL = true;
-  else if(num === 3)pad.DR = true;
-  else if(num === 4){
-	  pad.START = true;
-	  okon.setRot(null, okon.sens.imu.rot.y, null);
-	  okon.armMotors();
-  }
-  else if(num === 5)pad.SELECT = true;
-  else if(num === 6)pad.L = true;
-  else if(num === 7)pad.R = true;
-  else if(num === 8)pad.LB = true;
-  else if(num === 9)pad.RB = true;
-  else if(num === 10){
-	  aiEnabled = !aiEnabled;
-	  pad.A = true;
-  }
-  else if(num === 11)pad.B = true;
-  else if(num === 12)pad.X = true;
-  else if(num === 13)pad.Y = true;
-  else if(num === 14){
-	  simulation.reset();
-	  pad.XBOX = true;
-  }
-});
- 
-gamepad.on("up", function (id, num) {
-  if(num === 0)pad.DU = false;
-  if(num === 1)pad.DD = false;
-  if(num === 2)pad.DL = false;
-  if(num === 3)pad.DR = false;
-  if(num === 4)pad.START = false;
-  if(num === 5){
-	  okon.disarmMotors();
-	  pad.SELECT = false;
-  }
-  if(num === 6)pad.L = false;
-  if(num === 7)pad.R = false;
-  if(num === 8)pad.LB = false;
-  if(num === 9)pad.RB = false;
-  if(num === 10)pad.A = false;
-  if(num === 11)pad.B = false;
-  if(num === 12)pad.X = false;
-  if(num === 13)pad.Y = false;
-  if(num === 14)pad.XBOX = false;
-});
 
 function exe(){
 	//console.clear();
@@ -525,46 +495,23 @@ function exe(){
 	process.stdout.write("\x1b[?25l");
 	
 	root.print('#      ', false, true, b); //DRAW TREE
-	if(aiEnabled){
-		let t = new Tick({tree: {}, blackboard: b});
-		let state = root.run(t);	
-		//console.log(state);	
-		//console.log(b.get('debug'));
-	}else{
-		pad.print();
-		okon.setStableVel(Math.abs(pad.LX) > 0.1 ? pad.LX : 0, null, Math.abs(pad.LY) > 0.1 ? pad.LY : 0, false);
-		if(okon.reachedTargetRotation(10))okon.setRot(null, Math.abs(pad.RX) > 0.1 ? pad.RX*10 : 0, null, true);
-		if(okon.reachedTargetDepth(0.05))okon.setDepth(pad.LB?0.1:pad.RB?-0.1:0,true);
-		if(pad.B){
-			okon.setRot(null, okon.sens.imu.rot.y, null);
-			okon.setDepth(-okon.orien.pos.y);
-		}
-	}
+
+    let t = new Tick({tree: {}, blackboard: b});
+    let state = root.run(t);	
+    //console.log(state);	
+    //console.log(b.get('debug'));
+
 	console.log("                                       ");
 	console.log("                                       ");
 	console.log("                                       ");
 }
-
-
 })();
 
 process.on('SIGINT', (code) => {
+    gokon.setStableVel(0,0,0)
 	console.log(code);
 	process.stdout.write("\x1b[?25h");
 	console.log("terminated");
 	process.exit();
 });
 
-/*
-https://www.csc.kth.se/~miccol/Michele_Colledanchise/Publications_files/2013_ICRA_mcko.pdf <<<
-https://robohub.org/introduction-to-behavior-trees/ <<
-https://www.gamecareerguide.com/features/1405/using_behavior_trees_to_create_.php <<<
-https://www.gamedeveloper.com/programming/behavior-trees-for-ai-how-they-work <
-https://robohub.org/introduction-to-behavior-trees/ <<<
-https://opensource.adobe.com/behavior_tree_editor/#/editor <<<
-https://cdn.discordapp.com/attachments/675801390886551552/906879064009236480/unknown.png KNR
-https://www.youtube.com/watch?v=sETuC2Mr6D8&list=PLFQdM4LOGDr_vYJuo8YTRcmv3FrwczdKg&index=7
-https://www.gameaipro.com/GameAIPro/GameAIPro_Chapter06_The_Behavior_Tree_Starter_Kit.pdf
-https://web.archive.org/web/20150626035025/http://docs.guineashots.com/behavior3js/classes/Wait.html
-https://www.youtube.com/watch?v=SgrG6uAZDHE	
-*/
