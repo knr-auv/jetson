@@ -9,8 +9,6 @@ def handle_ping(args = None) -> None:
     cur_ping = round((time.time() - float(args))*10000)/10
     sum += cur_ping
     n += 1
-    print(f'avg RTT is {sum/n} ping:{cur_ping}')
-    time.sleep(1)
 
 oc = OkonClient(ip="127.0.0.1", port=44210, sync_interval=.05, debug=False) #ping simRST hitNGZ hitFZ packet error disconnect # run on separate thread
 oc.on_event('simRST', handle_simulation_reset) 
@@ -23,10 +21,17 @@ n = 0
 if oc.connect():
     sim.reset()
 
-    # while True: # ping checking
-    #     oc.send(PacketType.GET_VIDEO_BYTES)
-    #     oc.send(PacketType.PING, PacketFlag.NONE, str(time.time())) 
-    #     time.sleep(.1)
+    i = 1000
+    while i > 0: # ping checking
+        oc.send(PacketType.GET_VIDEO_BYTES)
+        oc.send(PacketType.PING, PacketFlag.NONE, str(time.time())) 
+        time.sleep(.01)
+        i -= 1
+    print('waiting')
+    while n < 1000:
+        time.sleep(.01)
+    print(f'avg RTT is {sum/n}ms')
+    exit()
 
     okon.disarm_motors()
     okon.set_stable_vel(x=0,y=0,z=0)
