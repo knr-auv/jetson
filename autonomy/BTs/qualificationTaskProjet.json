@@ -1,0 +1,202 @@
+{
+  "version": "0.3.0",
+  "scope": "project",
+  "selectedTree": "5ae5c55c-0659-4e71-8e04-78692b8ef430",
+  "trees": [
+    {
+      "version": "0.3.0",
+      "scope": "tree",
+      "id": "5ae5c55c-0659-4e71-8e04-78692b8ef430",
+      "title": "QualificationTaskBehaviorTree",
+      "description": "",
+      "root": "5128077f-145f-488c-8cec-180f1be7451e",
+      "properties": {},
+      "nodes": {
+        "0aa4769b-c32b-407a-a2a5-4d326902e7c0": {
+          "id": "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
+          "name": "wait",
+          "title": "TryDetectNTimes(object=\"gate\",n=3)[WRITE blackboard.detection]",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -72,
+            "y": -660
+          }
+        },
+        "bf3e8148-2e35-4486-871e-f86163c46470": {
+          "id": "bf3e8148-2e35-4486-871e-f86163c46470",
+          "name": "wait",
+          "title": "RotateDeltaYawAngle(delta=2.0)[READ blackboard.deltaYaw)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -60,
+            "y": -420
+          }
+        },
+        "134202c9-d4ea-43a0-af1e-00d2f62487e2": {
+          "id": "134202c9-d4ea-43a0-af1e-00d2f62487e2",
+          "name": "wait",
+          "title": "SetVelocity(z=1.0)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": -360
+          }
+        },
+        "13a14a92-9ddc-4062-89e7-d641cb33f502": {
+          "id": "13a14a92-9ddc-4062-89e7-d641cb33f502",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -492,
+            "y": -564
+          },
+          "children": [
+            "0aa4769b-c32b-407a-a2a5-4d326902e7c0",
+            "8bc96a7e-f63d-488e-8843-b16e55632bb7",
+            "2bff74b3-3f69-4ae0-8399-dd8f5ba4e118",
+            "89fee7f1-37d0-4d8b-ad89-bf6165f6b2a0",
+            "bf3e8148-2e35-4486-871e-f86163c46470",
+            "134202c9-d4ea-43a0-af1e-00d2f62487e2"
+          ]
+        },
+        "5128077f-145f-488c-8cec-180f1be7451e": {
+          "id": "5128077f-145f-488c-8cec-180f1be7451e",
+          "name": "select",
+          "title": "Select",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right), succeeding when any one succeeds.  Fails if all fail.",
+          "properties": {},
+          "display": {
+            "x": -636,
+            "y": -324
+          },
+          "children": [
+            "13a14a92-9ddc-4062-89e7-d641cb33f502",
+            "3a5e270c-b85f-4728-8626-6d52a1b6ba1b"
+          ]
+        },
+        "2bff74b3-3f69-4ae0-8399-dd8f5ba4e118": {
+          "id": "2bff74b3-3f69-4ae0-8399-dd8f5ba4e118",
+          "name": "wait",
+          "title": "CalculateDeltaYaw()[READ blackboard.detection | WRITE blackboard.deltaYaw]",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -12,
+            "y": -540
+          }
+        },
+        "3bd82b68-71fb-4321-8610-affe0bfa00a8": {
+          "id": "3bd82b68-71fb-4321-8610-affe0bfa00a8",
+          "name": "wait",
+          "title": "Wait(secs=2.0)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -216,
+            "y": -252
+          }
+        },
+        "e5619e13-b440-4187-8852-a1bd241d89f7": {
+          "id": "e5619e13-b440-4187-8852-a1bd241d89f7",
+          "name": "done",
+          "title": "End()",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -180,
+            "y": -108
+          }
+        },
+        "3a5e270c-b85f-4728-8626-6d52a1b6ba1b": {
+          "id": "3a5e270c-b85f-4728-8626-6d52a1b6ba1b",
+          "name": "sequence",
+          "title": "Sequence",
+          "description": "Takes multiple children and runs them from top to bottom (or left to right).  If any fail, this node fails, if all succeed, this node succeeds.",
+          "properties": {},
+          "display": {
+            "x": -468,
+            "y": -156
+          },
+          "children": [
+            "3bd82b68-71fb-4321-8610-affe0bfa00a8",
+            "94f7a411-e3c5-4bd5-83dd-37ce6efb2ce6",
+            "52a77660-78dc-4cc7-b6d8-991190bca1ae",
+            "e5619e13-b440-4187-8852-a1bd241d89f7"
+          ]
+        },
+        "8bc96a7e-f63d-488e-8843-b16e55632bb7": {
+          "id": "8bc96a7e-f63d-488e-8843-b16e55632bb7",
+          "name": "wait",
+          "title": "IsGateFarEnough(max_distance=1.5)[READ blackboard.detection",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -72,
+            "y": -600
+          }
+        },
+        "89fee7f1-37d0-4d8b-ad89-bf6165f6b2a0": {
+          "id": "89fee7f1-37d0-4d8b-ad89-bf6165f6b2a0",
+          "name": "wait",
+          "title": "SetDepth(depth=1.1,delta=0.05)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -480
+          }
+        },
+        "52a77660-78dc-4cc7-b6d8-991190bca1ae": {
+          "id": "52a77660-78dc-4cc7-b6d8-991190bca1ae",
+          "name": "wait",
+          "title": "Wait(secs=0.1)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -192,
+            "y": -156
+          }
+        },
+        "94f7a411-e3c5-4bd5-83dd-37ce6efb2ce6": {
+          "id": "94f7a411-e3c5-4bd5-83dd-37ce6efb2ce6",
+          "name": "wait",
+          "title": "SetVelocity(z=0.0)",
+          "description": "",
+          "properties": {},
+          "display": {
+            "x": -204,
+            "y": -204
+          }
+        }
+      },
+      "display": {
+        "camera_x": 1083.5999999642372,
+        "camera_y": 764.5000000298023,
+        "camera_z": 1,
+        "x": -744,
+        "y": -324
+      }
+    }
+  ],
+  "custom_nodes": [
+    {
+      "version": "0.3.0",
+      "scope": "node",
+      "name": "timer()",
+      "category": "action",
+      "title": null,
+      "description": null,
+      "properties": {}
+    },
+    {
+      "version": "0.3.0",
+      "scope": "node",
+      "properties": {}
+    }
+  ]
+}
