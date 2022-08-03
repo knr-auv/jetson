@@ -1,8 +1,8 @@
-from queue import Queue
+import json
 import socket
 import time
+from queue import Queue
 from threading import Thread
-import json
 
 from numpy import number
 
@@ -137,25 +137,13 @@ class Okon:
 
     def reachedTargetRotation(self, delta):
         return (
-            angle_difference(
-                self.control["stable"]["rot"]["x"], self.sens["imu"]["rot"]["x"]
-            )
-            < delta
-            and angle_difference(
-                self.control["stable"]["rot"]["y"], self.sens["imu"]["rot"]["y"]
-            )
-            < delta
-            and angle_difference(
-                self.control["stable"]["rot"]["z"], self.sens["imu"]["rot"]["z"]
-            )
-            < delta
+            angle_difference(self.control["stable"]["rot"]["x"], self.sens["imu"]["rot"]["x"]) < delta
+            and angle_difference(self.control["stable"]["rot"]["y"], self.sens["imu"]["rot"]["y"]) < delta
+            and angle_difference(self.control["stable"]["rot"]["z"], self.sens["imu"]["rot"]["z"]) < delta
         )
 
     def reachedTargetDepth(self, delta):
-        return (
-            abs(self.control["stable"]["depth"] - self.sens["baro"] / 1000 / 9.81)
-            < delta
-        )
+        return abs(self.control["stable"]["depth"] - self.sens["baro"] / 1000 / 9.81) < delta
 
     def get_detection(self, className: str):
         return list(
@@ -165,9 +153,7 @@ class Okon:
             )
         )
 
-    def set_stable_rot(
-        self, x: float = None, y: float = None, z: float = None, add=False
-    ) -> None:
+    def set_stable_rot(self, x: float = None, y: float = None, z: float = None, add=False) -> None:
         if x is not None:
             if add:
                 self.control["stable"]["rot"]["x"] += x
@@ -203,9 +189,7 @@ class Simulation:
         self._okon_client.send(PacketType.SET_ORIEN, PacketFlag.DO_NOT_LOG_PACKET)
         self._okon_client.send(PacketType.GET_SENS, PacketFlag.DO_NOT_LOG_PACKET)
         self._okon_client.send(PacketType.SET_PID, PacketFlag.DO_NOT_LOG_PACKET)
-        self._okon_client.send(
-            PacketType.SET_CONTROL_MODE, PacketFlag.DO_NOT_LOG_PACKET
-        )
+        self._okon_client.send(PacketType.SET_CONTROL_MODE, PacketFlag.DO_NOT_LOG_PACKET)
         self._okon_client.send(PacketType.SET_STABLE, PacketFlag.DO_NOT_LOG_PACKET)
         self._okon_client.send(PacketType.GET_DETE, PacketFlag.DO_NOT_LOG_PACKET)
 
@@ -266,9 +250,7 @@ class OkonClient:
             print(f"failed to connect {err}")
             return False
 
-    def send(
-        self, packet_type: int, packet_flag: int = PacketFlag.NONE, json: str = None
-    ) -> None:
+    def send(self, packet_type: int, packet_flag: int = PacketFlag.NONE, json: str = None) -> None:
         if json == None:
             self._to_send.put((packet_type, packet_flag, 0))
         else:
@@ -294,9 +276,7 @@ class OkonClient:
         if packet[2] > 0:
             self.socket.sendall(packet[3])
             if self.debug and packet[1] & PacketFlag.DO_NOT_LOG_PACKET == 0:
-                print(
-                    f'SENT {PacketType.get(packet[0])} {PacketFlag.get(packet[1])} dat:{packet[3].decode("utf-8") }'
-                )
+                print(f'SENT {PacketType.get(packet[0])} {PacketFlag.get(packet[1])} dat:{packet[3].decode("utf-8") }')
         else:
             if self.debug and packet[1] & PacketFlag.DO_NOT_LOG_PACKET == 0:
                 print(f"SENT {PacketType.get(packet[0])} {PacketFlag.get(packet[1])}")
