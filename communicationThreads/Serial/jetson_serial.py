@@ -1,10 +1,11 @@
 
+from cmath import log
 import socket
 import threading
 import time
 import logging
 import serial
-
+import datetime
 
 class JetsonSerial:
 
@@ -17,6 +18,7 @@ class JetsonSerial:
         self.serial_port = serial
 
         self.InitSerial()
+        self.createSockets()
 
 
 
@@ -38,42 +40,59 @@ class JetsonSerial:
         except:
             logging.error("Couldn't open serial: {}".format(self.serial_port))
             exit()
-        
-        # Create socket
-        self.createSockets()
-
 
 
     def runReceiverWorker(self):
         
         # Read from jetson and write to device
-        print("Hi, im receiver worker!!!")
-    
+        logging.info("Hi, im receiver worker!!!")
+
         while(self.serial.isOpen()):
             
             test_data = b'\xAA\xFF\xCC'
-            self.serial.write(test_data)
+
+            try:
+                self.serial.write(test_data)
+            except:
+                self.serial.close()
+                break;
+
             time.sleep(0.1)
 
-
+        logging.error("Cannot write to serial!!!")
 
     def runTransceiverWorker(self):
         
         # Read from device and write to jetson
-        print("Hi, im transceiver worker!!!")
+        logging.info("Hi, im transceiver worker!!!")
+
+        busy = datetime.datetime.utcnow()
 
         while(self.serial.isOpen()):
 
-            buff_size = self.serial.inWaiting()
+            try:
+                buff_size = self.serial.inWaiting()
+            except:
+                logging.error("Cannot check if there is something in input queue!")
+                break
             
             if (buff_size == 0):
+                not_busy = datetime.datetime.utcnow()
+
+                if ( ( (not_busy - busy).total_seconds() ) > 5 ):
+                    logging.error("Serial port is not responding for more than 5 seconds...")
+                    break
+
                 continue
 
             rv_bytes = self.serial.read(buff_size)
-            print(rv_bytes)
+            logging.info(rv_bytes)
 
+            busy = datetime.datetime.utcnow()
 
-
+        # Place where emergency situation can be handled
+        
+        
     def createSockets(self):
         # Start workers threads
         self.startWorkers()
@@ -81,17 +100,12 @@ class JetsonSerial:
 
 
     def startWorkers(self):
+        self.event = threading.Event()
         self.rx_worker = threading.Thread(target=self.runReceiverWorker, daemon=True)
         self.tx_worker = threading.Thread(target=self.runTransceiverWorker, daemon=True)
 
         self.rx_worker.start()
         self.tx_worker.start()
-
-
-
-    def PrintMsg(self, index):
-        print("Hi, my index is: {}!".format(index))
-
 
 
     def __del__(self):
@@ -105,13 +119,31 @@ class JetsonSerial:
         print("end of life")
 
 
-
 if __name__ == "__main__":
 
-    format = "%(asctime)s: %(message)s"
+    format = "%(asctime)s [%(funcName)s():%(lineno)s] %(message)s"
     logging.basicConfig(format=format, level=logging.INFO,
                         datefmt="%H:%M:%S")
 
     serial = JetsonSerial()
-    time.sleep(10)
+    
+    start = datetime.datetime.utcnow()
+    end = datetime.datetime.utcnow()
+
+    while((end - start).total_seconds() < 60):
+        
+        if (serial.rx_worker.is_alive() == False):
+            serial.rx_worker.join()
+            serial.rx_worker = threading.Thread(target=serial.runReceiverWorker, daemon=True)
+            serial.rx_worker.start()
+
+        if (serial.tx_worker.is_alive() == False):
+            serial.tx_worker.join()
+            serial.tx_worker = threading.Thread(target=serial.runTransceiverWorker, daemon=True)
+            serial.tx_worker.start()
+
+        time.sleep(1)
+
+        end = datetime.datetime.utcnow()
+
     serial.__del__()
