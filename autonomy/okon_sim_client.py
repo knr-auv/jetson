@@ -4,7 +4,7 @@ import time
 from queue import Queue
 from threading import Thread
 
-from numpy import number
+from okon import Okon
 
 
 class PacketType:  # PacketType.PING
@@ -61,7 +61,7 @@ class PacketFlag:  # PacketType.PING
         return flags
 
 
-class Okon:
+class OkonSim(Okon):
     def __init__(self, okon_client) -> None:
         self._okon_client = okon_client
         self.sens = {
@@ -218,9 +218,9 @@ def angle_norm(a: dict) -> dict:
     return {"x": x, "y": y, "z": z}
 
 
-class OkonClient:
+class OkonSimClient:
     def __init__(self, ip, port, options=None, sync_interval=0.05, debug=True) -> None:
-        self.okon = Okon(self)
+        self.okon = OkonSim(self)
         self.simulation = Simulation(self)
 
         self.ip = ip

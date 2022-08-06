@@ -5,7 +5,7 @@ import time
 
 import py_trees
 
-from okon_client import Okon
+from okon_sim_client import Okon
 
 
 class Status:

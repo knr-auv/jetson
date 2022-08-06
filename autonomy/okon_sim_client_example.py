@@ -1,6 +1,6 @@
 import time
 
-from okon_client import OkonClient, PacketFlag, PacketType
+from okon_sim_client import OkonSimClient, PacketFlag, PacketType
 
 
 def handle_simulation_reset(args=None) -> None:
@@ -14,7 +14,7 @@ def handle_ping(args=None) -> None:
     n += 1
 
 
-oc = OkonClient(
+oc = OkonSimClient(
     ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False
 )  # ping simRST hitNGZ hitFZ packet error disconnect # run on separate thread
 oc.on_event("simRST", handle_simulation_reset)
