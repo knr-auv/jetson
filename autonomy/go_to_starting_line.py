@@ -9,9 +9,9 @@ Run this script before running qualification_task_behavior_tree.py script.
 """
 import time
 
-from okon_client import OkonClient
+from okon_sim_client import OkonSimClient
 
-oc = OkonClient(ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False)
+oc = OkonSimClient(ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False)
 okon = oc.okon
 
 sim = oc.simulation
