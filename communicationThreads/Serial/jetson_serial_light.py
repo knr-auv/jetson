@@ -1,4 +1,5 @@
 
+from multiprocessing import Lock
 import threading
 import time
 import logging
@@ -17,7 +18,6 @@ class JetsonSerial:
         self.InitSerial()
 
 
-
     def InitSerial(self, baud_rate = 115200, timeout = 0.5, parity = serial.PARITY_NONE):
         
         self.serial = serial.Serial()
@@ -26,6 +26,9 @@ class JetsonSerial:
         self.serial.timeout = timeout
         self.serial.write_timeout = timeout
         self.serial.parity = parity
+
+        self.output_buffer = []
+        self.output_lock = Lock()
 
         # Try open serial to check if it is available
         try:
@@ -37,25 +40,7 @@ class JetsonSerial:
             logging.error("Couldn't open serial: {}".format(self.serial_port))
             exit()
 
-        self.startWorkers()
-
-    def runReceiverWorker(self):
-        
-        # Read from jetson and write to device
-
-        while ( self.serial.isOpen() and not self.crash_event.is_set() ):
-            
-            test_data = b'\xAA\xFF\xCC'
-
-            try:
-                self.serial.write(test_data)
-            except:
-                self.crash_event.set()
-                self.handleCrash()
-                logging.error("Cannot write to serial, ending...")
-                break
-
-            time.sleep(0.1)
+        self.startWorkers()     
 
 
     def runTransceiverWorker(self):
@@ -84,30 +69,44 @@ class JetsonSerial:
 
                 continue
 
-            rv_bytes = self.serial.read(buff_size)
-            logging.info(rv_bytes)
+            self.output_lock.acquire()
+            self.output_buffer.append( self.serial.read(buff_size) )
+            self.output_lock.release()
 
             busy = datetime.datetime.utcnow()          
 
 
     def startWorkers(self):
-        self.rx_worker = threading.Thread(target=self.runReceiverWorker, daemon=True)
-        self.tx_worker = threading.Thread(target=self.runTransceiverWorker, daemon=True)
 
-        self.rx_worker.start()
+        self.tx_worker = threading.Thread(target=self.runTransceiverWorker, daemon=True)
         self.tx_worker.start()
+
+
+    def writeToSerial(self, data : bytes):
+        
+        try:
+            self.serial.write(data)
+        except:
+            logging.error("Cannot write to serial, ending...")
+
+
+
+    def readFromSerial(self):
+        
+        self.output_lock.acquire()
+
+        data = self.output_buffer
+
+        if (len(data) > 0):
+            self.output_buffer = []
+
+        self.output_lock.release()
+
+        return data
 
 
     def handleCrash(self):
         
-        start_time = datetime.datetime.utcnow()
-
-        while (self.rx_worker.isAlive() or self.tx_worker.isAlive() ):
-            logging.info("One thread is still alive!")
-            curr_time = datetime.datetime.utcnow()
-            if ( ( curr_time - start_time ).total_seconds() > 10 ):
-                break
-
         self.crash_event.clear()
 
         # Close serial 
@@ -137,7 +136,6 @@ class JetsonSerial:
 
         self.crash_event.set()
 
-        self.rx_worker.join()
         self.tx_worker.join()
 
         self.crash_event.clear()
@@ -157,7 +155,7 @@ if __name__ == "__main__":
     start = datetime.datetime.utcnow()
     end = datetime.datetime.utcnow()
 
-    while((end - start).total_seconds() < 60):
+    while((end - start).total_seconds() < 5):
         
         # if (serial.rx_worker.is_alive() == False):
         #     serial.rx_worker.join()
@@ -169,7 +167,8 @@ if __name__ == "__main__":
         #     serial.tx_worker = threading.Thread(target=serial.runTransceiverWorker, daemon=True)
         #     serial.tx_worker.start()
 
-        time.sleep(1)
+        serial.writeToSerial(b'\xAA\xFF\xCC')
+        print(serial.readFromSerial())
 
         end = datetime.datetime.utcnow()
 
