@@ -1,0 +1,7 @@
+
+Co trzeba zmienić:
+- nazwe wątków, w poprzednim założeniu ich nazwy miały sens, teraz należy je odwrócić (tx -> rx, rx -> tx)
+- obsługa bufora odbieranych danych, obecnie część bajtów jest gubiona w trakcie czytania
+
+Alternatywa:
+  jetson_serial_light ma usunięty wątek odpowiedzialny za transmisję (nie jest potrzebny skoro jest wykonywana na żądanie), problemy te same co zwykły
