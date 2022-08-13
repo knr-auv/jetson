@@ -69,6 +69,11 @@ class JetsonSerial:
 
                 continue
 
+
+            # Sensitive part, beware death locks
+            while (self.output_lock.locked()):
+                pass
+                
             self.output_lock.acquire()
             self.output_buffer.append( self.serial.read(buff_size) )
             self.output_lock.release()
@@ -93,13 +98,13 @@ class JetsonSerial:
 
     def readFromSerial(self):
         
+        # Sensitive part, beware death locks
+        while (self.output_lock.locked()):
+            pass
+
         self.output_lock.acquire()
-
         data = self.output_buffer
-
-        if (len(data) > 0):
-            self.output_buffer = []
-
+        self.output_buffer.clear()
         self.output_lock.release()
 
         return data
