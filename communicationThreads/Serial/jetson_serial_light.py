@@ -1,13 +1,11 @@
-
-from multiprocessing import Lock
 import threading
 import time
 import logging
 import serial
 import datetime
 
-class JetsonSerial:
 
+class JetsonSerial:
 
     def __init__(self, serial = '/dev/ttyUSB0'):
 
@@ -28,7 +26,7 @@ class JetsonSerial:
         self.serial.parity = parity
 
         self.output_buffer = []
-        self.output_lock = Lock()
+        self.output_lock = threading.RLock()
 
         # Try open serial to check if it is available
         try:
@@ -69,16 +67,16 @@ class JetsonSerial:
 
                 continue
 
-
-            # Sensitive part, beware death locks
-            while (self.output_lock.locked()):
-                pass
-                
             self.output_lock.acquire()
-            self.output_buffer.append( self.serial.read(buff_size) )
+
+            self.output_buffer.append(self.serial.read(buff_size))
+
+            if (len(self.output_buffer) > 512) :
+                self.output_buffer.pop(0)
+
             self.output_lock.release()
 
-            busy = datetime.datetime.utcnow()          
+            busy = datetime.datetime.utcnow()         
 
 
     def startWorkers(self):
@@ -97,14 +95,14 @@ class JetsonSerial:
 
 
     def readFromSerial(self):
-        
-        # Sensitive part, beware death locks
-        while (self.output_lock.locked()):
-            pass
 
         self.output_lock.acquire()
+
         data = self.output_buffer
-        self.output_buffer.clear()
+
+        if (len(self.output_buffer) > 0):
+            self.output_buffer = []
+
         self.output_lock.release()
 
         return data
@@ -136,8 +134,6 @@ class JetsonSerial:
 
 
     def __del__(self):
-        
-        print("Im cleaning...")
 
         self.crash_event.set()
 
@@ -160,20 +156,15 @@ if __name__ == "__main__":
     start = datetime.datetime.utcnow()
     end = datetime.datetime.utcnow()
 
-    while((end - start).total_seconds() < 5):
-        
-        # if (serial.rx_worker.is_alive() == False):
-        #     serial.rx_worker.join()
-        #     serial.rx_worker = threading.Thread(target=serial.runReceiverWorker, daemon=True)
-        #     serial.rx_worker.start()
-
-        # if (serial.tx_worker.is_alive() == False):
-        #     serial.tx_worker.join()
-        #     serial.tx_worker = threading.Thread(target=serial.runTransceiverWorker, daemon=True)
-        #     serial.tx_worker.start()
+    while((end - start).total_seconds() < 10):
 
         serial.writeToSerial(b'\xAA\xFF\xCC')
-        print(serial.readFromSerial())
+
+        # Needs some delay between write and read
+        time.sleep(0.03)
+        data = serial.readFromSerial()
+
+        print(data)
 
         end = datetime.datetime.utcnow()
 
