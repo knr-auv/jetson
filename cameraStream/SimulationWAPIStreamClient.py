@@ -5,7 +5,7 @@ import time
 import cv2
 import numpy as np
 
-import communicationThreads.Simulation.simulationClient as sc
+import communicationThreads.Simulation.simulationClient2 as sc
 import variable
 from cameraStream.stream import cameraStream
 
@@ -21,10 +21,10 @@ class SimulationWAPIStreamClient(cameraStream):
     __fi_x = (math.pi - h_fov) / 2
     __fi_y = 2 * math.pi - v_fov / 2
 
-    def __init__(self):
+    def __init__(self, client):
         threading.Thread.__init__(self)
         self.frame = None
-        self.client = sc.SimulationClient()
+        self.client = client
 
     def run(self):
         while self.active:
@@ -36,8 +36,8 @@ class SimulationWAPIStreamClient(cameraStream):
         return self.frame
 
     def receive_frame(self):
-        val = self.client.get_stream_frame()
-        if val != None:
+        val = self.client.okon.video
+        if val is not None:
             self.frame = val
 
     def setFov(self, h_fov, v_fov):
