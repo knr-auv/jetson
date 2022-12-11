@@ -16,6 +16,7 @@ from cameraStream.ToGuiStream import ToGuiStream
 # for GUI only
 from communicationThreads.GUI.Server import JetsonServer
 from communicationThreads.GUI.Setup import PrepareCallbacks
+from communicationThreads.Simulation.okon_sim_client import OkonSimClient, PacketFlag, PacketType
 from config.ConfigLoader import ConfigLoader
 
 # controlThread
@@ -24,8 +25,13 @@ from controlThread.controlThread_simulation import SimulationControlThread
 if __name__ == "__main__":
 
     logging.basicConfig(level=logging.DEBUG)
+    # init sim_client
+    simulation_client = OkonSimClient(ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False)
+    if not simulation_client.connect():
+        print("Not connected!")
+
     # init cameraStream
-    cameraStream = SimulationWAPIStreamClient()
+    cameraStream = SimulationWAPIStreamClient(simulation_client)
     cameraStream.setFov(60, 60)
     # init control thread
     controlThread = SimulationControlThread()
@@ -39,10 +45,10 @@ if __name__ == "__main__":
     autonomyThread = AutonomyThread(detector, controller)
     autonomyThread.StartAutonomy()
 
-    # load config and start camera
+    # # load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    # detector.StartDetecting()
+    detector.StartDetecting()
 
     # lines only for gui
     mode = "simulation"
