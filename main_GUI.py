@@ -34,21 +34,23 @@ if __name__ == "__main__":
     cameraStream = SimulationWAPIStreamClient(simulation_client)
     cameraStream.setFov(60, 60)
     # init control thread
-    controlThread = SimulationControlThread()
+    controlThread = SimulationControlThread(simulation_client)
 
     # init autonomy helpers
     # we can switch them according to environment
-    detector = Simulation_noGPU_detector(cameraStream, controlThread)
+    # detector = Simulation_noGPU_detector(cameraStream, controlThread)
+
+    detector = None
     controller = Controller(controlThread)
 
     # init autonomy
     autonomyThread = AutonomyThread(detector, controller)
-    autonomyThread.StartAutonomy()
+    # autonomyThread.StartAutonomy()
 
     # # load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    detector.StartDetecting()
+    # detector.StartDetecting()
 
     # lines only for gui
     mode = "simulation"
@@ -61,11 +63,12 @@ if __name__ == "__main__":
 
     # after receiving a msg server invokes a callback
     # for sending telemetry server uses 'dataCollector' marked below as 'd'
+    # TODO: Setup callbacks to support new simulation
     c, d = PrepareCallbacks(detector, autonomyThread, controlThread)
     server.SetCallbacks(c, d)
 
     # event handling - make sure that arguments are matching
-    detector.RegisterDetectionCallback(server.sender.SendDetection)
+    # detector.RegisterDetectionCallback(server.sender.SendDetection)
 
     # start when ready
     server.StartServer()

@@ -5,7 +5,7 @@ import time
 import cv2
 import numpy as np
 
-import communicationThreads.Simulation.simulationClient2 as sc
+import communicationThreads.Simulation.simulationClient as sc
 import variable
 from cameraStream.stream import cameraStream
 
@@ -28,17 +28,12 @@ class SimulationWAPIStreamClient(cameraStream):
 
     def run(self):
         while self.active:
-            self.receive_frame()
+            self.frame = self.client.okon.video
             # around 50 fps
             time.sleep(0.01)
 
     def getFrame(self):
-        return self.frame
-
-    def receive_frame(self):
-        val = self.client.okon.video
-        if val is not None:
-            self.frame = val
+        return self.client.okon.video
 
     def setFov(self, h_fov, v_fov):
         self.h_fov = h_fov
@@ -55,6 +50,7 @@ class SimulationWAPIStreamClient(cameraStream):
         return self.client.get_depth_map()  # jpg bytes
 
     def getPointCloud(self):
+        # TODO: fix
         d_map = self.client.get_depth_map()  # jpg bytes
         nparray = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparray, cv2.IMREAD_GRAYSCALE)
