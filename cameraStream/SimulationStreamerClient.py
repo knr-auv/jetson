@@ -1,7 +1,11 @@
+import logging
+import socket
+import struct
+import threading
+import time
 
-import socket, struct, logging, time, threading
-from variable import SIM_STREAM_ADDRESS
 from cameraStream.stream import cameraStream
+from variable import SIM_STREAM_ADDRESS
 
 
 class SimulationStreamerClient(cameraStream):
@@ -17,7 +21,7 @@ class SimulationStreamerClient(cameraStream):
         self.data = b""
         self.frame = None
         self.newFrame = False
-        self.lastframe =0
+        self.lastframe = 0
         self.lock = threading.Lock()
 
     def run(self):
@@ -26,15 +30,15 @@ class SimulationStreamerClient(cameraStream):
         logging.debug("Connected with simulation stream")
         while self.active:
             self.receive_frame()
-            #around 50 fps
+            # around 50 fps
             time.sleep(0.02)
-            
+
     def stop(self):
         self.socket.close()
 
     def __del__(self):
         self.socket.close()
-    
+
     def getFrame(self):
         return self.frame
 
@@ -43,11 +47,11 @@ class SimulationStreamerClient(cameraStream):
         self.data = b""
         self.socket.send(b"\x69")
         confirm = self.socket.recv(1)
-        if not(confirm == b"\x69"):
+        if not (confirm == b"\x69"):
             logging.debug("Message error s")
         lenght = self.socket.recv(4)
-        lenght = struct.unpack('<I', lenght)[0]
-        while not(len(self.data) >= lenght):
+        lenght = struct.unpack("<I", lenght)[0]
+        while not (len(self.data) >= lenght):
             self.data += self.socket.recv(4096)
-        self.frame=self.data        
+        self.frame = self.data
         self.newFrame = True

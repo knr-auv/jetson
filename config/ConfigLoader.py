@@ -1,6 +1,7 @@
 import json
 import pathlib
 
+
 class ConfigLoader:
     """Class for loading configuration files"""
 
@@ -12,9 +13,10 @@ class ConfigLoader:
             for key in data:
                 data[key]
                 for i in data[key]:
-                    ret+=[data[key][i]]
+                    ret += [data[key][i]]
             return ret
 
-if __name__=="__main__":
+
+if __name__ == "__main__":
     data = ConfigLoader.LoadPIDs("config/PID_simulation.json")
     print(data)

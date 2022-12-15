@@ -4,41 +4,51 @@ from tools.Delegate import Delegate
 class ControlThread:
     """Base class for comunication with Okon controller"""
 
-    #data that can be obtained from controller
+    # data that can be obtained from controller
     __mode = "stable"
-    __acc = [0]*3
-    __mag = [0]*3
-    __gyro =[0]*3
-    __depth =0
-    __attitude= [0]*3
-    __angular_velocity = [0]*3
+    __acc = [0] * 3
+    __mag = [0] * 3
+    __gyro = [0] * 3
+    __depth = 0
+    __attitude = [0] * 3
+    __angular_velocity = [0] * 3
 
-    __position = [0]*3
-    __acceleration = [0]*3
-    __velocity = [0]*3
-    __motors = [0]*5
-    __battery = [0]*2
+    __position = [0] * 3
+    __acceleration = [0] * 3
+    __velocity = [0] * 3
+    __motors = [0] * 5
+    __battery = [0] * 2
 
     __depth_setpoint = 0
-    __attitude_setpoint = [0]*3
-    __angular_vel_setpoint = [0]*3
-    keys = ["attitude","gyro", "acc", "mag", "depth",\
-            "angular_velocity", "position", "velocity",\
-            "acceleration","motors"]
+    __attitude_setpoint = [0] * 3
+    __angular_vel_setpoint = [0] * 3
+    keys = [
+        "attitude",
+        "gyro",
+        "acc",
+        "mag",
+        "depth",
+        "angular_velocity",
+        "position",
+        "velocity",
+        "acceleration",
+        "motors",
+    ]
 
-#Invoke after receiving new data, as argument pass a dictionary with keys defined above.
-#You can subscribe to this callback, but it is prefered to use NewDataNotification
+    # Invoke after receiving new data, as argument pass a dictionary with keys defined above.
+    # You can subscribe to this callback, but it is prefered to use NewDataNotification
     NewDataCallback = Delegate()
 
-#Prefered way of notifying about new data.
-#It takes no arguments, but it might be used for settings flag
-#F.e: NewDataNotyfication+=lambda: NewDataDlag = true
+    # Prefered way of notifying about new data.
+    # It takes no arguments, but it might be used for settings flag
+    # F.e: NewDataNotyfication+=lambda: NewDataDlag = true
     NewDataNotification = Delegate()
     DisarmNotificator = Delegate()
     ArmNotificator = Delegate()
+
     def __init__(self):
-        self.NewDataCallback+=self.__update_local_var
-        self.NewDataCallback+=self.NewDataNotification
+        self.NewDataCallback += self.__update_local_var
+        self.NewDataCallback += self.NewDataNotification
         self.DisarmNotificator = Delegate()
         self.ArmNotificator = Delegate()
 
@@ -54,10 +64,11 @@ class ControlThread:
         self.__acceleration = data["acceleration"]
         self.__motors = data["motors"]
 
-#Interface to control the boat
+    # Interface to control the boat
     def HandleSteeringInput(self, data):
         pass
-#common methods for mode 1 and 2. Control mode is either 0 -> manual or 1-> autonomy
+
+    # common methods for mode 1 and 2. Control mode is either 0 -> manual or 1-> autonomy
     def arm(self, controlMode=0):
         self.ArmNotificator()
 
@@ -72,22 +83,23 @@ class ControlThread:
 
     def moveForward(self, value):
         pass
-#mode 0 -> zadane są prędkości kątowe -> łódka się sama nie poziomuje
 
-    def setAngularVelocity(self, roll,pitch, yaw):
-        self.__angular_vel_setpoint = [roll, pitch,yaw]
+    # mode 0 -> zadane są prędkości kątowe -> łódka się sama nie poziomuje
+
+    def setAngularVelocity(self, roll, pitch, yaw):
+        self.__angular_vel_setpoint = [roll, pitch, yaw]
 
     def vertical(self, arg):
         pass
 
-#mode 1 -> łódka się poziomuje
-    def setAttitude(self, roll, pitch,yaw):
-        self.__attitude_setpoint = [roll,pitch,yaw]
-    
+    # mode 1 -> łódka się poziomuje
+    def setAttitude(self, roll, pitch, yaw):
+        self.__attitude_setpoint = [roll, pitch, yaw]
+
     def setDepth(self, depth):
         self.__depth_setpoint = depth
 
-#lepiej brać setpoint niż dane z łódki
+    # lepiej brać setpoint niż dane z łódki
     def getAttitudeSetpoint(self):
         return self.__attitude_setpoint
 
@@ -108,17 +120,17 @@ class ControlThread:
 
     def getIMUData(self):
         ret = self.__attitude
-        ret+=self.__acc
-        ret+=self.__gyro
-        ret+=self.__mag
+        ret += self.__acc
+        ret += self.__gyro
+        ret += self.__mag
         ret.append(self.__depth)
 
         return ret
 
     def getPosData(self):
         ret = self.__position
-        ret+= self.__velocity
-        ret+=self.__acceleration
+        ret += self.__velocity
+        ret += self.__acceleration
         return ret
 
     def getMotors(self):
@@ -129,6 +141,6 @@ class ControlThread:
 
     def setPIDs(self, arg):
         pass
-       
+
     def getPIDs(self):
         pass

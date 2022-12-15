@@ -1,8 +1,10 @@
 from tools.Delegate import Delegate
 
+
 class Object(object):
-    index = int() # numer taska
-    status = int() # status taska. Np. 0- todo, 1- done, 2- aborted/failed
+    index = int()  # numer taska
+    status = int()  # status taska. Np. 0- todo, 1- done, 2- aborted/failed
+
 
 class TaskBaseClass(object):
     __callback = Delegate()
@@ -15,7 +17,7 @@ class TaskBaseClass(object):
 
     def Stop(self):
         pass
-    
+
     def InvokeCallback(self, index, status):
         self.__callback.Invoke(index, status)
 

@@ -1,4 +1,7 @@
-import logging, sys, json
+import json
+import logging
+import sys
+
 from parser_baseclass import Parser
 
 
@@ -16,20 +19,20 @@ class JetsonParser(Parser):
         try:
             if data[0] == self.parser_proto["PID"]:
                 logging.debug("PID")
-                if data[1] != self.pid_spec['all']:
+                if data[1] != self.pid_spec["all"]:
                     msg.pop(0)
                     if msg[0] == self.pid_spec["roll"]:
-                        msg[0] = 'roll'
+                        msg[0] = "roll"
                     elif msg[0] == self.pid_spec["pitch"]:
-                        msg[0] = 'pitch'
+                        msg[0] = "pitch"
                     elif msg[0] == self.pid_spec["yaw"]:
-                        msg[0] = 'yaw'
+                        msg[0] = "yaw"
                     elif msg[0] == self.pid_spec["depth"]:
-                        msg[0] = 'depth'
+                        msg[0] = "depth"
                     logging.debug(msg)
                 elif data[1] == self.pid_spec["all"]:
                     msg.pop(0)
-                    msg[0] = 'all'
+                    msg[0] = "all"
                     logging.debug(msg)
 
             elif data[0] == self.parser_proto["MOTORS"]:

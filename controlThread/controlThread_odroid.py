@@ -1,18 +1,18 @@
-
-#this should be some kind of thread.
-#it controll pid thread and simulation client
-from communicationThreads.odroidClient import OdroidClient
-from communicationThreads.GUIServer import comunicator
-from tools.PID.pid_thread import PIDThread
-from controlThread.controlThread import ControlThread
+# this should be some kind of thread.
+# it controll pid thread and simulation client
 import threading
+
+from communicationThreads.GUIServer import comunicator
+from communicationThreads.odroidClient import OdroidClient
+from controlThread.controlThread import ControlThread
+from tools.PID.pid_thread import PIDThread
 
 
 class odroidConnection(ControlThread):
-    def __init__(self, comunicator = comunicator()):
+    def __init__(self, comunicator=comunicator()):
         self.comunicator = comunicator
         self.client = OdroidClient()
-        #self.PIDThread = PIDThread(self.client)
+        # self.PIDThread = PIDThread(self.client)
         pass
 
     def arm(self):
@@ -26,7 +26,6 @@ class odroidConnection(ControlThread):
         self.PIDThread.active = False
         self.comunicator.confirmDisarm()
 
-
     def setControlMode(self, mode):
         print(mode)
         pass
@@ -34,17 +33,18 @@ class odroidConnection(ControlThread):
     def moveForward(self, value):
         self.PIDThread.forward = value
 
-    #temporary methods
+    # temporary methods
     def vertical(self, value):
         self.PIDThread.vertical = value
+
     def yaw(self, value):
         self.PIDThread.yaw = value
 
-#mode 1
+    # mode 1
     def setAngularVelocity(self, pitch, roll, yaw):
         pass
 
-#mode 2
+    # mode 2
     def yawVelocity(self, yaw):
         pass
 
@@ -52,18 +52,18 @@ class odroidConnection(ControlThread):
         self.PIDThread.roll_PID.set_point = roll
         self.PIDThread.pitch_PID.set_point = pitch
 
-    #if we are in mode supported by magnetometer we can set heading
+    # if we are in mode supported by magnetometer we can set heading
     def setHeading(self, heading):
-        #here we set heading... north, east, west etc.
+        # here we set heading... north, east, west etc.
         pass
 
     def setDepth(self, depth):
         pass
 
-#comunication stuff
+    # comunication stuff
 
     def getHeading(self):
-        #return heading
+        # return heading
         pass
 
     def getImuData(self):
@@ -75,7 +75,7 @@ class odroidConnection(ControlThread):
     def getMotors(self):
         return self.PIDThread.getMotors()
 
-#PID stuff
+    # PID stuff
     def setPIDs(self, arg):
         self.PIDThread.setPIDs(arg)
 

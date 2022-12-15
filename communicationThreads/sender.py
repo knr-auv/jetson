@@ -1,16 +1,18 @@
-import struct, logging, json
+import json
+import logging
+import struct
 
 
 class Sender:
     def __init__(self, protocol):
         self.pid_spec = protocol["PID_SPEC"]
-        self.control_spec = protocol['CONTROL_SPEC']
+        self.control_spec = protocol["CONTROL_SPEC"]
 
     def send_msg(self, data):
         # self.ack = b""
         logging.debug("send_msg")
-        length = struct.pack('<I', len(data))
-        #logging.debug(f"frame length: {len(data)}")
+        length = struct.pack("<I", len(data))
+        # logging.debug(f"frame length: {len(data)}")
         # logging.debug(length)
         header = length
         # header = b"\xA0" + length
@@ -25,21 +27,21 @@ class Sender:
 
     def sendPid(self, PID=[]):
         axis = PID[0]
-        if axis == 'roll':
+        if axis == "roll":
             spec = self.pid_spec["roll"]
-        elif axis == 'pitch':
+        elif axis == "pitch":
             spec = self.pid_spec["pitch"]
-        elif axis == 'yaw':
+        elif axis == "yaw":
             spec = self.pid_spec["yaw"]
-        elif axis == 'all':
+        elif axis == "all":
             spec = self.pid_spec["all"]
-        elif axis == 'depth':
-            spec = self.pid_spec['depth']
+        elif axis == "depth":
+            spec = self.pid_spec["depth"]
         else:
             logging.debug(f"{axis} is not a valid argument of sendPid. Valid arguments: 'roll', 'pitch', 'yaw', 'all'")
             return
         PID.pop(0)
         frame = [self.sender_proto["PID"], spec] + PID
         logging.debug(f"frame: {frame}")
-        frame=json.dumps(frame).encode("ansi")
+        frame = json.dumps(frame).encode("ansi")
         self.send_msg(frame)
