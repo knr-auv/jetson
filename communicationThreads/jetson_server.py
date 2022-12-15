@@ -2,17 +2,17 @@ import json
 import logging
 import socket
 import struct
-import time
 import threading
+import time
 from concurrent.futures import ThreadPoolExecutor
 
 from jetson_parser import JetsonParser
 from jetson_sender import JetsonSender
+
 from variable import *
 
 
 class JetsonServer(JetsonSender, JetsonParser):
-
     def __init__(self, protocol, addr=JETSON_ADDRESS):
         JetsonSender.__init__(self, protocol)
         JetsonParser.__init__(self, protocol)
@@ -20,7 +20,7 @@ class JetsonServer(JetsonSender, JetsonParser):
 
         self.server = None
         self.active_conn = None
-        self.lock=threading.Lock()
+        self.lock = threading.Lock()
         self.host = addr[0]
         self.port = addr[1]
         self.active = True
@@ -66,19 +66,18 @@ class JetsonServer(JetsonSender, JetsonParser):
         self.sendBoatDataRequest()
         self.sendPIDRequest("all")
 
-
         while self.active:
             try:
                 if rx_state == FRAME_SECTION["HEADER"]:
                     logging.debug("Header")
 
                     data = self.active_conn.recv(4)
-                    if data == b'':
+                    if data == b"":
                         raise ConnectionResetError
                     rx_len = struct.unpack("<L", data)[0]
                     logging.debug(f"frame length: {rx_len}")
                     # rx_len -= 4
-                    #logging.debug(rx_len)
+                    # logging.debug(rx_len)
                     rx_state = FRAME_SECTION["DATA"]
 
                 elif rx_state == FRAME_SECTION["DATA"]:
@@ -122,11 +121,10 @@ class JetsonServer(JetsonSender, JetsonParser):
         self.server.close()
 
 
-
 if __name__ == "__main__":
     logging.basicConfig(level=logging.DEBUG)
     addr = ("localhost", 1234)
-    with open("protocol.json", 'r') as p:
+    with open("protocol.json", "r") as p:
         protocol = json.load(p)
     server = JetsonServer(protocol, addr)
     server.start_serving()

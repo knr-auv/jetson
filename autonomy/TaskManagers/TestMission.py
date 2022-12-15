@@ -1,6 +1,10 @@
+import threading
+import time
+
 import autonomy.Tasks.Tasks as Tasks
+
 from .TaskManagerBase import TaskManager
-import threading, time
+
 
 class Mission(TaskManager):
     controller = None
@@ -13,7 +17,6 @@ class Mission(TaskManager):
         x = None
 
     def run(self):
-        task = Tasks.SwimToXYZTask(self.controller,0,0,0)
+        task = Tasks.SwimToXYZTask(self.controller, 0, 0, 0)
         self.controller.arm()
         task.Start()
-    
