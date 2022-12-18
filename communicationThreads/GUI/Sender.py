@@ -88,7 +88,7 @@ class Sender:
     def SendDetection(self, fps, detectionList):
         key = bytes([Protocol.TO_GUI.AUTONOMY_MSG.DETECTION])
         test = {"fps": fps, "ObjectsList": detectionList}
-        print(test)
+        # print(test)
         data = json.dumps({"fps": fps, "ObjectsList": detectionList})
         data = data.encode()
         self.SendAutonomyMsg(data, key)

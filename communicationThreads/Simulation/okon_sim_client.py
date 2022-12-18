@@ -153,6 +153,14 @@ class OkonSim:
             )
         )
 
+    def get_visible_detection(self):
+        return list(
+            filter(
+                lambda d: d["visibleInFrame"],
+                self.sens["detection"],
+            )
+        )
+
     def set_stable_rot(self, x: float = None, y: float = None, z: float = None, add=False) -> None:
         if x is not None:
             if add:
@@ -348,8 +356,8 @@ class OkonSimClient:
             checkpoints = json.loads(data_bytes.decode())
             self.simulation.checkpoints = checkpoints
         elif packet_type == PacketType.HIT_NGZ:
-            ngz = json.loads(data_bytes.decode())
-            self._emit_event("hitNGZ", ngz["id"])
+            ngz = data_bytes.decode()
+            self._emit_event("hitNGZ", ngz)
         elif packet_type == PacketType.HIT_FZ:
             fz = json.loads(data_bytes.decode())
             self._emit_event("hitFZ", fz["id"])

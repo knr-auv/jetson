@@ -38,9 +38,7 @@ if __name__ == "__main__":
 
     # init autonomy helpers
     # we can switch them according to environment
-    # detector = Simulation_noGPU_detector(cameraStream, controlThread)
-
-    detector = None
+    detector = Simulation_noGPU_detector(cameraStream, controlThread, simulation_client)
     controller = Controller(controlThread)
 
     # init autonomy
@@ -50,7 +48,7 @@ if __name__ == "__main__":
     # # load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    # detector.StartDetecting()
+    detector.StartDetecting()
 
     # lines only for gui
     mode = "simulation"
@@ -68,7 +66,7 @@ if __name__ == "__main__":
     server.SetCallbacks(c, d)
 
     # event handling - make sure that arguments are matching
-    # detector.RegisterDetectionCallback(server.sender.SendDetection)
+    detector.RegisterDetectionCallback(server.sender.SendDetection)
 
     # start when ready
     server.StartServer()

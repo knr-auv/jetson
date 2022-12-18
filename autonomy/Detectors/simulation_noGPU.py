@@ -9,26 +9,25 @@ from communicationThreads.Simulation.simulationClient import SimulationClient
 class Simulation_noGPU_detector(base.DetectorBaseClass):
     cameraStream = None
 
-    def __init__(self, cameraStream, controlThread):
+    def __init__(self, cameraStream, controlThread, client):
         super().__init__()
         # control thread is used for obtaining position and attitude data
         self.controlThread = controlThread
         self.cameraStream = cameraStream
-        self.client = SimulationClient()
+        self.client = client
         if cameraStream == None:
             return None
 
     j = 0
 
     def DetectorTask(self):
-        time.sleep(1)
+        time.sleep(1 / 30)
         LastDetections = list()
         detection = self.get_detection()
-        detection = detection["detected"]
+        # detection = detection["detected"]
         for i in detection:
-            if i["visibleInFrame"]:
-                o = self.handle_detection(i)
-                LastDetections.append(o.toDictionary())
+            o = self.handle_detection(i)
+            LastDetections.append(o.toDictionary())
 
         ####################################
         """
@@ -42,7 +41,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         fdc.close()
         self.j +=1
         """
-        fps = 1
+        fps = 30
         self.InvokeCallback(fps, LastDetections)
 
     def handle_detection(self, detection):
@@ -91,4 +90,4 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
 
     def get_detection(self):
         # camera stream is based on simulation web api.
-        return self.client.get_detection()
+        return self.client.okon.get_visible_detection()

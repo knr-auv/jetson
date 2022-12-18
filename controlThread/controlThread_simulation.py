@@ -12,13 +12,20 @@ class SimulationControlThread(ControlThread):
         # self.PIDThread = PIDThread(self.client, self.HandleNewData)
 
     def HandleSteeringInput(self, data):
-        print("Handling steering...")
+        if data[0] != 0 or data[1] != 0 or data[2] != 0:
+            rot = self.client.okon.sens["imu"]["rot"]
+            self.client.okon.set_stable_rot(
+                y=rot["y"] + data[2] / 100, z=rot["z"] - data[0] / 100, x=rot["x"] + data[1] / 100
+            )
+        if data[3] != 0:
+            self.client.okon.set_stable_vel(z=data[3] / 1000)
+        if data[4] != 0:
+            self.client.okon.set_depth(self.client.okon.sens["baro"] / 9800 - data[4] / 200)
         # self.PIDThread.HandleSteeringInput(data)
 
     # common methods for mode 1 and 2
     def disarm(self):
         super().disarm()
-        print("Handling steering...")
         self.client.okon.disarm_motors()
         # self.PIDThread.disarm()
 
@@ -70,12 +77,15 @@ class SimulationControlThread(ControlThread):
 
     def getPIDs(self):
         print("Get pids")
-        return None
+        return [0] * 16
         # return self.PIDThread.GetPIDs()
 
     def HandleNewData(self, data):
+
         attitude, gyro, acc, mag, depth, angular_velocity, position, velocity, acceleration, motors = data
         val = {}
+        test_string = "foo"
+        eval(test_string)
         for i in self.keys:
             val[i] = eval(i)
         self.NewDataCallback.Invoke(val)
