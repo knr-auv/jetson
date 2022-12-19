@@ -26,9 +26,9 @@ jobs:
       with:
         configuration: "--check-only --diff --line-length 120 --profile black"
     - name: Black formatter
-        uses: psf/black@stable
-        with:
-          options: "--check --verbose --line-length 120"
+      uses: psf/black@stable
+      with:
+        options: "--check --verbose --line-length 120"
 
 
     # TODO: Support linting with flake8 and maybe testing?
