@@ -21,24 +21,19 @@ class SimulationWAPIStreamClient(cameraStream):
     __fi_x = (math.pi - h_fov) / 2
     __fi_y = 2 * math.pi - v_fov / 2
 
-    def __init__(self):
+    def __init__(self, client):
         threading.Thread.__init__(self)
         self.frame = None
-        self.client = sc.SimulationClient()
+        self.client = client
 
     def run(self):
         while self.active:
-            self.receive_frame()
+            self.frame = self.client.okon.video
             # around 50 fps
             time.sleep(0.01)
 
     def getFrame(self):
-        return self.frame
-
-    def receive_frame(self):
-        val = self.client.get_stream_frame()
-        if val != None:
-            self.frame = val
+        return self.client.okon.video
 
     def setFov(self, h_fov, v_fov):
         self.h_fov = h_fov
@@ -55,6 +50,7 @@ class SimulationWAPIStreamClient(cameraStream):
         return self.client.get_depth_map()  # jpg bytes
 
     def getPointCloud(self):
+        # TODO: fix
         d_map = self.client.get_depth_map()  # jpg bytes
         nparray = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparray, cv2.IMREAD_GRAYSCALE)
