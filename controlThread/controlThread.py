@@ -119,16 +119,11 @@ class ControlThread:
         return self.__depth
 
     def getIMUData(self):
-        ret = self.__attitude
-        ret += self.__acc
-        ret += self.__gyro
-        ret += self.__mag
-        ret.append(self.__depth)
-
-        return ret
+        pass
 
     def getPosData(self):
-        ret = self.__position
+        ret = []
+        ret += self.__position
         ret += self.__velocity
         ret += self.__acceleration
         return ret

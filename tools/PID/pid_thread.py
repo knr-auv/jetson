@@ -270,7 +270,7 @@ class PIDThread:
             return int((input - in_min) * (out_max - out_min) / (in_max - in_min) + out_min)
 
         ret = []
-        for i in self.m:
+        for i in self.motors:
             ret.append(map_value(i, -1000, 1000, 0, 100))
         return ret
 
