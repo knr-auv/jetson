@@ -5,12 +5,13 @@ import threading
 import time
 
 from variable import GUI_STREAM
+from cameraStream.stream import cameraStream
 
 
 class ToGuiStream:
     """Stream server intended for sending video feed to GUI"""
 
-    def __init__(self, stream):
+    def __init__(self, stream: cameraStream):
         self.stream = stream
         self.__ListenToClient = True
 

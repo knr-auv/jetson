@@ -45,7 +45,7 @@ if __name__ == "__main__":
     autonomyThread = AutonomyThread(detector, controller)
     # autonomyThread.StartAutonomy()
 
-    # # load config and start camera
+    # load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
     detector.StartDetecting()
@@ -61,7 +61,6 @@ if __name__ == "__main__":
 
     # after receiving a msg server invokes a callback
     # for sending telemetry server uses 'dataCollector' marked below as 'd'
-    # TODO: Setup callbacks to support new simulation
     c, d = PrepareCallbacks(detector, autonomyThread, controlThread)
     server.SetCallbacks(c, d)
 
@@ -72,6 +71,4 @@ if __name__ == "__main__":
     server.StartServer()
 
     # setup logger. F.e. Logger.setStream(print, None) or:
-    # fd = open("log.txt","a")
-    # Logger.setStream(fd.write, None)
     Logger.setStream(server.sender.SendLog, None)

@@ -5,7 +5,6 @@ import time
 import cv2
 import numpy as np
 
-import communicationThreads.Simulation.simulationClient as sc
 import variable
 from cameraStream.stream import cameraStream
 
