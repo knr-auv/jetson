@@ -3,7 +3,6 @@ import time
 
 import autonomy.Detectors.DetectorBaseClass as base
 import tools.MathUtils as h
-from communicationThreads.Simulation.simulationClient import SimulationClient
 
 
 class Simulation_noGPU_detector(base.DetectorBaseClass):
