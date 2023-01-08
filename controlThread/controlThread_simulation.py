@@ -80,12 +80,20 @@ class SimulationControlThread(ControlThread):
         return [0] * 16
         # return self.PIDThread.GetPIDs()
 
-    def HandleNewData(self, data):
+    def getIMUData(self):
+        ret = []
+        imu = self.client.okon.sens["imu"]
+        # TODO implementation for accelerometer and magnetometer to be checked
+        ret += [imu["rot"]["z"], imu["rot"]["x"], imu["rot"]["y"]]
+        ret += [imu["accel"]["z"], imu["accel"]["x"], imu["accel"]["y"]]
+        ret += [imu["rotSpeed"]["z"], imu["rotSpeed"]["x"], imu["rotSpeed"]["y"]]
+        ret += [imu["rot"]["z"], imu["rot"]["x"], imu["rot"]["y"]]
+        ret += [self.client.okon.sens["baro"] / 9800]
+        return ret
 
+    def HandleNewData(self, data):
         attitude, gyro, acc, mag, depth, angular_velocity, position, velocity, acceleration, motors = data
         val = {}
-        test_string = "foo"
-        eval(test_string)
         for i in self.keys:
             val[i] = eval(i)
         self.NewDataCallback.Invoke(val)
