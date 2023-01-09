@@ -49,7 +49,7 @@ class SimulationWAPIStreamClient(cameraStream):
         return self.client.get_depth_map()  # jpg bytes
 
     def getPointCloud(self):
-        # TODO: fix
+        # TODO: uninitiaded img_bytes, not used d_map. Fix those and check if returned map is working well
         d_map = self.client.get_depth_map()  # jpg bytes
         nparray = np.frombuffer(img_bytes, np.uint8)
         img = cv2.imdecode(nparray, cv2.IMREAD_GRAYSCALE)
