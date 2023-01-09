@@ -4,8 +4,8 @@ import struct
 import threading
 import time
 
-from variable import GUI_STREAM
 from cameraStream.stream import cameraStream
+from variable import GUI_STREAM
 
 
 class ToGuiStream:
