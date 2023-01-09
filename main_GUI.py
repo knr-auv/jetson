@@ -5,21 +5,13 @@ import tools.Logger as Logger
 import variable
 from autonomy.autonomyThread import AutonomyThread
 from autonomy.Controller import Controller
-
-# detector
 from autonomy.Detectors.simulation_noGPU import Simulation_noGPU_detector
-
-# cameraStream
 from cameraStream.SimulationWAPIStreamClient import SimulationWAPIStreamClient
 from cameraStream.ToGuiStream import ToGuiStream
-
-# for GUI only
 from communicationThreads.GUI.Server import JetsonServer
 from communicationThreads.GUI.Setup import PrepareCallbacks
 from communicationThreads.Simulation.okon_sim_client import OkonSimClient, PacketFlag, PacketType
 from config.ConfigLoader import ConfigLoader
-
-# controlThread
 from controlThread.controlThread_simulation import SimulationControlThread
 
 if __name__ == "__main__":
