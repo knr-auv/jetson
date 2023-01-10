@@ -27,19 +27,20 @@ Links to JSON files with projects of Behavior Trees:
     ```
 
 3. Make sure you're on the repos root directory (`jetson/`). All imports are relative to the root in this project, so they can be easily imported in other directories. We also need to use this as a package.
+
     ```bash
-    $ ls
+    $ pwd
     .../jetson
     ```
 
 3. Move AUV to starting position
 
     ```bash
-    $ python autonomy/go_to_starting_line.py
+    $ python -m autonomy.go_to_starting_line
     ```
 
 4. Run Behavior Tree
 
     ```bash
-    $ python autonomy/qualification_task_behavior_tree.py
+    $ python -m autonomy.qualification_task_behavior_tree
     ```
