@@ -9,8 +9,8 @@ import time
 
 import py_trees
 
-from okon_actions import Rotate, SetDepth
-from okon_sim_client import OkonSimClient
+from autonomy.okon_actions import Rotate, SetDepth
+from autonomy.okon_sim_client import OkonSimClient
 
 oc = OkonSimClient(ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False)
 oc.connect()

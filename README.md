@@ -24,15 +24,42 @@ Software includes:
 
 
 ## Usage
+### Prerequisites
+To kick off with Jetson, you should set up Conda environment and install internal dependencies(simulation, GUI).
 
-### Startup
+### Creating Conda Environment with Dependencies (Python)
+
+1. Create Conda Environment and Install Dependencies
+
+    ```bash
+    conda env create -f environment.yml
+    ```
+
+2. Activate Conda Environment
+
+    ```bash
+    conda activate jetson
+    ```
+
+### Updating Dependencies (Python) - if environment.yml file changed
+1. Activate Conda Environment
+
+    ```bash
+    conda activate jetson
+    ```
+
+2. Update Conda Environment Dependencies
+
+    ```bash
+    conda env update -f environment.yml --prune
+    ```
+### Dependencies
 Okon can operate with and without GUI. Nevertheless they are some common requirements:
-- Make sure you have installed following python modules:
-  - numpy
-- Download [Simulation](https://github.com/knr-auv/simulation/ "Simulation")
-- Download [GUI](https://github.com/knr-auv/GUI-v2 "GUI") (optional)
+- Download release 2.3 of [Simulation](https://github.com/knr-auv/simulation/ "Simulation")
+- Download release 1.0.2 of [GUI](https://github.com/knr-auv/GUI-v2 "GUI")
 
-In both cases it is nessecary to launch simulation first, than you can launch main.py (version withou GUI is not suported yet).
+In both cases it is nessecary to launch simulation first, than you can launch main_GUI.py. After that, you should run GUI.
+GUI in networking settings should have _control port: 65531_ and _stream port: 8090_ to allow you to connect to simulation and GUI.
 
 ### Important notes
 Launching jetson without running simulation will fail. If program can't establish connection with simulation or GUI please make sure that IP adresses are corect. If problem still occurs try disabling your firewall.

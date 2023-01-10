@@ -5,7 +5,7 @@ import time
 
 import py_trees
 
-from okon_sim_client import Okon
+from communicationThreads.Simulation.okon_sim_client import OkonSim
 
 
 class Status:
@@ -16,7 +16,7 @@ class Status:
 
 
 class SetDepth(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "set depth", okon: Okon = None, depth: float = 0.6, delta: float = 0.05):
+    def __init__(self, name: str = "set depth", okon: OkonSim = None, depth: float = 0.6, delta: float = 0.05):
         super().__init__(name)
         self.okon = okon
         self.depth = depth
@@ -46,7 +46,9 @@ class SetDepth(py_trees.behaviour.Behaviour):
 
 
 class SetVelocity(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "set velocity", okon: Okon = None, x: float = 0.0, y: float = 0.0, z: float = 0.0):
+    def __init__(
+        self, name: str = "set velocity", okon: OkonSim = None, x: float = 0.0, y: float = 0.0, z: float = 0.0
+    ):
         super().__init__(name)
         self.okon = okon
         self.x = x
@@ -71,7 +73,7 @@ class SetVelocity(py_trees.behaviour.Behaviour):
 
 
 class Rotate(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "rotate", okon: Okon = None, add_angle: float = 45.0, delta: float = 1.0):
+    def __init__(self, name: str = "rotate", okon: OkonSim = None, add_angle: float = 45.0, delta: float = 1.0):
         super().__init__(name)
         self.okon = okon
         self.add_angle = add_angle
@@ -104,7 +106,7 @@ class Rotate(py_trees.behaviour.Behaviour):
 
 
 class RotateDeltaYawAngle(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "rotate delta yaw angle", okon: Okon = None, delta: float = 1.0):
+    def __init__(self, name: str = "rotate delta yaw angle", okon: OkonSim = None, delta: float = 1.0):
         super().__init__(name)
         self.okon = okon
         self.delta = delta
@@ -135,7 +137,7 @@ class RotateDeltaYawAngle(py_trees.behaviour.Behaviour):
 
 
 class TryDetectNTimes(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "try detect n times", okon: Okon = None, object: str = "gate", n: int = 3):
+    def __init__(self, name: str = "try detect n times", okon: OkonSim = None, object: str = "gate", n: int = 3):
         super().__init__(name)
         self.okon = okon
         self.object = object
@@ -175,7 +177,7 @@ class TryDetectNTimes(py_trees.behaviour.Behaviour):
 
 
 class CalculateDeltaYaw(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "calculate delta yaw", okon: Okon = None):
+    def __init__(self, name: str = "calculate delta yaw", okon: OkonSim = None):
         super().__init__(name)
         self.okon = okon
         self.blackboard = self.attach_blackboard_client()
@@ -217,7 +219,7 @@ class CalculateDeltaYaw(py_trees.behaviour.Behaviour):
 
 
 class IsGateFarEnough(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "calculate delta yaw", okon: Okon = None, max_distance: float = 1.5):
+    def __init__(self, name: str = "calculate delta yaw", okon: OkonSim = None, max_distance: float = 1.5):
         super().__init__(name)
         self.okon = okon
         self.max_distance = max_distance
@@ -246,7 +248,7 @@ class IsGateFarEnough(py_trees.behaviour.Behaviour):
 
 
 class Wait(py_trees.behaviour.Behaviour):
-    def __init__(self, name: str = "wait", okon: Okon = None, secs: float = 0.0):
+    def __init__(self, name: str = "wait", okon: OkonSim = None, secs: float = 0.0):
         super().__init__(name)
         self.okon = okon
         self.secs = secs

@@ -1,10 +1,11 @@
 import json
-import threading
+from threading import Lock, Thread
 
+import tools.Logger as Logger
 from tools.Delegate import Delegate
 
 
-class Object(object):
+class Object:
     keys = ["type", "accuracy", "boundingBox", "boundingBox3D", "position", "distance", "height", "width"]
 
     type = None
@@ -26,36 +27,40 @@ class Object(object):
         return ret
 
 
-class DetectorBaseClass(object):
-    __callback = Delegate()
-    shouldDetect = False
-    detectionThread = None
-    __isDetecting = False
-
+class DetectorBaseClass(Thread):
     def __init__(self):
+        super().__init__()
         self.__callback = Delegate()
+        self.shouldDetect = False
+        self.__isDetecting = False
+        self.lock = Lock()
 
     def isDetecting(self):
         return self.__isDetecting
 
     def StartDetecting(self):
-        self.detectionThread = threading.Thread(target=self.__DetectorLoop, name="DetectorThread")
-        self.shouldDetect = True
-        self.detectionThread.start()
+        with self.lock:
+            self.shouldDetect = True
+        self.start()
+        Logger.write("Detector started", self.name)
 
     def StopDetecting(self):
         self.shouldDetect = False
-        if self.detectionThread != None and self.detectionThread.is_alive():
-            self.detectionThread.join()
-
-    def __DetectorLoop(self):
-        self.__isDetecting = True
-        while self.shouldDetect:
-            self.DetectorTask()
-        self.__isDetecting = False
+        Logger.write("Stoping detector...", self.name)
 
     def DetectorTask(self):
         pass
+
+    def run(self):
+        self.__isDetecting = True
+        while True:
+            with self.lock:
+                if not self.shouldDetect:
+                    break
+            self.DetectorTask()
+        print("stopped")
+        self.__isDetecting = False
+        Logger.write("Detector stoped", self.name)
 
     def InvokeCallback(self, fps, NewDetection):
         self.__callback.Invoke(fps, NewDetection)
@@ -65,3 +70,8 @@ class DetectorBaseClass(object):
 
     def RemoveDetectionCallback(self, callback):
         self.__callback.Remove(callback)
+
+
+def start_detector(detector: DetectorBaseClass):
+    detector = detector()
+    detector.StartDetecting()
