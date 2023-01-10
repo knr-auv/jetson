@@ -34,6 +34,7 @@ class PacketType:  # PacketType.PING
     GET_REC = 0xD3
     GET_DETE = 0xDE
 
+    @staticmethod
     def get(val: int) -> str:  # PacketType.get(0xA5)
         for k, v in vars(PacketType).items():
             if v == val:
@@ -46,6 +47,7 @@ class PacketFlag:  # PacketType.PING
     DO_NOT_LOG_PACKET = 2
     TEST = 128
 
+    @staticmethod
     def get(val: int) -> str:  # PacketFlag.get(1|2)
         flags = ""
         if val == 0:
