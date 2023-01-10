@@ -3,16 +3,14 @@ import logging
 
 import tools.Logger as Logger
 import variable
-from autonomy.autonomyThread import AutonomyThread
-from autonomy.Controller import Controller
-from autonomy.Detectors.simulation_noGPU import Simulation_noGPU_detector
 from cameraStream.SimulationWAPIStreamClient import SimulationWAPIStreamClient
 from cameraStream.ToGuiStream import ToGuiStream
 from communicationThreads.GUI.Server import JetsonServer
 from communicationThreads.GUI.Setup import PrepareCallbacks
-from communicationThreads.Simulation.okon_sim_client import OkonSimClient, PacketFlag, PacketType
+from communicationThreads.Simulation.okon_sim_client import OkonSimClient
 from config.ConfigLoader import ConfigLoader
 from controlThread.controlThread_simulation import SimulationControlThread
+from Detectors.simulation_noGPU import Simulation_noGPU_detector
 
 if __name__ == "__main__":
 
@@ -30,17 +28,18 @@ if __name__ == "__main__":
 
     # init autonomy helpers
     # we can switch them according to environment
+    # TODO: currently detector is only usable once. FIX!!!
     detector = Simulation_noGPU_detector(cameraStream, controlThread, simulation_client)
-    controller = Controller(controlThread)
 
+    # TODO: add new autonomy
     # init autonomy
-    autonomyThread = AutonomyThread(detector, controller)
+    autonomyThread = None
+    # autonomyThread = AutonomyThread(detector, controller)
     # autonomyThread.StartAutonomy()
 
     # load config and start camera
     controlThread.setPIDs(ConfigLoader.LoadPIDs("config/PID_simulation.json"))
     cameraStream.start()
-    detector.StartDetecting()
 
     # lines only for gui
     mode = "simulation"

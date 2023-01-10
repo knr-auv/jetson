@@ -1,5 +1,5 @@
 """Module similar to logging. It is thread safe and allows to log data from anywhere in the code"""
-
+# TODO: FIX LOGGING! IT'S NOT WORKING AT ALL
 import math
 import time
 from threading import Lock

@@ -1,10 +1,10 @@
 import controlThread.controlThread as ct
 import tools.Logger as Logger
+from communicationThreads.GUI.Callbacks import Callbacks, DataCollector
+from Detectors.DetectorBaseClass import DetectorBaseClass, start_detector
 
-from .Callbacks import Callbacks, DataCollector
 
-
-def PrepareCallbacks(detector, autonomyThread, controlThread=ct.ControlThread()):
+def PrepareCallbacks(detector: DetectorBaseClass, autonomyThread, controlThread=ct.ControlThread):
     """Method which prepares interface for GUI"""
 
     dc = DataCollector()
@@ -20,10 +20,12 @@ def PrepareCallbacks(detector, autonomyThread, controlThread=ct.ControlThread())
     dc.GetBattery = lambda: [12.1, 13.1]
 
     # callbacks
-    cb.StartAutonomyCallback += autonomyThread.StartAutonomy
-    cb.StopAutonomyCallback += autonomyThread.StopAutonomy
-    cb.StartDetectorCallback += autonomyThread.StartDetector
-    cb.StopDetectorCallback += autonomyThread.StopDetector
+    # TODO: add autonomy Callbacks for new autonomy
+    # cb.StartAutonomyCallback += autonomyThread.StartAutonomy
+    # cb.StopAutonomyCallback += autonomyThread.StopAutonomy
+    # TODO: currently detector is only usable once. FIX!!!
+    cb.StartDetectorCallback += detector.StartDetecting
+    cb.StopDetectorCallback += detector.StopDetecting
 
     cb.ArmCallback += controlThread.arm
     cb.DisarmCallback += controlThread.disarm

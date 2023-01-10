@@ -14,35 +14,7 @@ Links to JSON files with projects of Behavior Trees:
 
 [Demo files](https://github.com/splintered-reality/py_trees/tree/devel/py_trees/demos) useful for implementaion software using py_trees library can be found in [the official repository](https://github.com/splintered-reality/py_trees).
 
-## Usage
-
-### Creating Conda Environment with Dependencies (Python)
-
-1. Create Conda Environment and Install Dependencies
-
-    ```bash
-    conda env create -f environment.yml
-    ```
-
-2. Activate Conda Environment
-
-    ```bash
-    conda activate okon-autonomy
-    ```
-
-### Updating Dependencies (Python) - if environment.yml file changed
-
-1. Activate Conda Environment
-
-    ```bash
-    conda activate okon-autonomy
-    ```
-
-2. Update Conda Environment Dependencies
-
-    ```bash
-    conda env update -f environment.yml --prune
-    ```
+## Usage    ```
 
 ### Running Qualification Task Behavior Tree
 
@@ -51,17 +23,23 @@ Links to JSON files with projects of Behavior Trees:
 2. Activate Conda Environment
 
     ```bash
-    conda activate okon-autonomy
+    $ conda activate jetson
+    ```
+
+3. Make sure you're on the repos root directory (`jetson/`). All imports are relative to the root in this project, so they can be easily imported in other directories. We also need to use this as a package.
+    ```bash
+    $ ls
+    .../jetson
     ```
 
 3. Move AUV to starting position
 
     ```bash
-    python go_to_starting_line.py
+    $ python autonomy/go_to_starting_line.py
     ```
 
 4. Run Behavior Tree
 
     ```bash
-    python qualification_task_behavior_tree.py
+    $ python autonomy/qualification_task_behavior_tree.py
     ```

@@ -1,6 +1,0 @@
-name: okon-autonomy
-dependencies:
-  - numpy
-  - pip
-  - pip:
-    - py_trees

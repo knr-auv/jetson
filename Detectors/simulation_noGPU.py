@@ -1,13 +1,11 @@
 import math
 import time
 
-import autonomy.Detectors.DetectorBaseClass as base
 import tools.MathUtils as h
+from Detectors.DetectorBaseClass import DetectorBaseClass, Object
 
 
-class Simulation_noGPU_detector(base.DetectorBaseClass):
-    cameraStream = None
-
+class Simulation_noGPU_detector(DetectorBaseClass):
     def __init__(self, cameraStream, controlThread, client):
         super().__init__()
         # control thread is used for obtaining position and attitude data
@@ -69,7 +67,7 @@ class Simulation_noGPU_detector(base.DetectorBaseClass):
         center_width = (minx + maxx) / 2
         center_height = (miny + maxy) / 2
 
-        obj = base.Object()
+        obj = Object()
         obj.type = name
         obj.accuracy = 1
         obj.distance = dist

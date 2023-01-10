@@ -3,7 +3,7 @@ import time
 
 import py_trees
 
-from okon_actions import (
+from autonomy.okon_actions import (
     CalculateDeltaYaw,
     Exit,
     IsGateFarEnough,
@@ -13,7 +13,7 @@ from okon_actions import (
     TryDetectNTimes,
     Wait,
 )
-from okon_sim_client import OkonSimClient
+from communicationThreads.Simulation.okon_sim_client import OkonSimClient
 
 oc = OkonSimClient(ip="127.0.0.1", port=44210, sync_interval=0.05, debug=False)
 oc.connect()

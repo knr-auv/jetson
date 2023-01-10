@@ -8,3 +8,5 @@ dependencies:
 - pip
 - numpy
 - opencv
+- pip:
+    - py_trees

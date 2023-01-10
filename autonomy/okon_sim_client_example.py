@@ -1,6 +1,6 @@
 import time
 
-from okon_sim_client import OkonSimClient, PacketFlag, PacketType
+from communicationThreads.Simulation.okon_sim_client import OkonSimClient, PacketFlag, PacketType
 
 
 def handle_simulation_reset(args=None) -> None:
