@@ -21,9 +21,9 @@ time.sleep(1.0)
 
 
 def create_root():
-    root = py_trees.composites.Selector("Selector")
+    root = py_trees.composites.Selector("Selector", True)
 
-    sequence_1 = py_trees.composites.Sequence("Sequence 1")
+    sequence_1 = py_trees.composites.Sequence("Sequence 1", True)
 
     try_detection_3_times = TryDetectNTimes(name="Try detect gate 3 times", okon=oc.okon, object="gate", n=3)
     check_if_gate_far_enough = IsGateFarEnough(
@@ -34,8 +34,14 @@ def create_root():
     rotate_deltaYaw = RotateDeltaYawAngle(name="Turn deltaYaw angle", okon=oc.okon, delta=2.0)
     set_velocity = SetVelocity(name="Set stable velocity of 1 m/s on Z axis", okon=oc.okon, z=1.0)
 
+    wait_for_1_sec = Wait(name="Wait for 2 seconds", okon=oc.okon, secs=1.0)
+    set_velocity_new = SetVelocity(name="Set stable velocity of 1 m/s on Z axis", okon=oc.okon, z=1.0)
+
+    # modyfikacja
     sequence_1.add_children(
         [
+            set_velocity_new,
+            wait_for_1_sec,
             try_detection_3_times,
             check_if_gate_far_enough,
             calculate_delta_yaw,
@@ -45,7 +51,7 @@ def create_root():
         ]
     )
 
-    sequence_2 = py_trees.composites.Sequence("Sequence 2")
+    sequence_2 = py_trees.composites.Sequence("Sequence 2", True)
 
     wait_for_2_secs = Wait(name="Wait for 2 seconds", okon=oc.okon, secs=2.0)
     stop_okon = SetVelocity(name="Stop Okon", okon=oc.okon, z=0.0)

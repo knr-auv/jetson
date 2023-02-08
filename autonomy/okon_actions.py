@@ -280,3 +280,48 @@ class Exit(py_trees.behaviour.Behaviour):
 
     def update(self):
         sys.exit()
+
+
+class SetGuard1True(py_trees.behaviour.Behaviour):
+    def __init__(self, name: str = "set guard 1 true", okon: OkonSim = None):
+        super().__init__(name)
+        self.okon = okon
+        self.blackboard = self.attach_blackboard_client()
+        self.blackboard.register_key(key="guard1", access=py_trees.common.Access.WRITE)
+        self.logger.debug(f"{self.__class__.__name__}.__init__()")
+
+    def initialise(self):
+        self.blackboard.guard1 = "False"
+        self.logger.debug(f"{self.__class__.__name__}.initialise()")
+
+    def update(self):
+        self.blackboard.guard1 = "True"
+        new_status = Status.SUCCESS
+        return new_status
+
+    def terminate(self, new_status):
+        """Nothing to clean up in this example."""
+        self.logger.debug(f"{self.__class__.__name__}.terminate()[{self.status}->{new_status}]")
+
+
+class IsBranch1Executed(py_trees.behaviour.Behaviour):
+    def __init__(self, name: str = "is branch 1 executed", okon: OkonSim = None):
+        super().__init__(name)
+        self.okon = okon
+        self.blackboard = self.attach_blackboard_client()
+        self.blackboard.register_key(key="guard1", access=py_trees.common.Access.READ)
+        self.logger.debug(f"{self.__class__.__name__}.__init__()")
+
+    def initialise(self):
+        self.logger.debug(f"{self.__class__.__name__}.initialise()")
+
+    def update(self):
+        if self.blackboard.guard1 == "True":
+            new_status = Status.SUCCESS
+        else:
+            new_status = Status.FAILURE
+        return new_status
+
+    def terminate(self, new_status):
+        """Nothing to clean up in this example."""
+        self.logger.debug(f"{self.__class__.__name__}.terminate()[{self.status}->{new_status}]")
